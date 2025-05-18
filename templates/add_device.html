@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add a New Device</h2>
+  <form method="post">
+    {% csrf_token %}
+
+    <h3>Main Asset</h3>
+    {{ asset_form.as_p }}
+
+    <h3>Data Acquisition & Control</h3>
+    {{ data_form.as_p }}
+
+    <h3>Electrical Specs – Downward</h3>
+    {{ down_form.as_p }}
+
+    <h3>Electrical Specs – Upward</h3>
+    {{ up_form.as_p }}
+
+    <h3>Electrical Specs – BESS</h3>
+    {{ bess_form.as_p }}
+
+    <h3>Environmental & Safety</h3>
+    {{ env_form.as_p }}
+
+    <h3>Physical Specs</h3>
+    {{ phys_form.as_p }}
+
+    <button type="submit">Submit</button>
+  </form>
+{% endblock %}
