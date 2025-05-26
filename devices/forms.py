@@ -1,6 +1,6 @@
 from django import forms
 from .models import (
-    MainAsset,
+    Asset,
     DataAcquisitionAndControl,
     ElectricalSpecsDownward,
     ElectricalSpecsUpward,
@@ -9,9 +9,9 @@ from .models import (
     PhysicalSpecs
 )
 
-class MainAssetForm(forms.ModelForm):
+class AssetForm(forms.ModelForm):
     class Meta:
-        model = MainAsset
+        model = Asset
         exclude = ['contributor']
 
 class DataAcquisitionForm(forms.ModelForm):

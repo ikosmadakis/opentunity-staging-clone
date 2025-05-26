@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .forms import (
-    MainAssetForm,
+    AssetForm,
     DataAcquisitionForm,
     ElectricalDownwardForm,
     ElectricalUpwardForm,
@@ -19,7 +19,7 @@ def dashboard(request):
 @login_required
 def add_device(request):
     if request.method == 'POST':
-        asset_form = MainAssetForm(request.POST)
+        asset_form = AssetForm(request.POST)
         data_form = DataAcquisitionForm(request.POST)
         down_form = ElectricalDownwardForm(request.POST)
         up_form = ElectricalUpwardForm(request.POST)
@@ -61,7 +61,7 @@ def add_device(request):
 
             return redirect('dashboard')
     else:
-        asset_form = MainAssetForm()
+        asset_form = AssetForm()
         data_form = DataAcquisitionForm()
         down_form = ElectricalDownwardForm()
         up_form = ElectricalUpwardForm()
