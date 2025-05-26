@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from devices import views as device_views
+from devices.views import activate
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,5 +25,9 @@ urlpatterns = [
     path('signup/', device_views.signup, name='signup'),
     path('add-device/', device_views.add_device, name='add_device'),
     path('', device_views.dashboard, name='dashboard'),  # homepage after login
+    path('device/<int:pk>/',             device_views.asset_detail, name='asset_detail'),
+    path('device/<int:pk>/edit/',        device_views.asset_edit,   name='asset_edit'),
+    path("activate/<uidb64>/<token>/", activate, name="activate"),
+
 
 ]

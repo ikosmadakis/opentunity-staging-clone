@@ -1,11 +1,42 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
   <title>OPENTUNITY UI</title>
+  <!-- If you’re using a CSS framework like Bootstrap, be sure to include its CSS here -->
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 </head>
 <body>
   <div class="container">
-    {% block content %}{% endblock %}
+    {# Messages Framework Display #}
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="alert alert-{{ message.tags }}">
+            {{ message }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {# Main content block #}
+    {% block content %}
+    {% endblock %}
   </div>
+
+  <!-- Optional: Auto‐dismiss script for messages -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.messages .alert').forEach(el => {
+        setTimeout(() => {
+          el.classList.add('fade');
+          setTimeout(() => el.remove(), 500);
+        }, 3000);
+      });
+    });
+  </script>
+  <style>
+    .fade { opacity: 0; transition: opacity 0.5s; }
+  </style>
 </body>
 </html>

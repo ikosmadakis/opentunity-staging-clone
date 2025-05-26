@@ -1,0 +1,11 @@
+Hello {{ user.get_full_name|default:user.username }},
+
+Thanks for registering at {{ site_name }}!
+To activate your account, click the link below (or copy-paste into your browser):
+
+  {{ activate_url }}
+
+If you didn’t sign up, you can ignore this message.
+
+Cheers,
+The {{ site_name }} Team

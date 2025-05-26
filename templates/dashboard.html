@@ -1,6 +1,43 @@
 {% extends "base.html" %}
+
 {% block content %}
   <h2>Welcome, {{ user.username }}</h2>
-  <p><a href="{% url 'add_device' %}">Add a Device</a></p>
-  <p><a href="{% url 'logout' %}">Logout</a></p>
+  <p>
+    <a href="{% url 'add_device' %}">Add a Device</a> |
+    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-link p-0 align-baseline">Logout</button>
+    </form>
+  </p>
+
+  <h3>Your Recent Devices</h3>
+  {% if recent_assets %}
+    <table border="1" cellpadding="5" cellspacing="0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Model</th>
+          <th>Classification</th>
+          <th>Added On</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for asset in recent_assets %}
+          <tr>
+            <td>{{ asset.id }}</td>
+            <td>{{ asset.model_name }}</td>
+            <td>{{ asset.classification.type }}</td>
+            <td>{{ asset.record_insertion_date|date:"Y-m-d H:i" }}</td>
+            <td>
+              <a href="{% url 'asset_detail' asset.id %}">View</a> |
+              <a href="{% url 'asset_edit'  asset.id %}">Edit</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>You haven’t added any devices yet. <a href="{% url 'add_device' %}">Add one now</a>.</p>
+  {% endif %}
 {% endblock %}

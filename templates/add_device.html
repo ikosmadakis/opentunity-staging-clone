@@ -1,30 +1,47 @@
 {% extends "base.html" %}
 {% block content %}
   <h2>Add a New Device</h2>
-  <form method="post">
+  <form method="post" action="{% url 'add_device' %}">
     {% csrf_token %}
 
-    <h3>Main Asset</h3>
     {{ asset_form.as_p }}
 
-    <h3>Data Acquisition & Control</h3>
-    {{ data_form.as_p }}
+    <div id="elec-specs" class="spec-block">
+      <h3>Electrical Specs (non-BESS)</h3>
+      {{ elec_form.non_field_errors }}
+      {{ elec_form.as_p }}
+    </div>
 
-    <h3>Electrical Specs – Downward</h3>
-    {{ down_form.as_p }}
+    <div id="bess-specs" class="spec-block">
+      <h3>BESS Specs (for Battery)</h3>
+      {{ bess_form.non_field_errors }}
+      {{ bess_form.as_p }}
+    </div>
 
-    <h3>Electrical Specs – Upward</h3>
-    {{ up_form.as_p }}
-
-    <h3>Electrical Specs – BESS</h3>
-    {{ bess_form.as_p }}
-
-    <h3>Environmental & Safety</h3>
-    {{ env_form.as_p }}
-
-    <h3>Physical Specs</h3>
-    {{ phys_form.as_p }}
-
-    <button type="submit">Submit</button>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary ms-2">Cancel</a>
   </form>
+
+  <script>
+    const cls     = document.getElementById("id_classification");
+    const elecDiv = document.getElementById("elec-specs");
+    const bessDiv = document.getElementById("bess-specs");
+
+    function toggleSpecs() {
+      const isBattery = cls.options[cls.selectedIndex].text.toUpperCase() === 'BATTERY';
+
+      elecDiv.style.display = isBattery ? 'none' : 'block';
+      bessDiv.style.display = isBattery ? 'block': 'none';
+
+      elecDiv.querySelectorAll('input, select, textarea').forEach(el => {
+        el.disabled = isBattery;
+      });
+      bessDiv.querySelectorAll('input, select, textarea').forEach(el => {
+        el.disabled = !isBattery;
+      });
+    }
+
+    cls.addEventListener('change', toggleSpecs);
+    window.addEventListener('load', toggleSpecs);
+  </script>
 {% endblock %}
