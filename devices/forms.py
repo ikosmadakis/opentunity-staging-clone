@@ -38,31 +38,40 @@ class AssetForm(forms.ModelForm):
                 'placeholder': 'e.g. 2024',
             }),
             'description': forms.Textarea(attrs={
-                'placeholder': 'Short description of flexibility (optional)',
+                'placeholder': 'e.g. "A battery energy storage system adjusting its energy output by discharging 5 MW during peak demand and charging 3 MW during surplus supply, responding dynamically to electricity pricing."',
                 'rows': 3,
             }),
-            'certifications': JSONTextarea(attrs={
-                'placeholder': 'e.g. {"std": ["CE", "IEC 62109", "UL 1741"]}',
-                'rows': 3,
+            'compliance_checklist': forms.Textarea(attrs={
+                'placeholder': """e.g. **Low Voltage Directive (LVD):** 2014/35/EU, compliant with harmonized standards EN IEC 60598-1:2021+A1:2022, EN IEC 60598-2-1:2021, EN 62471:2008.
+                * **Electromagnetic Compatibility (EMC) Directive:** 2014/30/EU, compliant with harmonized standards EN IEC 55015:2019+A11:2020, EN IEC 61547:2009.
+                * **Restriction of Hazardous Substances (RoHS) Directive:** 2011/65/EU, compliant with harmonized standard EN IEC 63000:2018.
+                * **Ecodesign for light sources and separate control gears:** (EU) 2019/2020, compliant with relevant parts of EN IEC 62612:2023, EN IEC 62442-1:2020.
+                * **Energy labelling of light sources:** (EU) 2019/2015, compliant with relevant parts of EN IEC 62612:2023.""",
+                'rows': 6,
             }),
-            'dacq_actuation': JSONTextarea(attrs={
+            'dacq_actuation': forms.Textarea(attrs={
                 'placeholder': (
-                    'e.g. {"action": "Go into the settings menu, scroll down to Services, '
-                    'and then enable the Modbus-TCP service", "set_port": 502, "set_access": "read_only"}'
+                    'e.g. Go into the settings menu, scroll down to Services, '
+                    'then enable the Modbus-TCP service and set_port = 502, '
+                    'and set_access = "read_only".'
                 ),
                 'rows': 3,
             }),
-            'dacq_attributes': JSONTextarea(attrs={
+            'devices_attribute': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'dacq_attributes': forms.Textarea(attrs={
                 'placeholder': (
                     'e.g. {"sens_data": {"Active Power": ["W", "SI"], '
                     '"Temperature": ["Celsius", "SI"], "Voltage Line 1": ["V", "SI"]}}'
                 ),
                 'rows': 3,
             }),
-            'control_actuation': JSONTextarea(attrs={
+            'control_actuation': forms.Textarea(attrs={
                 'placeholder': (
-                    'e.g. {"action": "Go into the settings menu, scroll down to Services, '
-                    'and then enable the Modbus-TCP service", "set_port": 502, "set_access": "write_only"}'
+                    'e.g. Go into the settings menu, scroll down to Services, '
+                    'then enable the Modbus-TCP service and set_port = 502, '
+                    'and set_access = "write_only".'
                 ),
                 'rows': 3,
             }),
@@ -163,10 +172,10 @@ class AssetForm(forms.ModelForm):
             'commissioning_date': (
                 'Date the device was put into operation. (optional)'
             ),
-            'certifications': (
-                'List of certifications and standards that may now or in the future, '
-                'directly or indirectly, assess and validate the flexibility potential of '
-                'various assets. (optional)'
+            'compliance_checklist': (
+                "Reference to the specific directives or regulations the product complies with: For example, for products sold in the EU, this would include directives like the Low Voltage Directive (LVD), Electromagnetic Compatibility (EMC) Directive, Radio Equipment Directive (RED), etc. The official title and the official journal reference (if applicable) are usually included.\n"
+                "Reference to harmonized standards applied (including their reference number and date of issue): These are European standards that provide a presumption of conformity with the essential requirements of the relevant directives.\n"
+                "Reference to other national or international standards and technical specifications applied (if any): This could include ISO standards, national standards, or the manufacturer's own specifications."
             ),
             'release_year': (
                 'Year of market introduction of the flexible asset. (optional)'
@@ -191,7 +200,7 @@ class AssetForm(forms.ModelForm):
             'dacq_actuation': (
                 'To retrieve data of an asset over a bus system (e.g. Ethernet) with a specified '
                 'protocol (e.g. Modbus TCP), the process involves several steps. Refers to a DACQ '
-                'activation process of a device.'
+                'activation process of a device. (optional)'
             ),
             'dacq_attributes': (
                 'Collection of information about an asset’s sensing data as well as the unit '
@@ -200,7 +209,7 @@ class AssetForm(forms.ModelForm):
             'control_actuation': (
                 'To control an asset over a bus system (e.g. Ethernet) with a specified protocol '
                 '(e.g. Modbus TCP), the process involves several steps. Refers to a control '
-                'activation process of a device.'
+                'activation process of a device. (optional)'
             ),
             'regulation': (
                 'How the asset’s power consumption (output) changes with respect to the input '

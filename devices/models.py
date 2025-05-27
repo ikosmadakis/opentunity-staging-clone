@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class DevicesAttributes(models.Model):
+    attribute = models.CharField(max_length=255, unique=True)
+    def __str__(self): return self.attribute
+
 class Manufacturer(models.Model):
     name = models.TextField()
     def __str__(self): return self.name
@@ -69,19 +73,20 @@ class Asset(models.Model):
     gtin                      = models.CharField(max_length=14, blank=True, null=True)
     model_name                = models.TextField()
     batch_name                = models.TextField(blank=True, null=True)
-    serial_number             = models.TextField(verbose_name="Serial #", blank=True, null=True)
+    serial_number             = models.TextField(verbose_name="Serial Number", blank=True, null=True)
     deployment                = models.ForeignKey(Deployment, on_delete=models.PROTECT, blank=True, null=True)
     classification            = models.ForeignKey(Classification, on_delete=models.PROTECT, blank=True, null=True)
     description               = models.TextField(blank=True, null=True)
     commissioning_date        = models.DateTimeField(blank=True, null=True)
-    certifications            = models.JSONField(blank=True, null=True)
+    compliance_checklist      = models.TextField(blank=True, null=True, verbose_name="List of Applicable Directives, Regulations, and Standards")
     release_year              = models.IntegerField(blank=True, null=True)
     flexibility               = models.ForeignKey(Flexibility, on_delete=models.PROTECT)
     communication             = models.ForeignKey(Communication, on_delete=models.PROTECT)
     communication_protocol    = models.ForeignKey(CommunicationProtocol, on_delete=models.PROTECT)
-    dacq_actuation            = models.TextField()
-    dacq_attributes           = models.TextField()
-    control_actuation         = models.TextField()
+    dacq_actuation            = models.TextField(blank=True, null=True, verbose_name="Data Acquisition Actuation")
+    devices_attribute         = models.ForeignKey(DevicesAttributes, on_delete=models.PROTECT, blank=True, null=True, verbose_name="Available Attributes")
+    dacq_attributes           = models.TextField(blank=True, null=True, verbose_name="Monitored Attributes")
+    control_actuation         = models.TextField(blank=True, null=True, verbose_name="Control Actuation")
     regulation                = models.ForeignKey(Regulation, on_delete=models.PROTECT)
     regulation_response_time_upward   = models.FloatField()
     regulation_response_time_downward = models.FloatField()

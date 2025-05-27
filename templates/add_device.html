@@ -4,8 +4,249 @@
   <form method="post" action="{% url 'add_device' %}">
     {% csrf_token %}
 
-    {{ asset_form.as_p }}
+    {# --- ASSET FORM FIELDS --- #}
+    <div class="mb-3">
+      {{ asset_form.opentunity_did.label_tag }}<br>
+      {{ asset_form.opentunity_did }}<br>
+      <small class="text-muted">{{ asset_form.opentunity_did.help_text }}</small>
+      {{ asset_form.opentunity_did.errors }}
+    </div>
 
+    <div class="mb-3">
+      {{ asset_form.gtin.label_tag }}<br>
+      {{ asset_form.gtin }}<br>
+      <small class="text-muted">{{ asset_form.gtin.help_text }}</small>
+      {{ asset_form.gtin.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.manufacturer.label_tag }}<br>
+      {{ asset_form.manufacturer }}<br>
+      <small class="text-muted">{{ asset_form.manufacturer.help_text }}</small>
+      {{ asset_form.manufacturer.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.model_name.label_tag }}<br>
+      {{ asset_form.model_name }}<br>
+      <small class="text-muted">{{ asset_form.model_name.help_text }}</small>
+      {{ asset_form.model_name.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.batch_name.label_tag }}<br>
+      {{ asset_form.batch_name }}<br>
+      <small class="text-muted">{{ asset_form.batch_name.help_text }}</small>
+      {{ asset_form.batch_name.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.serial_number.label_tag }}<br>
+      {{ asset_form.serial_number }}<br>
+      <small class="text-muted">{{ asset_form.serial_number.help_text }}</small>
+      {{ asset_form.serial_number.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.deployment.label_tag }}<br>
+      {{ asset_form.deployment }}<br>
+      <small class="text-muted">{{ asset_form.deployment.help_text }}</small>
+      {{ asset_form.deployment.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.classification.label_tag }}<br>
+      {{ asset_form.classification }}<br>
+      <small class="text-muted">{{ asset_form.classification.help_text }}</small>
+      {{ asset_form.classification.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.description.label_tag }}<br>
+      {{ asset_form.description }}<br>
+      <small class="text-muted">{{ asset_form.description.help_text }}</small>
+      {{ asset_form.description.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.commissioning_date.label_tag }}<br>
+      {{ asset_form.commissioning_date }}<br>
+      <small class="text-muted">{{ asset_form.commissioning_date.help_text }}</small>
+      {{ asset_form.commissioning_date.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.compliance_checklist.label_tag }}<br>
+      {{ asset_form.compliance_checklist }}<br>
+      <small class="text-muted">{{ asset_form.compliance_checklist.help_text }}</small>
+      {{ asset_form.compliance_checklist.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.release_year.label_tag }}<br>
+      {{ asset_form.release_year }}<br>
+      <small class="text-muted">{{ asset_form.release_year.help_text }}</small>
+      {{ asset_form.release_year.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.flexibility.label_tag }}<br>
+      {{ asset_form.flexibility }}<br>
+      <small class="text-muted">{{ asset_form.flexibility.help_text }}</small>
+      {{ asset_form.flexibility.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.communication.label_tag }}<br>
+      {{ asset_form.communication }}<br>
+      <small class="text-muted">{{ asset_form.communication.help_text }}</small>
+      {{ asset_form.communication.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.communication_protocol.label_tag }}<br>
+      {{ asset_form.communication_protocol }}<br>
+      <small class="text-muted">{{ asset_form.communication_protocol.help_text }}</small>
+      {{ asset_form.communication_protocol.errors }}
+    </div>
+
+    {# --- ATTRIBUTE SELECTION AND MONITORED ATTRIBUTES --- #}
+    <div class="mb-3">
+      <label for="id_devices_attribute" class="form-label">Available Attribute</label>
+      {{ asset_form.devices_attribute }}
+      <button type="button" id="add-attribute" class="btn btn-outline-secondary btn-sm ms-2">
+        Add Attribute
+      </button>
+      {{ asset_form.devices_attribute.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.dacq_attributes.label_tag }}<br>
+      {{ asset_form.dacq_attributes }}<br>
+      <small class="text-muted">{{ asset_form.dacq_attributes.help_text }}</small>
+      {{ asset_form.dacq_attributes.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.dacq_actuation.label_tag }}<br>
+      {{ asset_form.dacq_actuation }}<br>
+      <small class="text-muted">{{ asset_form.dacq_actuation.help_text }}</small>
+      {{ asset_form.dacq_actuation.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.control_actuation.label_tag }}<br>
+      {{ asset_form.control_actuation }}<br>
+      <small class="text-muted">{{ asset_form.control_actuation.help_text }}</small>
+      {{ asset_form.control_actuation.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.regulation.label_tag }}<br>
+      {{ asset_form.regulation }}<br>
+      <small class="text-muted">{{ asset_form.regulation.help_text }}</small>
+      {{ asset_form.regulation.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.regulation_response_time_upward.label_tag }}<br>
+      {{ asset_form.regulation_response_time_upward }}<br>
+      <small class="text-muted">{{ asset_form.regulation_response_time_upward.help_text }}</small>
+      {{ asset_form.regulation_response_time_upward.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.regulation_response_time_downward.label_tag }}<br>
+      {{ asset_form.regulation_response_time_downward }}<br>
+      <small class="text-muted">{{ asset_form.regulation_response_time_downward.help_text }}</small>
+      {{ asset_form.regulation_response_time_downward.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.regulation_response_time_unit.label_tag }}<br>
+      {{ asset_form.regulation_response_time_unit }}<br>
+      <small class="text-muted">{{ asset_form.regulation_response_time_unit.help_text }}</small>
+      {{ asset_form.regulation_response_time_unit.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.regulation_response_time_accuracy.label_tag }}<br>
+      {{ asset_form.regulation_response_time_accuracy }}<br>
+      <small class="text-muted">{{ asset_form.regulation_response_time_accuracy.help_text }}</small>
+      {{ asset_form.regulation_response_time_accuracy.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.maximum_upward_regulation.label_tag }}<br>
+      {{ asset_form.maximum_upward_regulation }}<br>
+      <small class="text-muted">{{ asset_form.maximum_upward_regulation.help_text }}</small>
+      {{ asset_form.maximum_upward_regulation.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.maximum_downward_regulation.label_tag }}<br>
+      {{ asset_form.maximum_downward_regulation }}<br>
+      <small class="text-muted">{{ asset_form.maximum_downward_regulation.help_text }}</small>
+      {{ asset_form.maximum_downward_regulation.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.minimum_regulation_step.label_tag }}<br>
+      {{ asset_form.minimum_regulation_step }}<br>
+      <small class="text-muted">{{ asset_form.minimum_regulation_step.help_text }}</small>
+      {{ asset_form.minimum_regulation_step.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.ip_rating.label_tag }}<br>
+      {{ asset_form.ip_rating }}<br>
+      <small class="text-muted">{{ asset_form.ip_rating.help_text }}</small>
+      {{ asset_form.ip_rating.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.storage_temperature.label_tag }}<br>
+      {{ asset_form.storage_temperature }}<br>
+      <small class="text-muted">{{ asset_form.storage_temperature.help_text }}</small>
+      {{ asset_form.storage_temperature.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.operating_temperature_range.label_tag }}<br>
+      {{ asset_form.operating_temperature_range }}<br>
+      <small class="text-muted">{{ asset_form.operating_temperature_range.help_text }}</small>
+      {{ asset_form.operating_temperature_range.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.relative_humidity_range.label_tag }}<br>
+      {{ asset_form.relative_humidity_range }}<br>
+      <small class="text-muted">{{ asset_form.relative_humidity_range.help_text }}</small>
+      {{ asset_form.relative_humidity_range.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.dimensions.label_tag }}<br>
+      {{ asset_form.dimensions }}<br>
+      <small class="text-muted">{{ asset_form.dimensions.help_text }}</small>
+      {{ asset_form.dimensions.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.weight.label_tag }}<br>
+      {{ asset_form.weight }}<br>
+      <small class="text-muted">{{ asset_form.weight.help_text }}</small>
+      {{ asset_form.weight.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ asset_form.form_factor.label_tag }}<br>
+      {{ asset_form.form_factor }}<br>
+      <small class="text-muted">{{ asset_form.form_factor.help_text }}</small>
+      {{ asset_form.form_factor.errors }}
+    </div>
+
+    {# --- ELECTRICAL/BESS SPECS --- #}
     <div id="elec-specs" class="spec-block">
       <h3>Electrical Specs (non-BESS)</h3>
       {{ elec_form.non_field_errors }}
@@ -23,25 +264,36 @@
   </form>
 
   <script>
+    // Show/hide Electrical/BESS specs based on classification
     const cls     = document.getElementById("id_classification");
     const elecDiv = document.getElementById("elec-specs");
     const bessDiv = document.getElementById("bess-specs");
 
     function toggleSpecs() {
       const isBattery = cls.options[cls.selectedIndex].text.toUpperCase() === 'BATTERY';
-
       elecDiv.style.display = isBattery ? 'none' : 'block';
       bessDiv.style.display = isBattery ? 'block': 'none';
-
-      elecDiv.querySelectorAll('input, select, textarea').forEach(el => {
-        el.disabled = isBattery;
-      });
-      bessDiv.querySelectorAll('input, select, textarea').forEach(el => {
-        el.disabled = !isBattery;
-      });
+      elecDiv.querySelectorAll('input, select, textarea').forEach(el => { el.disabled = isBattery; });
+      bessDiv.querySelectorAll('input, select, textarea').forEach(el => { el.disabled = !isBattery; });
     }
 
     cls.addEventListener('change', toggleSpecs);
     window.addEventListener('load', toggleSpecs);
+
+    // Add-attribute button script
+    document.addEventListener('DOMContentLoaded', function () {
+      const select = document.getElementById("id_devices_attribute");
+      const textarea = document.getElementById("id_dacq_attributes");
+      const button = document.getElementById("add-attribute");
+
+      if (select && textarea && button) {
+        button.addEventListener('click', function () {
+          const attr = select.options[select.selectedIndex].text;
+          if (attr && !textarea.value.includes(attr)) {
+            textarea.value += (textarea.value ? '\n' : '') + attr;
+          }
+        });
+      }
+    });
   </script>
 {% endblock %}
