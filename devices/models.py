@@ -1,6 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class BessApplication(models.Model):
+    application_name = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text="Human-readable name of the BESS application"
+    )
+    def __str__(self): return self.application_name
+
 class DevicesAttributes(models.Model):
     attribute = models.CharField(max_length=255, unique=True)
     def __str__(self): return self.attribute
@@ -145,7 +153,7 @@ class ElectricalSpecs(models.Model):
 
 class BESSSpecs(models.Model):
     asset                        = models.OneToOneField(Asset, on_delete=models.CASCADE, related_name='bess_specs')
-    application                  = models.TextField()
+    bess_application             = models.ForeignKey(BessApplication, on_delete=models.PROTECT, verbose_name="Application", blank=True, null=True)
     cell_type                    = models.ForeignKey(CellType, on_delete=models.PROTECT)
     voltage_nominal              = models.FloatField()
     voltage_range                = models.JSONField()

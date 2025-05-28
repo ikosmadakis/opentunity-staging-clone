@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Asset, ElectricalSpecs, BESSSpecs, ContentContributor, Units
+import json
 
 class JSONTextarea(forms.Textarea):
     def format_value(self, value):
@@ -12,38 +13,38 @@ class JSONTextarea(forms.Textarea):
 
 class AssetForm(forms.ModelForm):
     # ————— Upward fields (as before) —————
-    power_generation      = forms.FloatField(label="Power generation", required=False)
+    power_generation      = forms.FloatField(label="Power generation", required=False, initial=0.0)
     power_generation_unit = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
-    duration              = forms.FloatField(label="Duration", required=False)
+    duration              = forms.FloatField(label="Duration", required=False, initial=0.0)
     duration_unit         = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
     # ————— **Downward** fields —————
-    load_reduction        = forms.FloatField(label="Load reduction", required=False)
+    load_reduction        = forms.FloatField(label="Load reduction", required=False, initial=0.0)
     load_reduction_unit   = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
-    down_duration         = forms.FloatField(label="Duration", required=False)
+    down_duration         = forms.FloatField(label="Duration", required=False, initial=0.0)
     down_duration_unit    = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
     # ————— Minimum regulation step fields —————
-    min_step            = forms.FloatField(label="Step", required=False)
+    min_step            = forms.FloatField(label="Step", required=False, initial=0.0)
     min_step_unit       = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
-    min_duration        = forms.FloatField(label="Duration", required=False)
+    min_duration        = forms.FloatField(label="Duration", required=False, initial=0.0)
     min_duration_unit   = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
     # ————— Storage temperature fields —————
-    storage_temp_min   = forms.FloatField(label="Min temperature", required=False)
-    storage_temp_max   = forms.FloatField(label="Max temperature", required=False)
+    storage_temp_min   = forms.FloatField(label="Min temperature", required=False, initial=-10)
+    storage_temp_max   = forms.FloatField(label="Max temperature", required=False, initial=60)
     storage_temp_unit  = forms.ModelChoiceField(label="Unit", queryset=Units.objects.all(), required=False)
     # ─── Operating temperature range ───
-    op_temp_min    = forms.FloatField(label="Min temperature",    required=False)
-    op_temp_max    = forms.FloatField(label="Max temperature",    required=False)
+    op_temp_min    = forms.FloatField(label="Min temperature", required=False, initial=-10)
+    op_temp_max    = forms.FloatField(label="Max temperature", required=False, initial=45)
     op_temp_unit   = forms.ModelChoiceField(label="Unit", queryset=Units.objects.all(), required=False)
     # ─── Relative humidity range ───
-    rh_min         = forms.FloatField(label="Min humidity",     required=False)
-    rh_max         = forms.FloatField(label="Max humidity",     required=False)
+    rh_min         = forms.FloatField(label="Min humidity", required=False, initial=10.0)
+    rh_max         = forms.FloatField(label="Max humidity", required=False, initial=95.0)
     rh_unit        = forms.ModelChoiceField(label="Unit", queryset=Units.objects.all(), required=False)
     # ─── Dimensions ───
-    dim_length     = forms.FloatField(label="Length (mm)", required=False)
-    dim_width      = forms.FloatField(label="Width (mm)",  required=False)
-    dim_height     = forms.FloatField(label="Height (mm)", required=False)
+    dim_length     = forms.FloatField(label="Length (mm)", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 200'}),)
+    dim_width      = forms.FloatField(label="Width (mm)", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 150'}),)
+    dim_height     = forms.FloatField(label="Height (mm)", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 100'}),)
     # ─── Weight ───
-    wt_value       = forms.FloatField(label="Weight",     required=False)
+    wt_value       = forms.FloatField(label="Weight", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 25.5'}),)
     wt_unit        = forms.ModelChoiceField(label="Unit", queryset=Units.objects.all(), required=False)
     class Meta:
         model = Asset
@@ -83,7 +84,7 @@ class AssetForm(forms.ModelForm):
                 '* Restriction of Hazardous Substances (RoHS) Directive: 2011/65/EU, compliant with harmonized standard EN IEC 63000:2018. \n'
                 '* Ecodesign for light sources and separate control gears: (EU) 2019/2020, compliant with relevant parts of EN IEC 62612:2023, EN IEC 62442-1:2020. \n'
                 '* Energy labelling of light sources: (EU) 2019/2015, compliant with relevant parts of EN IEC 62612:2023. \n',
-                'rows': 8,
+                'rows': 4,
             }),
             'dacq_actuation': forms.Textarea(attrs={
                 'placeholder': (
@@ -112,12 +113,6 @@ class AssetForm(forms.ModelForm):
                 ),
                 'rows': 3,
             }),
-            # 'regulation_response_time_accuracy': JSONTextarea(attrs={
-            #     'placeholder': (
-            #         'e.g.  {"resp_time_accuracy": 5.5, "units": "%"}'
-            #     ),
-            #     'rows': 3,
-            # }),
             'maximum_upward_regulation': forms.HiddenInput(),
             'maximum_downward_regulation': forms.HiddenInput(),
             'minimum_regulation_step': forms.HiddenInput(),
@@ -245,13 +240,13 @@ class AssetForm(forms.ModelForm):
                 'Proximity of the mean of measurement results to the true value, expressed as a percentage. Default is 1%, if this does not apply, leave empty. (optional)'
             ),
             'maximum_upward_regulation': (
-                'Maximum power generation to meet higher-than-expected demand for a specified amount of time.'
+                'Maximum power generation to meet higher-than-expected demand for a specified amount of time. In case of downward flexibility devices, leave 0.0 by default.'
             ),
             'maximum_downward_regulation': (
-                'Maximum load reduction to meet lower-than-expected power supply for a specified amount of time.'
+                'Maximum load reduction to meet lower-than-expected power supply for a specified amount of time. In case of upward flexibility devices, leave 0.0 by default.'
             ),
             'minimum_regulation_step': (
-                'Minimum power generation or load reduction step to meet demand or supply for a specified amount of time.'
+                'Minimum power generation or load reduction step to meet demand or supply for a specified amount of time. In case it does not apply, leave 0.0 default.'
             ),
             'ip_rating': (
                 'Ingress Protection Rating: a standard used to define the level of protection a device has against dust and water ingress, '
@@ -492,14 +487,14 @@ class ElectricalSpecsForm(forms.ModelForm):
     output_max_curr_duration = forms.FloatField(label="Duration (sec)", required=False, initial=0.0)
 
     # ─── power_output_nominal_uf unpacked ───
-    pow_nom_gen_kva   = forms.FloatField(label="Genset rated (kVA)",                  required=False, initial=0.0)
-    pow_nom_gen_kw    = forms.FloatField(label="Genset rated (kW)",                   required=False, initial=0.0)
-    pow_nom_runtime_h = forms.FloatField(label="Genset runtime @100%Load (hours)",    required=False, initial=0.0)
+    pow_nom_gen_kva   = forms.FloatField(label="Generation rated (kVA)", required=False, initial=0.0)
+    pow_nom_gen_kw    = forms.FloatField(label="Generation rated (kW)", required=False, initial=0.0)
+    pow_nom_runtime_h = forms.FloatField(label="Generation runtime @100%Load (hours)", required=False, initial=0.0)
 
     # ─── power_output_max_uf unpacked ───
-    pow_max_gen_kva   = forms.FloatField(label="Genset max (kVA)",                    required=False, initial=0.0)
-    pow_max_gen_kw    = forms.FloatField(label="Genset max (kW)",                     required=False, initial=0.0)
-    pow_max_runtime_h = forms.FloatField(label="Genset peak runtime (hours)",         required=False, initial=0.0)
+    pow_max_gen_kva   = forms.FloatField(label="Generation max (kVA)", required=False, initial=0.0)
+    pow_max_gen_kw    = forms.FloatField(label="Generation max (kW)", required=False, initial=0.0)
+    pow_max_runtime_h = forms.FloatField(label="Generation runtime (hours)", required=False, initial=0.0)
 
     class Meta:
         model   = ElectricalSpecs
@@ -665,41 +660,79 @@ class ElectricalSpecsForm(forms.ModelForm):
 
 
 class BESSSpecsForm(forms.ModelForm):
+    # ─── Discrete inputs in place of the JSONFields ───
+    voltage_min = forms.FloatField(
+        label="Min voltage (V)",
+        required=False,
+        initial=0.0,
+    )
+    voltage_max = forms.FloatField(
+        label="Max voltage (V)",
+        required=False,
+        initial=0.0,
+    )
+    capacity_rated_Ah = forms.FloatField(
+        label="Rated capacity (Ah)",
+        required=False,
+        initial=200,
+    )
+    capacity_temp_celsius = forms.FloatField(
+        label="Temperature (°C)",
+        required=False,
+        initial=25,
+    )
+    cycle_count          = forms.IntegerField(
+        label="Cycles",
+        required=False,
+        initial=3000,
+        help_text="Total number of charge/discharge cycles before capacity drops below a specified level."
+    )
+    depth_of_discharge   = forms.FloatField(
+        label="Depth of Discharge (%)",
+        required=False,
+        initial=90.0,
+        help_text="Percentage of depth-of-discharge at which cycle life is rated."
+    )
+    bms = forms.CharField(
+        label="BMS",
+        required=False,
+        widget=forms.TextInput(attrs={
+            "placeholder": "e.g. Varta EMS VS-Pro2"
+        }),
+        help_text="Type or model of BMS to control the battery, based on method and measurements."
+    )
+    state_estimation = forms.CharField(
+        label="State_estimation",
+        required=False,
+        widget=forms.TextInput(attrs={
+            "placeholder": "e.g. SOC, SOH"
+        })
+    )
+    monitoring = forms.CharField(
+        label="Attribute Monitoring",
+        required=False,
+        widget=forms.TextInput(attrs={
+            "placeholder": "e.g. Voltage, Current, Temperature"
+        })
+    )
+
     class Meta:
         model = BESSSpecs
         exclude = ['asset']
         widgets = {
-            'application': forms.TextInput(attrs={
-                'placeholder': 'e.g. Stationary Off-Grid',
-            }),
             'cell_type': forms.Select(),
             'voltage_nominal': forms.NumberInput(attrs={
                 'placeholder': 'e.g. 51.2',
             }),
-            'voltage_range': JSONTextarea(attrs={
-                'placeholder': (
-                    'e.g. {"min_volt":44,"max_volt":54}'
-                ),
-                'rows': 3,
-            }),
-            'capacity': JSONTextarea(attrs={
-                'placeholder': (
-                    'e.g. {"rated_capacity_Ah":100.0,"temp_celsius":20}'
-                ),
-                'rows': 3,
-            }),
+            'voltage_range': forms.HiddenInput(),
+            'capacity': forms.HiddenInput(),
             'maximum_charge_current': forms.NumberInput(attrs={
                 'placeholder': 'e.g. 70.0',
             }),
             'maximum_discharge_current': forms.NumberInput(attrs={
                 'placeholder': 'e.g. 100.0',
             }),
-            'cycle_life': JSONTextarea(attrs={
-                'placeholder': (
-                    'e.g. {"cycles":6000,"dod_%":90}'
-                ),
-                'rows': 3,
-            }),
+            'cycle_life': forms.HiddenInput(),
             'energy_rating_nominal': forms.NumberInput(attrs={
                 'placeholder': 'e.g. 5.12',
             }),
@@ -714,19 +747,13 @@ class BESSSpecsForm(forms.ModelForm):
             'round_trip_efficiency': forms.NumberInput(attrs={
                 'placeholder': 'e.g. 91.5',
             }),
-            'battery_management_system': JSONTextarea(attrs={
-                'placeholder': (
-                    'e.g. {"bms":"Varta EMS VS-Pro 2","state_estimation":["SOC","SOH"],'
-                    '"monitoring":["Voltage","Current","Temperature"]}'
-                ),
-                'rows': 4,
-            }),
+            'battery_management_system': forms.HiddenInput(),
             'degradation_rate': forms.NumberInput(attrs={
                 'placeholder': 'e.g. 1.0',
             }),
         }
         help_texts = {
-            'application': (
+            'bess_application': (
                 'Describes the intended use case (e.g. grid stabilization, renewable energy integration, backup power, peak shaving).'
             ),
             'cell_type': (
@@ -775,6 +802,70 @@ class BESSSpecsForm(forms.ModelForm):
                 'Rate at which battery capacity/performance declines over time.'
             ),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        vr = getattr(self.instance, 'voltage_range', None)
+        if isinstance(vr, dict):
+            self.fields['voltage_min'].initial = vr.get('min_volt', 0.0)
+            self.fields['voltage_max'].initial = vr.get('max_volt', 0.0)
+        cap = getattr(self.instance, 'capacity', None)
+        if isinstance(cap, dict):
+            self.fields['capacity_rated_Ah'].initial   = cap.get('rated_capacity_Ah', 0.0)
+            self.fields['capacity_temp_celsius'].initial = cap.get('temp_celsius', 0.0)
+        cl = getattr(self.instance, 'cycle_life', None)
+        if isinstance(cl, dict):
+            self.fields['cycle_count'].initial        = cl.get('cycles', 0)
+            self.fields['depth_of_discharge'].initial = cl.get('dod_%', 0.0)
+        raw = getattr(self.instance, "battery_management_system", None)
+        if isinstance(raw, dict):
+            self.fields["bms"].initial              = raw.get("bms", "")
+            # store lists as comma-joined strings
+            self.fields["state_estimation"].initial = ", ".join(raw.get("state_estimation", []))
+            self.fields["monitoring"].initial       = ", ".join(raw.get("monitoring", []))
+
+
+    def clean(self):
+        cleaned = super().clean()
+        vmin = cleaned.get('voltage_min')
+        vmax = cleaned.get('voltage_max')
+        if vmin is not None or vmax is not None:
+            cleaned['voltage_range'] = {
+                'min_volt': vmin  or 0.0,
+                'max_volt': vmax  or 0.0,
+            }
+
+        rcap = cleaned.get('capacity_rated_Ah')
+        tcel = cleaned.get('capacity_temp_celsius')
+        if rcap is not None or tcel is not None:
+            cleaned['capacity'] = {
+                'rated_capacity_Ah': rcap         or 0.0,
+                'temp_celsius':      tcel        or 0.0,
+            }
+
+        cc  = cleaned.get('cycle_count')
+        dod = cleaned.get('depth_of_discharge')
+        if cc is not None or dod is not None:
+            cleaned['cycle_life'] = {
+                'cycles':   cc  or 0,
+                'dod_%':    dod or 0.0,
+            }
+
+        bms   = cleaned.get("bms", "").strip()
+        se    = cleaned.get("state_estimation", "")
+        mon   = cleaned.get("monitoring", "")
+
+        # split CSV back into lists
+        se_list  = [s.strip() for s in se.split(",") if s.strip()]
+        mon_list = [m.strip() for m in mon.split(",") if m.strip()]
+
+        # always write back a dict
+        cleaned["battery_management_system"] = {
+            "bms":               bms,
+            "state_estimation":  se_list,
+            "monitoring":        mon_list,
+        }
+
+        return cleaned
 
 class SignupForm(UserCreationForm):
     email       = forms.EmailField(
