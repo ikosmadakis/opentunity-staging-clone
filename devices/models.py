@@ -75,7 +75,7 @@ class Asset(models.Model):
     batch_name                = models.TextField(blank=True, null=True)
     serial_number             = models.TextField(verbose_name="Serial Number", blank=True, null=True)
     deployment                = models.ForeignKey(Deployment, on_delete=models.PROTECT, blank=True, null=True)
-    classification            = models.ForeignKey(Classification, on_delete=models.PROTECT, blank=True, null=True)
+    classification            = models.ForeignKey(Classification, on_delete=models.PROTECT)
     description               = models.TextField(blank=True, null=True)
     commissioning_date        = models.DateTimeField(blank=True, null=True)
     compliance_checklist      = models.TextField(blank=True, null=True, verbose_name="List of Applicable Directives, Regulations, and Standards")
@@ -88,10 +88,10 @@ class Asset(models.Model):
     dacq_attributes           = models.TextField(blank=True, null=True, verbose_name="Monitored Attributes")
     control_actuation         = models.TextField(blank=True, null=True, verbose_name="Control Actuation")
     regulation                = models.ForeignKey(Regulation, on_delete=models.PROTECT)
-    regulation_response_time_upward   = models.FloatField()
-    regulation_response_time_downward = models.FloatField()
-    regulation_response_time_unit     = models.ForeignKey(Units, on_delete=models.PROTECT, related_name='+')
-    regulation_response_time_accuracy = models.JSONField()
+    regulation_response_time_upward   = models.FloatField(blank=True, null=True, default=1 )
+    regulation_response_time_downward = models.FloatField(blank=True, null=True, default=1)
+    regulation_response_time_unit     = models.ForeignKey(Units, on_delete=models.PROTECT, related_name='+', blank=True, null=True)
+    regulation_response_time_accuracy = models.FloatField(blank=True, null=True, default=1)
     maximum_upward_regulation         = models.JSONField()
     maximum_downward_regulation       = models.JSONField()
     minimum_regulation_step           = models.JSONField()
@@ -105,6 +105,18 @@ class Asset(models.Model):
 
     def __str__(self):
         return f"{self.model_name} ({self.opentunity_did or self.id})"
+
+class VoltageRegulationOption(models.Model):
+    """Lookup table for voltage regulation: Yes / No / Not Sure."""
+    name = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Voltage Regulation Option"
+        verbose_name_plural = "Voltage Regulation Options"
+
 
 class ElectricalSpecs(models.Model):
     asset                         = models.OneToOneField(Asset, on_delete=models.CASCADE, related_name='elec_specs')
@@ -120,7 +132,7 @@ class ElectricalSpecs(models.Model):
     power_consumption_max_df      = models.FloatField()
     standby_power_consumption     = models.FloatField()
     power_consumption_units       = models.ForeignKey(Units, on_delete=models.PROTECT)
-    voltage_regulation_uf         = models.FloatField()
+    voltage_regulation_uf         = models.ForeignKey(VoltageRegulationOption, on_delete=models.PROTECT, verbose_name="Voltage regulation")
     voltage_range_uf              = models.JSONField()
     output_current_nominal_uf     = models.FloatField()
     output_current_max_uf         = models.JSONField()

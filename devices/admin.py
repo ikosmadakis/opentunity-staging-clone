@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     DevicesAttributes, Manufacturer, Deployment, Classification, Flexibility,
     Communication, CommunicationProtocol, Regulation,
-    Units, CellType
+    Units, CellType, VoltageRegulationOption
 )
 
 admin.site.register(DevicesAttributes)
@@ -15,3 +15,7 @@ admin.site.register(CommunicationProtocol)
 admin.site.register(Regulation)
 admin.site.register(Units)
 admin.site.register(CellType)
+
+@admin.register(VoltageRegulationOption)
+class VoltageRegulationOptionAdmin(admin.ModelAdmin):
+    list_display = ('name',)

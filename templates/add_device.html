@@ -5,12 +5,6 @@
     {% csrf_token %}
 
     {# --- ASSET FORM FIELDS --- #}
-    <div class="mb-3">
-      {{ asset_form.opentunity_did.label_tag }}<br>
-      {{ asset_form.opentunity_did }}<br>
-      <small class="text-muted">{{ asset_form.opentunity_did.help_text }}</small>
-      {{ asset_form.opentunity_did.errors }}
-    </div>
 
     <div class="mb-3">
       {{ asset_form.gtin.label_tag }}<br>
@@ -176,26 +170,94 @@
       {{ asset_form.regulation_response_time_accuracy.errors }}
     </div>
 
-    <div class="mb-3">
-      {{ asset_form.maximum_upward_regulation.label_tag }}<br>
-      {{ asset_form.maximum_upward_regulation }}<br>
-      <small class="text-muted">{{ asset_form.maximum_upward_regulation.help_text }}</small>
-      {{ asset_form.maximum_upward_regulation.errors }}
+    {# -- our new section for maximum_upward_regulation -- #}
+    <h4>Maximum upward regulation</h4>
+    <div class="row mb-3">
+      <div class="col">
+        {{ asset_form.power_generation.label_tag }}
+        {{ asset_form.power_generation }}
+        {{ asset_form.power_generation.errors }}
+      </div>
+      <div class="col">
+        {{ asset_form.power_generation_unit.label_tag }}
+        {{ asset_form.power_generation_unit }}
+        {{ asset_form.power_generation_unit.errors }}
+      </div>
     </div>
-
-    <div class="mb-3">
-      {{ asset_form.maximum_downward_regulation.label_tag }}<br>
-      {{ asset_form.maximum_downward_regulation }}<br>
-      <small class="text-muted">{{ asset_form.maximum_downward_regulation.help_text }}</small>
-      {{ asset_form.maximum_downward_regulation.errors }}
+    <div class="row mb-3">
+      <div class="col">
+        {{ asset_form.duration.label_tag }}
+        {{ asset_form.duration }}
+        {{ asset_form.duration.errors }}
+      </div>
+      <div class="col">
+        {{ asset_form.duration_unit.label_tag }}
+        {{ asset_form.duration_unit }}
+        {{ asset_form.duration_unit.errors }}
+      </div>
     </div>
-
-    <div class="mb-3">
-      {{ asset_form.minimum_regulation_step.label_tag }}<br>
-      {{ asset_form.minimum_regulation_step }}<br>
-      <small class="text-muted">{{ asset_form.minimum_regulation_step.help_text }}</small>
-      {{ asset_form.minimum_regulation_step.errors }}
-    </div>
+    {{ asset_form.maximum_upward_regulation }} {# hidden JSON input #}
+    <small class="form-text text-muted">
+    {{ asset_form.maximum_upward_regulation.help_text }}
+    </small>
+    {# -- our new section for maximum_downward_regulation -- #}
+    <h4>Maximum downward regulation</h4>
+      <div class="row mb-3">
+        <div class="col">
+          {{ asset_form.load_reduction.label_tag }}
+          {{ asset_form.load_reduction }}
+          {{ asset_form.load_reduction.errors }}
+        </div>
+        <div class="col">
+          {{ asset_form.load_reduction_unit.label_tag }}
+          {{ asset_form.load_reduction_unit }}
+          {{ asset_form.load_reduction_unit.errors }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col">
+          {{ asset_form.down_duration.label_tag }}
+          {{ asset_form.down_duration }}
+          {{ asset_form.down_duration.errors }}
+        </div>
+        <div class="col">
+          {{ asset_form.down_duration_unit.label_tag }}
+          {{ asset_form.down_duration_unit }}
+          {{ asset_form.down_duration_unit.errors }}
+        </div>
+      </div>
+      {{ asset_form.maximum_downward_regulation }} {# hidden JSON input #}
+      <small class="form-text text-muted">
+          {{ asset_form.maximum_downward_regulation.help_text }}</small>
+    <h4>Minimum regulation step</h4>
+      <div class="row mb-3">
+        <div class="col">
+          {{ asset_form.min_step.label_tag }}
+          {{ asset_form.min_step }}
+          {{ asset_form.min_step.errors }}
+        </div>
+        <div class="col">
+          {{ asset_form.min_step_unit.label_tag }}
+          {{ asset_form.min_step_unit }}
+          {{ asset_form.min_step_unit.errors }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col">
+          {{ asset_form.min_duration.label_tag }}
+          {{ asset_form.min_duration }}
+          {{ asset_form.min_duration.errors }}
+        </div>
+        <div class="col">
+          {{ asset_form.min_duration_unit.label_tag }}
+          {{ asset_form.min_duration_unit }}
+          {{ asset_form.min_duration_unit.errors }}
+        </div>
+      </div>
+      {{ asset_form.minimum_regulation_step }}  {# hidden JSON input #}
+      <small class="form-text text-muted">
+        {{ asset_form.minimum_regulation_step.help_text }}
+      </small>
 
     <div class="mb-3">
       {{ asset_form.ip_rating.label_tag }}<br>
@@ -204,40 +266,109 @@
       {{ asset_form.ip_rating.errors }}
     </div>
 
-    <div class="mb-3">
-      {{ asset_form.storage_temperature.label_tag }}<br>
-      {{ asset_form.storage_temperature }}<br>
-      <small class="text-muted">{{ asset_form.storage_temperature.help_text }}</small>
-      {{ asset_form.storage_temperature.errors }}
+    <h4>Storage temperature</h4>
+    <div class="row mb-3">
+      <div class="col">
+        {{ asset_form.storage_temp_min.label_tag }}
+        {{ asset_form.storage_temp_min }}
+        {{ asset_form.storage_temp_min.errors }}
+      </div>
+      <div class="col">
+        {{ asset_form.storage_temp_max.label_tag }}
+        {{ asset_form.storage_temp_max }}
+        {{ asset_form.storage_temp_max.errors }}
+      </div>
+      <div class="col">
+        {{ asset_form.storage_temp_unit.label_tag }}
+        {{ asset_form.storage_temp_unit }}
+        {{ asset_form.storage_temp_unit.errors }}
+      </div>
     </div>
+    {{ asset_form.storage_temperature }}  {# Hidden JSONField input: #}
+    <small class="form-text text-muted">
+      {{ asset_form.storage_temperature.help_text }}
+    </small>
 
-    <div class="mb-3">
-      {{ asset_form.operating_temperature_range.label_tag }}<br>
-      {{ asset_form.operating_temperature_range }}<br>
-      <small class="text-muted">{{ asset_form.operating_temperature_range.help_text }}</small>
-      {{ asset_form.operating_temperature_range.errors }}
-    </div>
+    <!-- Operating temperature range -->
+    <h4>Operating temperature range</h4>
+      <div class="row mb-3">
+        <div class="col">
+          {{ asset_form.op_temp_min.label_tag }}
+          {{ asset_form.op_temp_min }}{{ asset_form.op_temp_min.errors }}
+        </div>
+        <div class="col">
+          {{ asset_form.op_temp_max.label_tag }}
+          {{ asset_form.op_temp_max }}{{ asset_form.op_temp_max.errors }}
+        </div>
+        <div class="col">
+          {{ asset_form.op_temp_unit.label_tag }}
+          {{ asset_form.op_temp_unit }}{{ asset_form.op_temp_unit.errors }}
+        </div>
+      </div>
+      {{ asset_form.operating_temperature_range }}  {# hidden input #}
+      <small class="form-text text-muted">
+        {{ asset_form.operating_temperature_range.help_text }}
+      </small>
 
-    <div class="mb-3">
-      {{ asset_form.relative_humidity_range.label_tag }}<br>
-      {{ asset_form.relative_humidity_range }}<br>
-      <small class="text-muted">{{ asset_form.relative_humidity_range.help_text }}</small>
-      {{ asset_form.relative_humidity_range.errors }}
+  <!-- Relative humidity range -->
+  <h4>Relative humidity range</h4>
+  <div class="row mb-3">
+    <div class="col">
+      {{ asset_form.rh_min.label_tag }}
+      {{ asset_form.rh_min }}{{ asset_form.rh_min.errors }}
     </div>
+    <div class="col">
+      {{ asset_form.rh_max.label_tag }}
+      {{ asset_form.rh_max }}{{ asset_form.rh_max.errors }}
+    </div>
+    <div class="col">
+      {{ asset_form.rh_unit.label_tag }}
+      {{ asset_form.rh_unit }}{{ asset_form.rh_unit.errors }}
+    </div>
+  </div>
+  {{ asset_form.relative_humidity_range }}
+  <small class="form-text text-muted">
+    {{ asset_form.relative_humidity_range.help_text }}
+  </small>
 
-    <div class="mb-3">
-      {{ asset_form.dimensions.label_tag }}<br>
-      {{ asset_form.dimensions }}<br>
-      <small class="text-muted">{{ asset_form.dimensions.help_text }}</small>
-      {{ asset_form.dimensions.errors }}
+  <!-- Dimensions -->
+  <h4>Dimensions</h4>
+  <div class="row mb-3">
+    <div class="col">
+      {{ asset_form.dim_length.label_tag }}
+      {{ asset_form.dim_length }}{{ asset_form.dim_length.errors }}
     </div>
+    <div class="col">
+      {{ asset_form.dim_width.label_tag }}
+      {{ asset_form.dim_width }}{{ asset_form.dim_width.errors }}
+    </div>
+    <div class="col">
+      {{ asset_form.dim_height.label_tag }}
+      {{ asset_form.dim_height }}{{ asset_form.dim_height.errors }}
+    </div>
+  </div>
+  {{ asset_form.dimensions }}
+  <small class="form-text text-muted">
+    {{ asset_form.dimensions.help_text }}
+  </small>
 
-    <div class="mb-3">
-      {{ asset_form.weight.label_tag }}<br>
-      {{ asset_form.weight }}<br>
-      <small class="text-muted">{{ asset_form.weight.help_text }}</small>
-      {{ asset_form.weight.errors }}
+  <!-- Weight -->
+  <h4>Weight</h4>
+  <div class="row mb-3">
+    <div class="col">
+      {{ asset_form.wt_value.label_tag }}
+      {{ asset_form.wt_value }}{{ asset_form.wt_value.errors }}
     </div>
+    <div class="col">
+      {{ asset_form.wt_unit.label_tag }}
+      {{ asset_form.wt_unit }}{{ asset_form.wt_unit.errors }}
+    </div>
+  </div>
+  {{ asset_form.weight }}
+  <small class="form-text text-muted">
+    {{ asset_form.weight.help_text }}
+  </small>
+
 
     <div class="mb-3">
       {{ asset_form.form_factor.label_tag }}<br>
@@ -248,10 +379,276 @@
 
     {# --- ELECTRICAL/BESS SPECS --- #}
     <div id="elec-specs" class="spec-block">
-      <h3>Electrical Specs (non-BESS)</h3>
-      {{ elec_form.non_field_errors }}
-      {{ elec_form.as_p }}
+        <h3>Electrical Specs (non-BESS)</h3>
+        {{ elec_form.non_field_errors }}
+
+        {# Phase & Frequency #}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ elec_form.phase_configuration.label_tag }}
+                {{ elec_form.phase_configuration }}
+                {{ elec_form.phase_configuration.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.phase_configuration.help_text }}
+            </small>
+            <br><br>
+            <div class="col-md-6">
+                {{ elec_form.frequency.label_tag }}
+                {{ elec_form.frequency }}
+                {{ elec_form.frequency.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.frequency.help_text }}
+            </small>
+            <br><br>
+        </div>
+
+        {# Nominal Voltage & Tolerance #}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ elec_form.voltage_nominal.label_tag }}
+                {{ elec_form.voltage_nominal }}
+                {{ elec_form.voltage_nominal.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.voltage_nominal.help_text }}
+            </small>
+            <br><br>
+            <div class="col-md-6">
+                {{ elec_form.voltage_tolerance_df.label_tag }}
+                {{ elec_form.voltage_tolerance_df }}
+                {{ elec_form.voltage_tolerance_df.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.voltage_tolerance_df.help_text }}
+            </small>
+            <br><br>
+        </div>
+
+        {# Current fields #}
+        <div class="row mb-3">
+            <div class="col-md-4">
+                {{ elec_form.current_nominal_df.label_tag }}
+                {{ elec_form.current_nominal_df }}
+                {{ elec_form.current_nominal_df.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.current_nominal_df.help_text }}
+            </small>
+            <br><br>
+            <div class="col-md-4">
+                {{ elec_form.current_min_df.label_tag }}
+                {{ elec_form.current_min_df }}
+                {{ elec_form.current_min_df.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.current_min_df.help_text }}
+            </small>
+            <br><br>
+            <div class="col-md-4">
+                {{ elec_form.current_max_df.label_tag }}
+                {{ elec_form.current_max_df }}
+                {{ elec_form.current_max_df.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.current_max_df.help_text }}
+            </small>
+            <br><br>
+        </div>
+
+        {# Inrush & Standby Power #}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ elec_form.inrush_current_max_df.label_tag }}
+                {{ elec_form.inrush_current_max_df }}
+                {{ elec_form.inrush_current_max_df.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.inrush_current_max_df.help_text }}
+            </small>
+            <br><br>
+            <div class="col-md-6">
+                {{ elec_form.standby_power_consumption.label_tag }}
+                {{ elec_form.standby_power_consumption }}
+                {{ elec_form.standby_power_consumption.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.standby_power_consumption.help_text }}
+            </small>
+            <br><br>
+        </div>
+
+        {# Power Consumption #}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ elec_form.power_consumption_nominal_df.label_tag }}
+                {{ elec_form.power_consumption_nominal_df }}
+                {{ elec_form.power_consumption_nominal_df.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.power_consumption_nominal_df.help_text }}
+            </small>
+            <br><br>
+            <div class="col-md-6">
+                {{ elec_form.power_consumption_max_df.label_tag }}
+                {{ elec_form.power_consumption_max_df }}
+                {{ elec_form.power_consumption_max_df.errors }}
+            </div>
+            <small class="form-text text-muted">
+                {{ elec_form.fields.power_consumption_max_df.help_text }}
+            </small>
+            <br><br>
+        </div>
+
+        {# ─── power_consumption_max_df unpacked ─── #}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ elec_form.power_consumption_units.label_tag }}
+                {{ elec_form.power_consumption_units }}
+                {{ elec_form.power_consumption_units.errors }}
+            </div>
+        </div>
+        <small class="form-text text-muted">
+            {{ elec_form.fields.power_consumption_units.help_text }}
+        </small>
+        <br><br>
+
+        {# ─── voltage_regulation_uf unpacked ─── #}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ elec_form.voltage_regulation_uf.label_tag }}
+                {{ elec_form.voltage_regulation_uf }}
+                {{ elec_form.voltage_regulation_uf.errors }}
+            </div>
+        </div>
+        <small class="form-text text-muted">
+            {{ elec_form.fields.voltage_regulation_uf.help_text }}
+        </small>
+        <br><br>
+
+        {# ─── voltage_range_uf unpacked ─── #}
+        <h4>Output voltage range</h4>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                {{ elec_form.voltage_min.label_tag }}
+                {{ elec_form.voltage_min }}
+                {{ elec_form.voltage_min.errors }}
+            </div>
+            <div class="col-md-4">
+                {{ elec_form.voltage_max.label_tag }}
+                {{ elec_form.voltage_max }}
+                {{ elec_form.voltage_max.errors }}
+            </div>
+            <div class="col-md-4">
+                {{ elec_form.voltage_acc.label_tag }}
+                {{ elec_form.voltage_acc }}
+                {{ elec_form.voltage_acc.errors }}
+            </div>
+        </div>
+        <small class="form-text text-muted">
+            {{ elec_form.fields.voltage_range_uf.help_text }}
+        </small>
+        <br><br>
+
+        {# ─── output_current_nominal_uf unpacked ─── #}
+        <div class="row mb-3 mt-4">
+            <div class="col-md-6">
+                {{ elec_form.output_current_nominal_uf.label_tag }}
+                {{ elec_form.output_current_nominal_uf }}
+                {{ elec_form.output_current_nominal_uf.errors }}
+            </div>
+        </div>
+        <small class="form-text text-muted">
+            {{ elec_form.fields.output_current_nominal_uf.help_text }}
+        </small>
+        <br><br>
+
+        {# ─── output_current_max_uf unpacked ─── #}
+        <h4>Output current max </h4>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                {{ elec_form.output_max_curr.label_tag }}
+                {{ elec_form.output_max_curr }}
+                {{ elec_form.output_max_curr.errors }}
+            </div>
+            <div class="col-md-4">
+                {{ elec_form.output_max_curr_duration.label_tag }}
+                {{ elec_form.output_max_curr_duration }}
+                {{ elec_form.output_max_curr_duration.errors }}
+            </div>
+        </div>
+        <small class="form-text text-muted">
+            {{ elec_form.fields.output_current_max_uf.help_text }}
+        </small>
+        <br><br>
+
+        {# ─── power_output_nominal_uf unpacked ─── #}
+        <h4>Rated Power Output</h4>
+        <div class="row mb-3">
+            <div class="col">
+                {{ elec_form.pow_nom_gen_kva.label_tag }}
+                {{ elec_form.pow_nom_gen_kva }}
+                {{ elec_form.pow_nom_gen_kva.errors }}
+            </div>
+            <div class="col">
+                {{ elec_form.pow_nom_gen_kw.label_tag }}
+                {{ elec_form.pow_nom_gen_kw }}
+                {{ elec_form.pow_nom_gen_kw.errors }}
+            </div>
+            <div class="col">
+                {{ elec_form.pow_nom_runtime_h.label_tag }}
+                {{ elec_form.pow_nom_runtime_h }}
+                {{ elec_form.pow_nom_runtime_h.errors }}
+            </div>
+        </div>
+        <small class="form-text">
+            {{ elec_form.power_output_nominal_uf.help_text }}
+        </small>
+        <br><br>
+
+        {# ─── power_output_max_uf unpacked ─── #}
+        <h4>Max Power Output</h4>
+        <div class="row mb-3">
+            <div class="col">
+                {{ elec_form.pow_max_gen_kva.label_tag }}
+                {{ elec_form.pow_max_gen_kva }}
+                {{ elec_form.pow_max_gen_kva.errors }}
+            </div>
+            <div class="col">
+                {{ elec_form.pow_max_gen_kw.label_tag }}
+                {{ elec_form.pow_max_gen_kw }}
+                {{ elec_form.pow_max_gen_kw.errors }}
+            </div>
+            <div class="col">
+                {{ elec_form.pow_max_runtime_h.label_tag }}
+                {{ elec_form.pow_max_runtime_h }}
+                {{ elec_form.pow_max_runtime_h.errors }}
+            </div>
+        </div>
+        <small class="form-text">
+            {{ elec_form.power_output_max_uf.help_text }}
+        </small>
+        <br><br>
+
+        {# Power Factor #}
+        <div class="mb-3">
+            {{ elec_form.power_factor.label_tag }}
+            {{ elec_form.power_factor }}
+            {{ elec_form.power_factor.errors }}
+        </div>
+        <small class="form-text text-muted">
+            {{ elec_form.fields.power_factor.help_text }}
+        </small>
+        <br><br>
+
+        {# ─── render hidden JSON-fields so they get submitted ─── #}
+        {{ elec_form.voltage_range_uf }}
+        {{ elec_form.output_current_max_uf }}
+        {{ elec_form.power_output_nominal_uf }}
+        {{ elec_form.power_output_max_uf }}
     </div>
+
 
     <div id="bess-specs" class="spec-block">
       <h3>BESS Specs (for Battery)</h3>
