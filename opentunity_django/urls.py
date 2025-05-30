@@ -28,6 +28,7 @@ urlpatterns = [
     path('device/<int:pk>/',             device_views.asset_detail, name='asset_detail'),
     path('device/<int:pk>/edit/',        device_views.asset_edit,   name='asset_edit'),
     path("activate/<uidb64>/<token>/", activate, name="activate"),
+    path('', include('devices.urls')),
 
 
 ]

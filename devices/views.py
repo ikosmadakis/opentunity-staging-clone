@@ -4,15 +4,14 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib import messages
-from .forms import SignupForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from .utils import send_activation_email
 
 
-from .forms import AssetForm, ElectricalSpecsForm, BESSSpecsForm
-from .models import ContentContributor, Asset
+from devices.forms import SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm
+from devices.models import ContentContributor, Asset
 
 def activate(request, uidb64, token):
     try:
@@ -55,6 +54,7 @@ def add_device(request):
 
         # 1) Validate the asset form first
         if not asset_form.is_valid():
+            print(asset_form.errors)  # Add this line in views.py for debugging
             messages.error(request, "Please correct the errors in the main asset form.")
             return render(request, 'add_device.html', {
                 'asset_form': asset_form,
@@ -173,19 +173,47 @@ def asset_edit(request, pk):
         pk=pk,
         record_contributor__user=request.user
     )
+    cls_type = (asset.classification.type or '').strip().upper()
+
+    # Get related specs object if exists
+    elec = getattr(asset, "elec_specs", None)
+    bess = getattr(asset, "bess_specs", None)
+
     if request.method == 'POST':
-        form = AssetForm(request.POST, instance=asset)
-        if form.is_valid():
-            form.save()
+        asset_form = AssetForm(request.POST, instance=asset)
+        elec_form = ElectricalSpecsForm(request.POST, instance=elec, prefix='elec')
+        bess_form = BESSSpecsForm(request.POST, instance=bess, prefix='bess')
+
+        valid = asset_form.is_valid()
+        valid_specs = False
+
+        if cls_type == 'BATTERY':
+            valid_specs = bess_form.is_valid()
+        else:
+            valid_specs = elec_form.is_valid()
+
+        if valid and valid_specs:
+            asset = asset_form.save()
+            if cls_type == 'BATTERY':
+                spec = bess_form.save(commit=False)
+            else:
+                spec = elec_form.save(commit=False)
+            spec.asset = asset
+            spec.save()
             messages.success(request, "Asset updated!")
             return redirect('asset_detail', pk=pk)
     else:
-        form = AssetForm(instance=asset)
+        asset_form = AssetForm(instance=asset)
+        elec_form = ElectricalSpecsForm(instance=elec, prefix='elec')
+        bess_form = BESSSpecsForm(instance=bess, prefix='bess')
 
     return render(request, 'devices/asset_edit.html', {
-        'form': form,
-        'asset': asset
+        'asset': asset,
+        'asset_form': asset_form,
+        'elec_form': elec_form,
+        'bess_form': bess_form,
     })
+
 
 
 

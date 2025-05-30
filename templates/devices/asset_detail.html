@@ -5,109 +5,56 @@
 
   <table>
     <tbody>
-      <tr>
-        <th>OpenTunity ID</th>
-        <td>{{ asset.opentunity_did|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Contributor</th>
-        <td>{{ asset.record_contributor.user.get_full_name|default:asset.record_contributor.user.username }}</td>
-      </tr>
-      <tr>
-        <th>Added On</th>
-        <td>{{ asset.record_insertion_date|date:"Y-m-d H:i" }}</td>
-      </tr>
-      <tr>
-        <th>Manufacturer</th>
-        <td>{{ asset.manufacturer.name }}</td>
-      </tr>
-      <tr>
-        <th>Model Name</th>
-        <td>{{ asset.model_name }}</td>
-      </tr>
-      <tr>
-        <th>Batch Name</th>
-        <td>{{ asset.batch_name|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Serial Number</th>
-        <td>{{ asset.serial_number|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Deployment</th>
-        <td>{{ asset.deployment.primary_environment|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Classification</th>
-        <td>{{ asset.classification.type|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Description</th>
-        <td>{{ asset.description|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Commissioning Date</th>
-        <td>{{ asset.commissioning_date|date:"Y-m-d"|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Certifications</th>
-        <td><pre>{{ asset.certifications|default:"—" }}</pre></td>
-      </tr>
-      <tr>
-        <th>Release Year</th>
-        <td>{{ asset.release_year|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Flexibility</th>
-        <td>{{ asset.flexibility.type }}</td>
-      </tr>
-      <tr>
-        <th>Communication</th>
-        <td><pre>{{ asset.communication.type }}</pre></td>
-      </tr>
-      <tr>
-        <th>Communication Protocol</th>
-        <td><pre>{{ asset.communication_protocol.type }}</pre></td>
-      </tr>
-      <tr>
-        <th>Data Acquisition Actuation</th>
-        <td>{{ asset.dacq_actuation }}</td>
-      </tr>
-      <tr>
-        <th>Data Acquisition Attributes</th>
-        <td><pre>{{ asset.dacq_attributes }}</pre></td>
-      </tr>
-      <tr>
-        <th>Control Actuation</th>
-        <td>{{ asset.control_actuation }}</td>
-      </tr>
-      <tr>
-        <th>Regulation</th>
-        <td>{{ asset.regulation.type }}</td>
-      </tr>
+      <tr><th>OpenTunity ID</th>        <td>{{ asset.opentunity_did|default:"—" }}</td></tr>
+      <tr><th>Contributor</th>          <td>{{ asset.record_contributor.user.get_full_name|default:asset.record_contributor.user.username }}</td></tr>
+      <tr><th>Added On</th>             <td>{{ asset.record_insertion_date|date:"Y-m-d H:i" }}</td></tr>
+      <tr><th>Manufacturer</th>         <td>{{ asset.manufacturer.name }}</td></tr>
+      <tr><th>Model Name</th>           <td>{{ asset.model_name }}</td></tr>
+      <tr><th>Batch Name</th>           <td>{{ asset.batch_name|default:"—" }}</td></tr>
+      <tr><th>Serial Number</th>        <td>{{ asset.serial_number|default:"—" }}</td></tr>
+      <tr><th>Deployment</th>           <td>{{ asset.deployment.primary_environment|default:"—" }}</td></tr>
+      <tr><th>Classification</th>       <td>{{ asset.classification.type|default:"—" }}</td></tr>
+      <tr><th>Description</th>          <td>{{ asset.description|default:"—" }}</td></tr>
+      <tr><th>Commissioning Date</th>   <td>{{ asset.commissioning_date|date:"Y-m-d"|default:"—" }}</td></tr>
+      <tr><th>Compliance Checklist</th> <td><pre>{{ asset.compliance_checklist|default:"—" }}</pre></td></tr>
+      <tr><th>Release Year</th>         <td>{{ asset.release_year|default:"—" }}</td></tr>
+      <tr><th>Flexibility</th>          <td>{{ asset.flexibility.type|default:"—" }}</td></tr>
+      <tr><th>Communication</th>        <td><pre>{{ asset.communication.type|default:"—" }}</pre></td></tr>
+      <tr><th>Communication Protocol</th> <td><pre>{{ asset.communication_protocol.type|default:"—" }}</pre></td></tr>
+      <tr><th>Data Acquisition Actuation</th> <td>{{ asset.dacq_actuation|default:"—" }}</td></tr>
+      <tr><th>Attributes</th>           <td>{{ asset.devices_attribute.attribute|default:"—" }}</td></tr>
+      <tr><th>Monitored Attributes</th> <td><pre>{{ asset.dacq_attributes|default:"—" }}</pre></td></tr>
+      <tr><th>Control Actuation</th>    <td>{{ asset.control_actuation|default:"—" }}</td></tr>
+      <tr><th>Regulation</th>           <td>{{ asset.regulation.type|default:"—" }}</td></tr>
       <tr>
         <th>Regulation Response Time (Upward)</th>
-        <td>{{ asset.regulation_response_time_upward }} {{ asset.regulation_response_time_unit.symbol }}</td>
+        <td>
+          {{ asset.regulation_response_time_upward|default:"—" }}
+          {% if asset.regulation_response_time_unit %}{{ asset.regulation_response_time_unit.symbol }}{% endif %}
+        </td>
       </tr>
       <tr>
         <th>Regulation Response Time (Downward)</th>
-        <td>{{ asset.regulation_response_time_downward }} {{ asset.regulation_response_time_unit.symbol }}</td>
+        <td>
+          {{ asset.regulation_response_time_downward|default:"—" }}
+          {% if asset.regulation_response_time_unit %}{{ asset.regulation_response_time_unit.symbol }}{% endif %}
+        </td>
       </tr>
       <tr>
-        <th>Response Time Accuracy</th>
-        <td><pre>{{ asset.regulation_response_time_accuracy }}</pre></td>
+        <th>Response Time Accuracy (%)</th>
+        <td>{{ asset.regulation_response_time_accuracy|default:"—" }}</td>
       </tr>
       <tr>
-        <th>Max Upward Regulation</th>
-        <td><pre>{{ asset.maximum_upward_regulation }}</pre></td>
+        <th>Maximum Upward Regulation</th>
+        <td><pre>{{ asset.maximum_upward_regulation|default:"—" }}</pre></td>
       </tr>
       <tr>
-        <th>Max Downward Regulation</th>
-        <td><pre>{{ asset.maximum_downward_regulation }}</pre></td>
+        <th>Maximum Downward Regulation</th>
+        <td><pre>{{ asset.maximum_downward_regulation|default:"—" }}</pre></td>
       </tr>
       <tr>
-        <th>Min Regulation Step</th>
-        <td><pre>{{ asset.minimum_regulation_step }}</pre></td>
+        <th>Minimum Regulation Step</th>
+        <td><pre>{{ asset.minimum_regulation_step|default:"—" }}</pre></td>
       </tr>
       <tr>
         <th>IP Rating</th>
@@ -115,23 +62,23 @@
       </tr>
       <tr>
         <th>Storage Temperature</th>
-        <td><pre>{{ asset.storage_temperature }}</pre></td>
+        <td><pre>{{ asset.storage_temperature|default:"—" }}</pre></td>
       </tr>
       <tr>
         <th>Operating Temperature Range</th>
-        <td><pre>{{ asset.operating_temperature_range }}</pre></td>
+        <td><pre>{{ asset.operating_temperature_range|default:"—" }}</pre></td>
       </tr>
       <tr>
         <th>Relative Humidity Range</th>
-        <td><pre>{{ asset.relative_humidity_range }}</pre></td>
+        <td><pre>{{ asset.relative_humidity_range|default:"—" }}</pre></td>
       </tr>
       <tr>
         <th>Dimensions</th>
-        <td><pre>{{ asset.dimensions }}</pre></td>
+        <td><pre>{{ asset.dimensions|default:"—" }}</pre></td>
       </tr>
       <tr>
         <th>Weight</th>
-        <td><pre>{{ asset.weight }}</pre></td>
+        <td><pre>{{ asset.weight|default:"—" }}</pre></td>
       </tr>
       <tr>
         <th>Form Factor</th>
@@ -140,51 +87,75 @@
     </tbody>
   </table>
 
+  {# ELECTRICAL SPECS #}
   {% if asset.elec_specs %}
-    <h3>Electrical Specs Details</h3>
+    <h3>Electrical Specs</h3>
     <table>
       <tbody>
-        <tr><th>Phase Configuration</th><td>{{ asset.elec_specs.phase_configuration }}</td></tr>
-        <tr><th>Frequency</th><td>{{ asset.elec_specs.frequency }}</td></tr>
-        <tr><th>Nominal Voltage</th><td>{{ asset.elec_specs.voltage_nominal }}</td></tr>
-        <tr><th>Voltage Tolerance (%)</th><td>{{ asset.elec_specs.voltage_tolerance_df }}</td></tr>
-        <tr><th>Nominal Current (A)</th><td>{{ asset.elec_specs.current_nominal_df }}</td></tr>
-        <tr><th>Min Current (A)</th><td>{{ asset.elec_specs.current_min_df }}</td></tr>
-        <tr><th>Max Current (A)</th><td>{{ asset.elec_specs.current_max_df }}</td></tr>
-        <tr><th>Inrush Current (A)</th><td>{{ asset.elec_specs.inrush_current_max_df }}</td></tr>
-        <tr><th>Nominal Power (W)</th><td>{{ asset.elec_specs.power_consumption_nominal_df }}</td></tr>
-        <tr><th>Max Power (W)</th><td>{{ asset.elec_specs.power_consumption_max_df }}</td></tr>
-        <tr><th>Standby Power (W)</th><td>{{ asset.elec_specs.standby_power_consumption }}</td></tr>
-        <tr><th>Power Consumption Units</th><td>{{ asset.elec_specs.power_consumption_units.symbol }}</td></tr>
-        <tr><th>Voltage Regulation (%)</th><td>{{ asset.elec_specs.voltage_regulation_uf }}</td></tr>
-        <tr><th>Voltage Range</th><td><pre>{{ asset.elec_specs.voltage_range_uf }}</pre></td></tr>
-        <tr><th>Output Current Nominal (A)</th><td>{{ asset.elec_specs.output_current_nominal_uf }}</td></tr>
-        <tr><th>Output Current Max</th><td><pre>{{ asset.elec_specs.output_current_max_uf }}</pre></td></tr>
-        <tr><th>Nominal Power Output</th><td><pre>{{ asset.elec_specs.power_output_nominal_uf }}</pre></td></tr>
-        <tr><th>Max Power Output</th><td><pre>{{ asset.elec_specs.power_output_max_uf }}</pre></td></tr>
-        <tr><th>Power Factor</th><td>{{ asset.elec_specs.power_factor }}</td></tr>
+        <tr><th>Phase Configuration</th>    <td>{{ asset.elec_specs.phase_configuration|default:"—" }}</td></tr>
+        <tr><th>Frequency</th>              <td>{{ asset.elec_specs.frequency|default:"—" }}</td></tr>
+        <tr><th>Nominal Voltage</th>        <td>{{ asset.elec_specs.voltage_nominal|default:"—" }}</td></tr>
+        <tr><th>Voltage Tolerance (%)</th>  <td>{{ asset.elec_specs.voltage_tolerance_df|default:"—" }}</td></tr>
+        <tr><th>Current (Nominal/Min/Max)</th>
+            <td>
+              {{ asset.elec_specs.current_nominal_df|default:"—" }} /
+              {{ asset.elec_specs.current_min_df|default:"—" }} /
+              {{ asset.elec_specs.current_max_df|default:"—" }}
+            </td>
+        </tr>
+        <tr><th>Inrush Current Max</th>     <td>{{ asset.elec_specs.inrush_current_max_df|default:"—" }}</td></tr>
+        <tr><th>Power Consumption (Nominal/Max)</th>
+            <td>
+              {{ asset.elec_specs.power_consumption_nominal_df|default:"—" }} /
+              {{ asset.elec_specs.power_consumption_max_df|default:"—" }}
+            </td>
+        </tr>
+        <tr><th>Standby Power</th>           <td>{{ asset.elec_specs.standby_power_consumption|default:"—" }}</td></tr>
+        <tr><th>Power Consumption Units</th> <td>{{ asset.elec_specs.power_consumption_units.symbol|default:"—" }}</td></tr>
+        <tr><th>Voltage Regulation</th>      <td>{{ asset.elec_specs.voltage_regulation_uf|default:"—" }}</td></tr>
+        <tr><th>Voltage Range</th>           <td><pre>{{ asset.elec_specs.voltage_range_uf|default:"—" }}</pre></td></tr>
+        <tr><th>Output Current Nominal</th>  <td>{{ asset.elec_specs.output_current_nominal_uf|default:"—" }}</td></tr>
+        <tr><th>Output Current Max</th>      <td><pre>{{ asset.elec_specs.output_current_max_uf|default:"—" }}</pre></td></tr>
+        <tr><th>Power Output (Nominal)</th>  <td><pre>{{ asset.elec_specs.power_output_nominal_uf|default:"—" }}</pre></td></tr>
+        <tr><th>Power Output (Max)</th>      <td><pre>{{ asset.elec_specs.power_output_max_uf|default:"—" }}</pre></td></tr>
+        <tr><th>Power Factor</th>            <td>{{ asset.elec_specs.power_factor|default:"—" }}</td></tr>
       </tbody>
     </table>
-  {% elif asset.bess_specs %}
-    <h3>BESS Specs Details</h3>
+  {% endif %}
+
+  {# BESS SPECS #}
+  {% if asset.bess_specs %}
+    <h3>BESS Specs</h3>
     <table>
       <tbody>
-        <tr><th>Application</th><td>{{ asset.bess_specs.application }}</td></tr>
-        <tr><th>Cell Type</th><td>{{ asset.bess_specs.cell_type.name }}</td></tr>
-        <tr><th>Nominal Voltage</th><td>{{ asset.bess_specs.voltage_nominal }}</td></tr>
-        <tr><th>Voltage Range</th><td><pre>{{ asset.bess_specs.voltage_range }}</pre></td></tr>
-        <tr><th>Capacity</th><td><pre>{{ asset.bess_specs.capacity }}</pre></td></tr>
-        <tr><th>Max Charge Current (A)</th><td>{{ asset.bess_specs.maximum_charge_current }}</td></tr>
-        <tr><th>Max Discharge Current (A)</th><td>{{ asset.bess_specs.maximum_discharge_current }}</td></tr>
-        <tr><th>Cycle Life</th><td><pre>{{ asset.bess_specs.cycle_life }}</pre></td></tr>
-        <tr><th>Energy Rating Nominal ({{ asset.bess_specs.energy_rating_nominal_units.symbol }})</th>
-            <td>{{ asset.bess_specs.energy_rating_nominal }}</td></tr>
-        <tr><th>Energy Rating Usable ({{ asset.bess_specs.energy_rating_usable_units.symbol }})</th>
-            <td>{{ asset.bess_specs.energy_rating_usable }}</td></tr>
-        <tr><th>C-rate</th><td>{{ asset.bess_specs.c_rate }}</td></tr>
-        <tr><th>Round-trip Efficiency (%)</th><td>{{ asset.bess_specs.round_trip_efficiency }}</td></tr>
-        <tr><th>Battery Management System</th><td><pre>{{ asset.bess_specs.battery_management_system }}</pre></td></tr>
-        <tr><th>Degradation Rate (%)</th><td>{{ asset.bess_specs.degradation_rate }}</td></tr>
+        <tr><th>Application</th>        <td>{{ asset.bess_specs.bess_application.application_name|default:"—" }}</td></tr>
+        <tr><th>Cell Type</th>          <td>{{ asset.bess_specs.cell_type.name|default:"—" }}</td></tr>
+        <tr><th>Nominal Voltage</th>    <td>{{ asset.bess_specs.voltage_nominal|default:"—" }}</td></tr>
+        <tr><th>Voltage Range</th>      <td><pre>{{ asset.bess_specs.voltage_range|default:"—" }}</pre></td></tr>
+        <tr><th>Capacity</th>           <td><pre>{{ asset.bess_specs.capacity|default:"—" }}</pre></td></tr>
+        <tr><th>Max Charge Current (A)</th>     <td>{{ asset.bess_specs.maximum_charge_current|default:"—" }}</td></tr>
+        <tr><th>Max Discharge Current (A)</th>  <td>{{ asset.bess_specs.maximum_discharge_current|default:"—" }}</td></tr>
+        <tr><th>Cycle Life</th>         <td><pre>{{ asset.bess_specs.cycle_life|default:"—" }}</pre></td></tr>
+        <tr><th>Energy Rating Nominal</th>
+            <td>
+              {{ asset.bess_specs.energy_rating_nominal|default:"—" }}
+              {% if asset.bess_specs.energy_rating_nominal_units %}
+                {{ asset.bess_specs.energy_rating_nominal_units.symbol }}
+              {% endif %}
+            </td>
+        </tr>
+        <tr><th>Energy Rating Usable</th>
+            <td>
+              {{ asset.bess_specs.energy_rating_usable|default:"—" }}
+              {% if asset.bess_specs.energy_rating_usable_units %}
+                {{ asset.bess_specs.energy_rating_usable_units.symbol }}
+              {% endif %}
+            </td>
+        </tr>
+        <tr><th>C-rate</th>                   <td>{{ asset.bess_specs.c_rate|default:"—" }}</td></tr>
+        <tr><th>Round-trip Efficiency (%)</th><td>{{ asset.bess_specs.round_trip_efficiency|default:"—" }}</td></tr>
+        <tr><th>Battery Management System</th><td><pre>{{ asset.bess_specs.battery_management_system|default:"—" }}</pre></td></tr>
+        <tr><th>Degradation Rate (%)</th>     <td>{{ asset.bess_specs.degradation_rate|default:"—" }}</td></tr>
       </tbody>
     </table>
   {% endif %}

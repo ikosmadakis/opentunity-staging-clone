@@ -4,6 +4,12 @@
 <form method="post" action="{% url 'add_device' %}">
     {% csrf_token %}
 
+    {% if asset_form.non_field_errors %}
+    <div class="alert alert-danger">
+        {{ asset_form.non_field_errors }}
+    </div>
+    {% endif %}
+
     {# --- ASSET FORM FIELDS --- #}
 
     <div class="mb-3">
@@ -885,26 +891,23 @@
         </div>
         <br>
 
-        {# Capacity (Ah @ °C) (unpacked) #}
-        <div class="mb-3">
-            <strong>
-                <label class="form-label">
-                    Capacity (Ah @ °C)
-                </label>
-            </strong>
-            <div class="d-flex gap-2">
-                {{ bess_form.capacity_rated_Ah }}
-                {{ bess_form.capacity_temp_celsius }}
-            </div>
-            {% if bess_form.capacity.help_text %}
-            <div class="form-text">
-                {{ bess_form.capacity.help_text }}
-            </div>
-            {% endif %}<br>
-            {{ bess_form.capacity_rated_Ah.errors }}
-            {{ bess_form.capacity_temp_celsius.errors }}
-        </div>
-        <br>
+        {# ─── Capacity (Ah @ °C) ─── #}
+  <div class="mb-3">
+    <strong>
+      <label class="form-label">Capacity (Ah @ °C)</label>
+    </strong>
+    <div class="d-flex gap-2">
+      {{ bess_form.capacity_rated_Ah }}
+      {{ bess_form.capacity_temp_celsius }}
+    </div>
+    {% if bess_form.capacity.help_text %}
+      <div class="form-text">{{ bess_form.capacity.help_text }}</div>
+    {% endif %}
+    {{ bess_form.capacity_rated_Ah.errors }}
+    {{ bess_form.capacity_temp_celsius.errors }}
+  </div>
+  {{ bess_form.capacity }}    {# hidden JSONField so it still gets submitted #}
+  <br>
 
         {# Max charge current #}
         <div class="mb-3">
@@ -934,26 +937,23 @@
         </div>
         <br>
 
-        {# Cycle Life (unpacked) #}
-        <div class="mb-3">
-            <strong>
-                <label class="form-label">
-                    Cycle life (no of cycles @ dod)
-                </label>
-            </strong>
-            <div class="d-flex gap-2">
-                {{ bess_form.cycle_count }}
-                {{ bess_form.depth_of_discharge }}
-            </div>
-            {% if bess_form.cycle_life.help_text %}
-            <div class="form-text">
-                {{ bess_form.cycle_life.help_text }}
-            </div>
-            {% endif %}<br>
-            {{ bess_form.cycle_count.errors }}
-            {{ bess_form.depth_of_discharge.errors }}
-        </div>
-        <br>
+        {# ─── Cycle Life (no of cycles @ DoD) ─── #}
+  <div class="mb-3">
+    <strong>
+      <label class="form-label">Cycle life (no&nbsp;of&nbsp;cycles&nbsp;@&nbsp;DoD)</label>
+    </strong>
+    <div class="d-flex gap-2">
+      {{ bess_form.cycle_count }}
+      {{ bess_form.depth_of_discharge }}
+    </div>
+    {% if bess_form.cycle_life.help_text %}
+      <div class="form-text">{{ bess_form.cycle_life.help_text }}</div>
+    {% endif %}
+    {{ bess_form.cycle_count.errors }}
+    {{ bess_form.depth_of_discharge.errors }}
+  </div>
+  {{ bess_form.cycle_life }}  {# hidden JSONField so it still gets submitted #}
+  <br>
 
         {# Energy ratings #}
         <div class="mb-3">
