@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     DevicesAttributes, Manufacturer, Deployment, Classification, Flexibility,
-    Communication, CommunicationProtocol, Regulation,
+    Communication, CommunicationProtocol, Regulation, APIKey,
     Units, CellType, VoltageRegulationOption, BessApplication, BESSSpecs
 )
 
@@ -30,3 +30,5 @@ class BESSSpecsAdmin(admin.ModelAdmin):
     list_display = ('asset', 'bess_application', 'cell_type', 'voltage_nominal')
     list_filter  = ('bess_application', 'cell_type')
     autocomplete_fields = ('bess_application',)
+
+admin.site.register(APIKey)

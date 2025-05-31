@@ -4,11 +4,21 @@ from rest_framework.exceptions import NotFound
 from .models import Asset
 from .serializers import AssetSerializer
 from rest_framework.routers import DefaultRouter
+from rest_framework.permissions import IsAuthenticated
 
 
 class AssetViewSet(viewsets.ReadOnlyModelViewSet):  # Only GET is allowed
     queryset = Asset.objects.all()
     serializer_class = AssetSerializer
+    permission_classes = [IsAuthenticated]
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     print("DEBUG: request.user =", request.user)
+    #     print("DEBUG: user.is_authenticated =", request.user.is_authenticated)
+    #     asset = self.get_object()
+    #     print("DEBUG: asset.record_contributor =", asset.record_contributor)
+    #     print("DEBUG: asset.record_contributor.user =", asset.record_contributor.user)
+    #     return super().retrieve(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         # You can return 404 or 403 or a custom message

@@ -1,5 +1,24 @@
 from django.db import models
 from django.contrib.auth.models import User
+import secrets
+
+class APIKey(models.Model):
+    key = models.CharField(max_length=40, unique=True, db_index=True)
+    name = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    @staticmethod
+    def generate_key():
+        return secrets.token_hex(20)
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = self.generate_key()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name or self.key
 
 class BessApplication(models.Model):
     application_name = models.CharField(
