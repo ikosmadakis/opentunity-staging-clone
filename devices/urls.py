@@ -1,8 +1,8 @@
 from django.urls import path, include
 from rest_framework import routers
-from .api_views import AssetViewSet
+from .api_views import AssetViewSet, NoRootRouter
 
-router = routers.DefaultRouter()
+router = NoRootRouter()
 router.register(r'assets', AssetViewSet)
 
 urlpatterns = [
