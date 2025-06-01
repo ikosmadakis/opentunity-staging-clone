@@ -29,6 +29,7 @@ urlpatterns = [
     path('device/<int:pk>/edit/',        device_views.asset_edit,   name='asset_edit'),
     path("activate/<uidb64>/<token>/", activate, name="activate"),
     path('', include('devices.urls')),
+    path('api/assets/<int:asset_id>/enter-api-key/', device_views.asset_api_key_entry, name='asset_api_key_entry'),
 
 
 ]

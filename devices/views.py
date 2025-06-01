@@ -27,6 +27,10 @@ def activate(request, uidb64, token):
     else:
         return render(request, "registration/activation_invalid.html")
 
+def asset_api_key_entry(request, asset_id):
+    # This just shows the form. No auth yet.
+    return render(request, 'enter_api_key.html', {'asset_id': asset_id})
+
 @login_required
 def dashboard(request):
     # Pull the 10 most recent assets created by this user
