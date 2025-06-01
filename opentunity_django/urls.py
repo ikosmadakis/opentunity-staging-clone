@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from devices import views as device_views
-from devices.views import activate
+from devices.views import activate, asset_qr_view
 
 
 urlpatterns = [
@@ -29,6 +29,7 @@ urlpatterns = [
     path('device/<int:pk>/edit/',        device_views.asset_edit,   name='asset_edit'),
     path("activate/<uidb64>/<token>/", activate, name="activate"),
     path('', include('devices.urls')),
+    path('asset/<int:pk>/qr/', asset_qr_view, name='asset_qr'),
 
 
 ]

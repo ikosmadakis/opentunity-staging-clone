@@ -8,10 +8,45 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from .utils import send_activation_email
+import qrcode, io
+from PIL import Image
+from django.contrib.staticfiles import finders
+from django.http import HttpResponse
 
 
 from devices.forms import SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm
 from devices.models import ContentContributor, Asset
+
+def asset_qr_view(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
+    # Set the URL to the unrestricted API endpoint
+    api_url = f"https://opentunity.pythonanywhere.com/api/assets/{asset.pk}/"
+    qr = qrcode.QRCode(box_size=6, border=2, error_correction=qrcode.constants.ERROR_CORRECT_H)
+    qr.add_data(api_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+
+    # Add logo to the center of the QR code
+    logo_path = finders.find('OPENTUNITY_LOGO.png')
+    if logo_path:
+        logo = Image.open(logo_path)
+        # Resize logo to 1/4 the width of the QR code
+        basewidth = img.size[0] // 4
+        wpercent = basewidth / float(logo.size[0])
+        hsize = int((float(logo.size[1]) * float(wpercent)))
+        logo = logo.resize((basewidth, hsize), Image.LANCZOS)
+        # Calculate position to paste the logo
+        pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
+        # Paste with alpha if present
+        if logo.mode in ('RGBA', 'LA'):
+            img.paste(logo, pos, mask=logo)
+        else:
+            img.paste(logo, pos)
+
+    buffer = io.BytesIO()
+    img.save(buffer, "PNG")
+    buffer.seek(0)
+    return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 def activate(request, uidb64, token):
     try:

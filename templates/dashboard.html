@@ -20,6 +20,7 @@
           <th>Classification</th>
           <th>Added On</th>
           <th>Actions</th>
+          <th>Opentunity <br>Asset QR</th>
         </tr>
       </thead>
       <tbody>
@@ -33,6 +34,11 @@
               <a href="{% url 'asset_detail' asset.id %}">View</a> |
               <a href="{% url 'asset_edit'  asset.id %}">Edit</a>
             </td>
+                <td style="text-align:center;vertical-align:middle;">
+                    <a href="{% url 'asset_qr' asset.pk %}" download="asset_{{ asset.pk }}_qr.png">
+                        <img src="{% url 'asset_qr' asset.pk %}" alt="Asset QR" width="100" height="100" />
+                    </a>
+                </td>
           </tr>
         {% endfor %}
       </tbody>
