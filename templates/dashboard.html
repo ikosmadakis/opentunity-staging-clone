@@ -20,6 +20,7 @@
           <th>Classification</th>
           <th>Added On</th>
           <th>Actions</th>
+          <th>Opentunity <br>Asset QR</th>
         </tr>
       </thead>
       <tbody>
@@ -30,8 +31,13 @@
             <td>{{ asset.classification.type }}</td>
             <td>{{ asset.record_insertion_date|date:"Y-m-d H:i" }}</td>
             <td>
-              <a href="{% url 'asset_detail' asset.id %}">View</a> |
-              <a href="{% url 'asset_edit'  asset.id %}">Edit</a>
+                <a href="{% url 'asset_detail' asset.id %}">View</a> |
+                <a href="{% url 'asset_edit'  asset.id %}">Edit</a>
+            </td>
+            <td align="center" valign="middle">
+                <a href="{% url 'api_qr' asset.id %}" download="api_qr_{{ asset.id }}.png">
+                    <img src="{% url 'api_qr' asset.id %}" alt="API QR" width="48" height="48">
+                </a>
             </td>
           </tr>
         {% endfor %}

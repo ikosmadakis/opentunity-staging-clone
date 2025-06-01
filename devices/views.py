@@ -8,10 +8,49 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from .utils import send_activation_email
-
-
+import qrcode, io, os
+from PIL import Image
+from django.conf import settings
+from django.http import HttpResponse
 from devices.forms import SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm
 from devices.models import ContentContributor, Asset
+
+def api_qr_view(request, asset_id):
+    asset = get_object_or_404(Asset, pk=asset_id)
+    url = f"https://opentunity.pythonanywhere.com/api/assets/{asset.id}/enter-api-key/"
+
+    # Generate QR code
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,  # High error correction for logo
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
+
+    # Path to your logo (adjust as needed)
+    logo_path = os.path.join(settings.BASE_DIR, 'devices', 'static', 'OPENTUNITY_LOGO.png')
+    if os.path.exists(logo_path):
+        logo = Image.open(logo_path)
+        # Resize logo
+        basewidth = img.size[0] // 4  # 1/4th of QR code width
+        wpercent = basewidth / float(logo.size[0])
+        hsize = int((float(logo.size[1]) * float(wpercent)))
+        logo = logo.resize((basewidth, hsize), Image.LANCZOS)
+        # Paste logo at center
+        pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
+        if logo.mode in ('RGBA', 'LA'):
+            img.paste(logo, pos, mask=logo)
+        else:
+            img.paste(logo, pos)
+
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    return HttpResponse(buffer.getvalue(), content_type="image/png")
+
 
 def activate(request, uidb64, token):
     try:
