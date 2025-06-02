@@ -87,6 +87,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'opentunity_django.wsgi.application'
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
 # Database
