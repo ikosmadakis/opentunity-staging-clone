@@ -1,31 +1,32 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-  <h2>Welcome, {{ user.username }}</h2>
-  <p>
-    <a href="{% url 'add_device' %}">Add a Device</a> |
-    <form action="{% url 'logout' %}" method="post" style="display:inline;">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-link p-0 align-baseline">Logout</button>
-    </form>
-  </p>
-
-  <h3>Your Recent Devices</h3>
-  {% if recent_assets %}
-    <table class="table table-striped table-bordered align-middle text-center">
-      <thead class="opentunity-gradient-thead">
+<h2>Welcome, {{ user.username }}</h2>
+<p>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="{% url 'add_device' %}">Add a Device</a>
+        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-link p-0 align-baseline">Logout</button>
+        </form>
+    </div>
+</p>
+<h3>Your Recent Devices</h3>
+{% if recent_assets %}
+<table class="table table-striped table-bordered align-middle text-center">
+    <thead class="opentunity-gradient-thead">
         <tr>
-          <th>ID</th>
-          <th>Model</th>
-          <th>Classification</th>
-          <th>Added On</th>
-          <th>Actions</th>
-          <th>Opentunity <br>Asset QR</th>
+            <th>ID</th>
+            <th>Model</th>
+            <th>Classification</th>
+            <th>Added On</th>
+            <th>Actions</th>
+            <th>Opentunity <br>Asset QR</th>
         </tr>
-      </thead>
-      <tbody>
+    </thead>
+    <tbody>
         {% for asset in recent_assets %}
-          <tr>
+        <tr>
             <td>{{ asset.id }}</td>
             <td>{{ asset.model_name }}</td>
             <td>{{ asset.classification.type }}</td>
@@ -34,16 +35,16 @@
               <a href="{% url 'asset_detail' asset.id %}" class="btn btn-sm btn-outline-primary">View</a> |
               <a href="{% url 'asset_edit'  asset.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
             </td>
-                <td style="text-align:center;vertical-align:middle;">
-                    <a href="{% url 'asset_qr' asset.pk %}" download="asset_{{ asset.pk }}_qr.png">
-                        <img src="{% url 'asset_qr' asset.pk %}" alt="Asset QR" width="100" height="100" />
-                    </a>
-                </td>
-          </tr>
+            <td style="text-align:center;vertical-align:middle;">
+                <a href="{% url 'asset_qr' asset.pk %}" download="asset_{{ asset.pk }}_qr.png">
+                    <img src="{% url 'asset_qr' asset.pk %}" alt="Asset QR" width="100" height="100" />
+                </a>
+            </td>
+        </tr>
         {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>You haven’t added any devices yet. <a href="{% url 'add_device' %}">Add one now</a>.</p>
-  {% endif %}
+    </tbody>
+</table>
+{% else %}
+<p>You haven’t added any devices yet. <a href="{% url 'add_device' %}">Add one now</a>.</p>
+{% endif %}
 {% endblock %}
