@@ -885,7 +885,7 @@ class SignupForm(UserCreationForm):
     eori_number = forms.CharField(
                      required=False,
                      max_length=30,
-                     label="EORI number (optional)"
+                     label="EORI number (required only for manufacturers)"
                   )
 
     class Meta:
