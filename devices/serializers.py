@@ -10,6 +10,7 @@ class AssetSerializer(serializers.ModelSerializer):
     communication_protocol = serializers.SerializerMethodField()
     regulation = serializers.SerializerMethodField()
     regulation_response_time_unit = serializers.SerializerMethodField()
+    record_contributor_username = serializers.SerializerMethodField()
 
     def get_manufacturer(self, obj):
         return obj.manufacturer.name if obj.manufacturer else None
@@ -35,6 +36,15 @@ class AssetSerializer(serializers.ModelSerializer):
     def get_regulation_response_time_unit(self, obj):
         return obj.regulation_response_time_unit.symbol if obj.regulation_response_time_unit else None
 
+    def get_record_contributor_username(self, obj):
+        # Assuming record_contributor is a FK to a profile with user field
+        # Adjust if your model is different!
+        if obj.record_contributor and hasattr(obj.record_contributor, 'user'):
+            return obj.record_contributor.user.username
+        # If it's a direct FK to User, then just:
+        # return obj.record_contributor.username
+        return None
+
     class Meta:
         model = Asset
-        fields = '__all__'  # Or list only the fields you want in the order you want
+        fields = '__all__'

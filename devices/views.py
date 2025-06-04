@@ -1,17 +1,16 @@
 from django.db import transaction
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
 from .utils import send_activation_email
 import qrcode, io
 from PIL import Image
 from django.contrib.staticfiles import finders
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 
 
 from devices.forms import SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm
@@ -249,6 +248,17 @@ def asset_edit(request, pk):
         'bess_form': bess_form,
     })
 
+@login_required
+def asset_delete(request, pk):
+    # Get the ContentContributor for this user
+    try:
+        cc = ContentContributor.objects.get(user=request.user)
+    except ContentContributor.DoesNotExist:
+        # Optionally, show error or redirect if not a CC
+        return HttpResponseForbidden("Not authorized.")
 
-
-
+    asset = get_object_or_404(Asset, pk=pk, record_contributor=cc)
+    if request.method == 'POST':
+        asset.delete()
+        return redirect('dashboard')
+    return render(request, 'devices/asset_confirm_delete.html', {'asset': asset})

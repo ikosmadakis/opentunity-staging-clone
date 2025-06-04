@@ -32,8 +32,12 @@
             <td>{{ asset.classification.type }}</td>
             <td>{{ asset.record_insertion_date|date:"Y-m-d H:i" }}</td>
             <td>
-              <a href="{% url 'asset_detail' asset.id %}" class="btn btn-sm btn-outline-primary">View</a> |
-              <a href="{% url 'asset_edit'  asset.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="{% url 'asset_detail' asset.id %}" class="btn btn-sm btn-outline-primary">View</a> |
+                <a href="{% url 'asset_edit'  asset.id %}" class="btn btn-sm btn-outline-primary">Edit</a> |
+                <form action="{% url 'asset_delete' asset.id %}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this device?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Delete</button>
+                </form>
             </td>
             <td style="text-align:center;vertical-align:middle;">
                 <a href="{% url 'asset_qr' asset.pk %}" download="asset_{{ asset.pk }}_qr.png">

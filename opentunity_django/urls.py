@@ -25,8 +25,9 @@ urlpatterns = [
     path('signup/', device_views.signup, name='signup'),
     path('add-device/', device_views.add_device, name='add_device'),
     path('', device_views.dashboard, name='dashboard'),  # homepage after login
-    path('device/<int:pk>/',             device_views.asset_detail, name='asset_detail'),
-    path('device/<int:pk>/edit/',        device_views.asset_edit,   name='asset_edit'),
+    path('device/<int:pk>/', device_views.asset_detail, name='asset_detail'),
+    path('device/<int:pk>/edit/', device_views.asset_edit,   name='asset_edit'),
+    path('asset/<int:pk>/delete/', device_views.asset_delete, name='asset_delete'),
     path("activate/<uidb64>/<token>/", activate, name="activate"),
     path('', include('devices.urls')),
     path('asset/<int:pk>/qr/', asset_qr_view, name='asset_qr'),
