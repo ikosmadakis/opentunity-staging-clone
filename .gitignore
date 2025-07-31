@@ -1,3 +1,5 @@
 # Ignore Python cache
 __pycache__/
 *.pyc
+# Staging secrets (keep out of Git)
+/opentunity_django/settings_staging.py
