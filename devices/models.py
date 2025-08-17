@@ -191,3 +191,84 @@ class BESSSpecs(models.Model):
 
     def __str__(self):
         return f"BESS Specs for Asset {self.asset.id}"
+
+
+class InverterSpecs(models.Model):
+    asset = models.OneToOneField(Asset, on_delete=models.CASCADE, related_name='inverter_specs')
+
+    model_name = models.TextField(blank=True, null=True)
+    phase_configuration = models.IntegerField(blank=True, null=True)
+    frequency = models.IntegerField(blank=True, null=True)
+
+    standby_power_consumption = models.FloatField(blank=True, null=True)
+
+    # AC side (nominal)
+    voltage_ac_l1_nom = models.FloatField(blank=True, null=True)
+    voltage_ac_l2_nom = models.FloatField(blank=True, null=True)
+    voltage_ac_l3_nom = models.FloatField(blank=True, null=True)
+    current_ac_l1_nom = models.FloatField(blank=True, null=True)
+    current_ac_l2_nom = models.FloatField(blank=True, null=True)
+    current_ac_l3_nom = models.FloatField(blank=True, null=True)
+
+    # DC side (nominal)
+    voltage_dc_nom = models.FloatField(blank=True, null=True)
+    current_dc_nom = models.FloatField(blank=True, null=True)
+
+    power_factor = models.FloatField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Inverter Specs for Asset {self.asset_id}"
+
+class PVModuleSpecs(models.Model):
+    asset = models.OneToOneField(Asset, on_delete=models.CASCADE, related_name='pv_module_specs')
+
+    application = models.TextField(blank=True, null=True)  # optional label you listed
+    module_type = models.TextField(blank=True, null=True)
+    module_name = models.TextField(blank=True, null=True)
+
+    voc = models.FloatField(blank=True, null=True)    # open-circuit
+    isc = models.FloatField(blank=True, null=True)    # short-circuit
+    vmpp = models.FloatField(blank=True, null=True)
+    impp = models.FloatField(blank=True, null=True)
+
+    temp_coef_pmax = models.FloatField(blank=True, null=True)   # %/°C
+    temp_coef_voc  = models.FloatField(blank=True, null=True)   # %/°C or V/°C (you choose)
+    temp_coef_isc  = models.FloatField(blank=True, null=True)   # %/°C
+    noct = models.FloatField(blank=True, null=True)             # °C
+    quantity = models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f"PV Module Specs for Asset {self.asset_id}"
+
+class SCCSpecs(models.Model):
+    asset = models.OneToOneField(Asset, on_delete=models.CASCADE, related_name='scc_specs')
+
+    model_name = models.TextField(blank=True, null=True)
+    voltage_input  = models.FloatField(blank=True, null=True)
+    current_input  = models.FloatField(blank=True, null=True)
+    voltage_output = models.FloatField(blank=True, null=True)
+    current_output = models.FloatField(blank=True, null=True)
+
+    def __str__(self):
+        return f"SCC Specs for Asset {self.asset_id}"
+
+class EnergyMeterSpecs(models.Model):
+    asset = models.OneToOneField(Asset, on_delete=models.CASCADE, related_name='meter_specs')
+
+    phase_configuration = models.IntegerField(blank=True, null=True)
+    frequency = models.IntegerField(blank=True, null=True)
+    voltage_nominal = models.IntegerField(blank=True, null=True)
+    voltage_tolerance_df = models.FloatField(blank=True, null=True)
+    current_nominal_df = models.FloatField(blank=True, null=True)
+    current_min_df = models.FloatField(blank=True, null=True)
+    current_max_df = models.FloatField(blank=True, null=True)
+
+    standby_power_consumption = models.FloatField(blank=True, null=True)
+    power_consumption_nominal_df = models.FloatField(blank=True, null=True)
+    power_consumption_units = models.ForeignKey(Units, on_delete=models.PROTECT, blank=True, null=True)
+
+    accuracy_class = models.CharField(max_length=50, blank=True, null=True)  # e.g. Class 0.2S, 0.5, 1
+
+    def __str__(self):
+        return f"Energy Meter Specs for Asset {self.asset_id}"
+

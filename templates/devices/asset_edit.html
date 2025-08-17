@@ -2,7 +2,8 @@
 
 {% block content %}
   <h2>Edit Device: {{ asset.model_name }}</h2>
-  <form method="post">
+
+  <form method="post" action="{% url 'asset_edit' asset.id %}">
     {% csrf_token %}
 
     {% if asset_form.non_field_errors %}
@@ -379,27 +380,96 @@
         <small class="text-muted">{{ asset_form.form_factor.help_text }}</small>
     </div>
 
-    {# --- SPECS FORMS SECTION --- #}
+    {# =========================
+       DYNAMIC SUB-FORM SECTION
+       ========================= #}
 
-    {% if asset.classification.type|lower == 'battery' %}
-      <h3>BESS Specs</h3>
-      {% if bess_form.non_field_errors %}
-        <div class="alert alert-danger">
-          {{ bess_form.non_field_errors }}
-        </div>
-      {% endif %}
-      {{ bess_form.as_p }}
-    {% else %}
+    <h3 id="subform-title">{{ subform_title }}</h3>
+
+    <div id="block-elec" class="{% if 'elec' not in required_forms %}d-none{% endif %}">
       <h3>Electrical Specs</h3>
       {% if elec_form.non_field_errors %}
-        <div class="alert alert-danger">
-          {{ elec_form.non_field_errors }}
-        </div>
+        <div class="alert alert-danger">{{ elec_form.non_field_errors }}</div>
       {% endif %}
       {{ elec_form.as_p }}
-    {% endif %}
+    </div>
+
+    <div id="block-bess" class="{% if 'bess' not in required_forms %}d-none{% endif %}">
+      <h3>BESS Specs</h3>
+      {% if bess_form.non_field_errors %}
+        <div class="alert alert-danger">{{ bess_form.non_field_errors }}</div>
+      {% endif %}
+      {{ bess_form.as_p }}
+    </div>
+
+    <div id="block-inv" class="{% if 'inv' not in required_forms %}d-none{% endif %}">
+      <h3>Inverter Specs</h3>
+      {{ inv_form.as_p }}
+    </div>
+
+    <div id="block-pv" class="{% if 'pv' not in required_forms %}d-none{% endif %}">
+      <h3>PV Module Specs</h3>
+      {{ pv_form.as_p }}
+    </div>
+
+    <div id="block-scc" class="{% if 'scc' not in required_forms %}d-none{% endif %}">
+      <h3>SCC Specs</h3>
+      {{ scc_form.as_p }}
+    </div>
+
+    <div id="block-meter" class="{% if 'meter' not in required_forms %}d-none{% endif %}">
+      <h3>Energy Meter Specs</h3>
+      {{ meter_form.as_p }}
+    </div>
 
     <button type="submit" class="btn btn-primary">Save Changes</button>
     <a href="{% url 'asset_detail' asset.id %}" class="btn btn-secondary ms-2">Cancel</a>
   </form>
+
+  <script>
+    // --- Dynamic title & block visibility based on Classification (same mapping as add page) ---
+    const MAP = {
+      "HVAC":                {title: "HVAC Specs",                           forms: ["elec"]},
+      "EVSE":                {title: "EVSE Specs",                           forms: ["elec"]},
+      "WATER HEATER":        {title: "Water Heater Specs",                   forms: ["elec"]},
+      "WHITE APPLIANCE":     {title: "White Appliance Specs",                forms: ["elec"]},
+      "ENERGY METER":        {title: "Energy Meter Specs",                   forms: ["meter"]},
+      "BATTERY SYSTEM":      {title: "BESS + Inverter Specs",                forms: ["bess","inv"]},
+      "PV SYSTEM":           {title: "PV Module + Inverter Specs",           forms: ["pv","inv"]},
+      "GENSET SYSTEM":       {title: "Genset Electrical Specs",              forms: ["elec"]},
+      "PV & BAT SYSTEM":     {title: "PV + BESS + SCC + Inverter Specs",     forms: ["pv","bess","scc","inv"]},
+      "GENSET & BAT SYSTEM": {title: "Genset + BESS + Inverter Specs",       forms: ["elec","bess","inv"]}
+    };
+
+    function setLayoutFor(clsText) {
+      const cfg = MAP[clsText] || {title: "Specifications", forms: []};
+      const titleEl = document.getElementById('subform-title');
+      if (titleEl) titleEl.textContent = cfg.title;
+
+      const all = ["elec","bess","inv","pv","scc","meter"];
+      all.forEach(code => {
+        const el = document.getElementById('block-' + code);
+        if (!el) return;
+        if (cfg.forms.includes(code)) {
+          el.classList.remove('d-none');
+          el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = false);
+        } else {
+          el.classList.add('d-none');
+          el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const cls = document.getElementById("id_classification");
+      if (cls) {
+        const initText = cls.options[cls.selectedIndex]?.text?.trim().toUpperCase();
+        setLayoutFor(initText || "");
+        cls.addEventListener('change', () => {
+          const text = cls.options[cls.selectedIndex].text.trim().toUpperCase();
+          setLayoutFor(text);
+        });
+      }
+    });
+  </script>
 {% endblock %}

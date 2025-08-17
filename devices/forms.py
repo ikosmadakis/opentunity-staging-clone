@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Asset, ElectricalSpecs, BESSSpecs, ContentContributor, Units
+from .models import Asset, ElectricalSpecs, BESSSpecs, ContentContributor, Units, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
 import json
 
 class JSONTextarea(forms.Textarea):
@@ -917,3 +917,24 @@ class SignupForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+# devices/forms.py
+class InverterSpecsForm(forms.ModelForm):
+    class Meta:
+        model = InverterSpecs
+        exclude = ['asset']
+
+class PVModuleSpecsForm(forms.ModelForm):
+    class Meta:
+        model = PVModuleSpecs
+        exclude = ['asset']
+
+class SCCSpecsForm(forms.ModelForm):
+    class Meta:
+        model = SCCSpecs
+        exclude = ['asset']
+
+class EnergyMeterSpecsForm(forms.ModelForm):
+    class Meta:
+        model = EnergyMeterSpecs
+        exclude = ['asset']
