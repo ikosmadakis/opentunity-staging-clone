@@ -1,5 +1,28 @@
 from rest_framework import serializers
-from .models import Asset
+from .models import Asset, InverterSpecs
+
+
+class InverterSpecsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InverterSpecs
+        fields = [
+            'max_apparent_feed_in_power_kva',
+            'nominal_active_power_kw',
+            'peak_active_power_kw',
+            'phase_configuration',
+            'frequency',
+            'standby_power_consumption',
+            'voltage_ac_l1_nom',
+            'voltage_ac_l2_nom',
+            'voltage_ac_l3_nom',
+            'current_ac_l1_nom',
+            'current_ac_l2_nom',
+            'current_ac_l3_nom',
+            'nom_dc_voltage_range',
+            'max_nominal_dc_current_a',
+            'power_factor',
+        ]
+
 
 class AssetSerializer(serializers.ModelSerializer):
     manufacturer = serializers.SerializerMethodField()
@@ -10,6 +33,9 @@ class AssetSerializer(serializers.ModelSerializer):
     communication_protocol = serializers.SerializerMethodField()
     regulation = serializers.SerializerMethodField()
     regulation_response_time_unit = serializers.SerializerMethodField()
+
+    # Nested inverter specs (read-only)
+    inverter_specs = InverterSpecsSerializer(read_only=True)
 
     def get_manufacturer(self, obj):
         return obj.manufacturer.name if obj.manufacturer else None
@@ -37,4 +63,4 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = '__all__'  # Or list only the fields you want in the order you want
+        fields = '__all__'

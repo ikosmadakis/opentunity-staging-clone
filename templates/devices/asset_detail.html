@@ -160,6 +160,55 @@
     </table>
   {% endif %}
 
+  {# INVERTER SPECS #}
+  {% if asset.inverter_specs %}
+  <h3>Inverter Specs</h3>
+  <table>
+    <tbody>
+      <tr><th>Maximum apparent feed-in power (kVA)</th>
+          <td>{{ asset.inverter_specs.max_apparent_feed_in_power_kva|default:"—" }}</td></tr>
+      <tr><th>Nominal active power (kW)</th>
+          <td>{{ asset.inverter_specs.nominal_active_power_kw|default:"—" }}</td></tr>
+      <tr><th>Peak active power (kW)</th>
+          <td>{{ asset.inverter_specs.peak_active_power_kw|default:"—" }}</td></tr>
+
+      <tr><th>Phase Configuration</th>
+          <td>{{ asset.inverter_specs.phase_configuration|default:"—" }}</td></tr>
+      <tr><th>Frequency (Hz)</th>
+          <td>{{ asset.inverter_specs.frequency|default:"—" }}</td></tr>
+      <tr><th>Standby Power Consumption (w)</th>
+          <td>{{ asset.inverter_specs.standby_power_consumption|default:"—" }}</td></tr>
+
+      <tr><th>Nominal AC Voltage L1 (V)</th>
+          <td>{{ asset.inverter_specs.nominal_ac_voltage_l1|default:"—" }}</td></tr>
+      <tr><th>Nominal AC Voltage L2 (V)</th>
+          <td>{{ asset.inverter_specs.nominal_ac_voltage_l2|default:"—" }}</td></tr>
+      <tr><th>Nominal AC Voltage L3 (V)</th>
+          <td>{{ asset.inverter_specs.nominal_ac_voltage_l3|default:"—" }}</td></tr>
+
+      <tr><th>Nominal AC Current L1 (A)</th>
+          <td>{{ asset.inverter_specs.nominal_ac_current_l1|default:"—" }}</td></tr>
+      <tr><th>Nominal AC Current L2 (A)</th>
+          <td>{{ asset.inverter_specs.nominal_ac_current_l2|default:"—" }}</td></tr>
+      <tr><th>Nominal AC Current L3 (A)</th>
+          <td>{{ asset.inverter_specs.nominal_ac_current_l3|default:"—" }}</td></tr>
+
+      <tr><th>Nominal DC voltage range (V)</th>
+          <td>
+            {% if asset.inverter_specs.nom_dc_voltage_range %}
+              <pre>{{ asset.inverter_specs.nom_dc_voltage_range }}</pre>
+            {% else %}—{% endif %}
+          </td></tr>
+      <tr><th>Max nominal DC current (A)</th>
+          <td>{{ asset.inverter_specs.max_nominal_dc_current_a|default:"—" }}</td></tr>
+
+      <tr><th>Power Factor (cos φac,r)</th>
+          <td>{{ asset.inverter_specs.power_factor|default:"—" }}</td></tr>
+    </tbody>
+  </table>
+{% endif %}
+
+
   <p>
     <a href="{% url 'asset_edit' asset.id %}">Edit</a> |
     <a href="{% url 'dashboard' %}">Back to Dashboard</a>

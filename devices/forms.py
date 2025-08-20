@@ -2,7 +2,6 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Asset, ElectricalSpecs, BESSSpecs, ContentContributor, Units, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
-import json
 
 class JSONTextarea(forms.Textarea):
     def format_value(self, value):
@@ -463,7 +462,6 @@ class AssetForm(forms.ModelForm):
 
         return cleaned
 
-
 class ElectricalSpecsForm(forms.ModelForm):
     # ─── Discrete fields for voltage_range_uf ───
     voltage_min = forms.FloatField(label="Min (V)", required=False, initial=0.0)
@@ -656,8 +654,6 @@ class ElectricalSpecsForm(forms.ModelForm):
         cleaned['power_output_max_uf'] = {'genset': mx}
 
         return cleaned
-
-
 
 class BESSSpecsForm(forms.ModelForm):
     # ─── Discrete inputs in place of the JSONFields ───
@@ -918,16 +914,190 @@ class SignupForm(UserCreationForm):
             user.save()
         return user
 
-# devices/forms.py
 class InverterSpecsForm(forms.ModelForm):
+    # visible helpers for the JSON range
+    inv_nom_dc_min = forms.FloatField(label="Min (V)", required=True)
+    inv_nom_dc_max = forms.FloatField(label="Max (V)", required=True)
+
     class Meta:
-        model = InverterSpecs
-        exclude = ['asset']
+        model  = InverterSpecs
+        fields = [
+            "max_apparent_feed_in_power_kva",
+            "nominal_active_power_kw",
+            "peak_active_power_kw",
+            "phase_configuration",
+            "frequency",
+            "standby_power_consumption",
+            "nominal_ac_voltage_l1",
+            "nominal_ac_voltage_l2",
+            "nominal_ac_voltage_l3",
+            "nominal_ac_current_l1",
+            "nominal_ac_current_l2",
+            "nominal_ac_current_l3",
+            "max_nominal_dc_current_a",
+            "power_factor",
+            "nom_dc_voltage_range",   # keep in the form; we’ll hide & fill it
+        ]
+        widgets = {
+            # IMPORTANT: don’t require this at field-level; hide it
+            "nom_dc_voltage_range": forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Make the backing JSON field NOT required so per-field validation doesn’t
+        # fail before we pack values in clean().
+        self.fields["nom_dc_voltage_range"].required = False
+
+        # Optional AC fields
+        for f in (
+            "nominal_ac_voltage_l1", "nominal_ac_voltage_l2", "nominal_ac_voltage_l3",
+            "nominal_ac_current_l1", "nominal_ac_current_l2", "nominal_ac_current_l3",
+        ):
+            self.fields[f].required = False
+
+        # If editing, unpack existing JSON into the helper inputs
+        rng = (self.instance.nom_dc_voltage_range or {}) if self.instance else {}
+        try:
+            self.fields["inv_nom_dc_min"].initial = rng.get("min_v")
+            self.fields["inv_nom_dc_max"].initial = rng.get("max_v")
+        except Exception:
+            pass
+
+        # Labels (per your spec)
+        self.fields["max_apparent_feed_in_power_kva"].label = "Nom apparent power (kVA)"
+        self.fields["nominal_active_power_kw"].label = "Nom active power (kW)"
+        self.fields["peak_active_power_kw"].label = "Peak active power (kW)"
+        self.fields["max_nominal_dc_current_a"].label = "Max nominal DC current (A)"
+        self.fields["nominal_ac_voltage_l1"].label = "Nom AC Voltage L1 (V)"
+        self.fields["nominal_ac_voltage_l2"].label = "Nom AC Voltage L2 (V)"
+        self.fields["nominal_ac_voltage_l3"].label = "Nom AC Voltage L3 (V)"
+        self.fields["nominal_ac_current_l1"].label = "Nom AC Current L1 (A)"
+        self.fields["nominal_ac_current_l2"].label = "Nom AC Current L2 (A)"
+        self.fields["nominal_ac_current_l3"].label = "Nom AC Current L3 (A)"
+        self.fields["power_factor"].label = "Power Factor (cosφ)"
+        self.fields["frequency"].label = "Frequency (Hz)"
+        self.fields["standby_power_consumption"].label = "Standby Power Consumption (W)"
+
+    def clean(self):
+        cd = super().clean()
+
+        min_v = cd.get("inv_nom_dc_min")
+        max_v = cd.get("inv_nom_dc_max")
+
+        # Enforce both present
+        if min_v is None:
+            self.add_error("inv_nom_dc_min", "Enter a minimum voltage.")
+        if max_v is None:
+            self.add_error("inv_nom_dc_max", "Enter a maximum voltage.")
+
+        # If both OK, pack into the hidden JSON field
+        if min_v is not None and max_v is not None:
+            cd["nom_dc_voltage_range"] = {"min_v": float(min_v), "max_v": float(max_v)}
+            # also write back so ModelForm.save() sees it
+            self.cleaned_data["nom_dc_voltage_range"] = cd["nom_dc_voltage_range"]
+        else:
+            # make sure the JSON field itself gets an error so the red box is meaningful
+            self.add_error("nom_dc_voltage_range", "Provide both Min V and Max V.")
+
+        # ---- NEW: phase-aware AC checks ----
+        phase = cd.get("phase_configuration")
+        v = [cd.get("nominal_ac_voltage_l1"), cd.get("nominal_ac_voltage_l2"), cd.get("nominal_ac_voltage_l3")]
+        a = [cd.get("nominal_ac_current_l1"), cd.get("nominal_ac_current_l2"), cd.get("nominal_ac_current_l3")]
+        if phase == 1:
+            # Disallow stray L2/L3 values
+            for fld in ("nominal_ac_voltage_l2","nominal_ac_voltage_l3","nominal_ac_current_l2","nominal_ac_current_l3"):
+                if cd.get(fld) not in (None, ""):
+                    self.add_error(fld, "Single-phase: only L1 is applicable.")
+        elif phase == 3:
+            # Require triplets fully specified (or all blank)
+            missing = []
+            for i in range(3):
+                if (v[i] is None) ^ (a[i] is None):
+                    missing.append(i+1)
+            if missing:
+                self.add_error(None, f"Three-phase: provide BOTH voltage and current for L{missing}.")
+            # Optional reasonable bounds (EU LV)
+            for i in range(3):
+                if v[i] is not None and not (180 <= float(v[i]) <= 265):
+                    self.add_error(f"nominal_ac_voltage_l{i+1}", "Expected 180–265 V.")
+                if a[i] is not None and float(a[i]) < 0:
+                    self.add_error(f"nominal_ac_current_l{i+1}", "Current cannot be negative.")
+
+        return cd
+
 
 class PVModuleSpecsForm(forms.ModelForm):
     class Meta:
         model = PVModuleSpecs
         exclude = ['asset']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Canonical hints for common PV fields (only applied if the field exists).
+        HINTS = {
+            "pmp_stc_w": ("Pmp @ STC (W)", "e.g. 410",
+                          "Maximum power at STC (1000 W/m², 25°C cell, AM1.5)."),
+            "voc_stc_v": ("Voc @ STC (V)", "e.g. 41.2",
+                          "Open-circuit voltage at STC."),
+            "isc_stc_a": ("Isc @ STC (A)", "e.g. 13.2",
+                          "Short-circuit current at STC."),
+            "vmp_stc_v": ("Vmp @ STC (V)", "e.g. 34.4",
+                          "Voltage at maximum power (STC)."),
+            "imp_stc_a": ("Imp @ STC (A)", "e.g. 11.9",
+                          "Current at maximum power (STC)."),
+            "efficiency_stc_pct": ("Module efficiency @ STC (%)", "e.g. 20.9",
+                                   "Module conversion efficiency at STC."),
+            "temp_coeff_pmp_pct_per_c": ("Temp. coeff Pmp (%/°C)", "e.g. -0.34",
+                                         "Relative change in Pmp per °C."),
+            "temp_coeff_voc_pct_per_c": ("Temp. coeff Voc (%/°C)", "e.g. -0.27",
+                                         "Relative change in Voc per °C."),
+            "temp_coeff_isc_pct_per_c": ("Temp. coeff Isc (%/°C)", "e.g. +0.045",
+                                         "Relative change in Isc per °C."),
+            "noct_cell_temp_c": ("NOCT cell temp (°C)", "e.g. 45",
+                                 "Nominal operating cell temperature (800 W/m², 20°C air, 1 m/s)."),
+            "bypass_diode_count": ("Bypass diodes (#)", "e.g. 3",
+                                   "Number of bypass diodes per module."),
+            "modules_in_series": ("Modules per string", "e.g. 10",
+                                  "Modules connected in series in one string."),
+            "strings_in_parallel": ("Strings in parallel", "e.g. 3",
+                                    "Parallel strings (strings per MPPT)."),
+            "length_mm": ("Module length (mm)", "e.g. 1722", "Mechanical length."),
+            "width_mm": ("Module width (mm)", "e.g. 1134", "Mechanical width."),
+            "height_mm": ("Module height (mm)", "e.g. 30", "Frame depth."),
+            "weight_kg": ("Module weight (kg)", "e.g. 21.0", "Mass of one module."),
+            "connector_type": ("Connector", "e.g. MC4", "Connector system / type."),
+            "ip_rating": ("IP rating", "e.g. IP68", "Ingress protection rating."),
+            "glass_thickness_mm": ("Glass thickness (mm)", "e.g. 3.2", "Front glass thickness."),
+            "bifaciality_factor_pct": ("Bifaciality factor (%)", "e.g. 75",
+                                       "Rear-side gain factor, if bifacial."),
+            "fire_class": ("Fire class", "e.g. Class C", "IEC 61730 fire rating."),
+        }
+
+        # Apply tailored labels, help_texts, and placeholders when present.
+        for name, field in self.fields.items():
+            if name in HINTS:
+                label, placeholder, helptext = HINTS[name]
+                field.label = label
+                field.help_text = helptext
+                # set placeholders for number/text inputs
+                if isinstance(field.widget, (forms.NumberInput, forms.TextInput)):
+                    field.widget.attrs.setdefault("placeholder", placeholder)
+            else:
+                # Sensible generic placeholders
+                if isinstance(field.widget, forms.NumberInput):
+                    field.widget.attrs.setdefault("placeholder", "e.g. 0.0")
+                elif isinstance(field.widget, forms.TextInput):
+                    field.widget.attrs.setdefault("placeholder", "e.g. value")
+
+            # Order any Units dropdowns like in other forms
+            if hasattr(field, "queryset"):
+                try:
+                    if field.queryset.model is Units:
+                        field.queryset = Units.objects.order_by("symbol")
+                except Exception:
+                    pass
 
 class SCCSpecsForm(forms.ModelForm):
     class Meta:

@@ -173,31 +173,293 @@
     {# Note: We rely on both class "d-none" (if you load Bootstrap) AND inline display:none for safety #}
 
     <div id="block-elec"
-         class="{% if 'elec' not in required_forms %}d-none{% endif %}"
-         {% if 'elec' not in required_forms %}style="display:none"{% endif %}>
-      <h4>Electrical Specs</h4>
-      {{ elec_form.as_p }}
+     class="{% if 'elec' not in required_forms %}d-none{% endif %}"
+     {% if 'elec' not in required_forms %}style="display:none"{% endif %}>
+        <h4>Electrical Specs</h4>
+        <!-- Phase & Frequency -->
+        <div class="row mb-3">
+            <div class="col-md-6" data-elec="phase_configuration">
+                <strong>{{ elec_form.phase_configuration.label_tag }}</strong>
+                {{ elec_form.phase_configuration }}<br>{{ elec_form.phase_configuration.errors }}
+                <small class="form-text text-muted">{{ elec_form.fields.phase_configuration.help_text }}</small>
+            </div>
+            <div class="col-md-6" data-elec="frequency">
+                <strong>{{ elec_form.frequency.label_tag }}</strong>
+                {{ elec_form.frequency }}<br>{{ elec_form.frequency.errors }}
+                <small class="form-text text-muted">{{ elec_form.fields.frequency.help_text }}</small>
+            </div>
+        </div>
+
+  <!-- Nominal Voltage & Tolerance -->
+  <div class="row mb-3">
+    <div class="col-md-6" data-elec="voltage_nominal">
+      <strong>{{ elec_form.voltage_nominal.label_tag }}</strong>
+      {{ elec_form.voltage_nominal }}<br>{{ elec_form.voltage_nominal.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.voltage_nominal.help_text }}</small>
+    </div>
+    <div class="col-md-6" data-elec="voltage_tolerance_df">
+      <strong>{{ elec_form.voltage_tolerance_df.label_tag }}</strong>
+      {{ elec_form.voltage_tolerance_df }}<br>{{ elec_form.voltage_tolerance_df.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.voltage_tolerance_df.help_text }}</small>
+    </div>
+  </div>
+
+  <!-- Current fields -->
+  <div class="row mb-3">
+    <div class="col-md-4" data-elec="current_nominal_df">
+      <strong>{{ elec_form.current_nominal_df.label_tag }}</strong>
+      {{ elec_form.current_nominal_df }}<br>{{ elec_form.current_nominal_df.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.current_nominal_df.help_text }}</small>
+    </div>
+    <div class="col-md-4" data-elec="current_min_df">
+      <strong>{{ elec_form.current_min_df.label_tag }}</strong>
+      {{ elec_form.current_min_df }}<br>{{ elec_form.current_min_df.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.current_min_df.help_text }}</small>
+    </div>
+    <div class="col-md-4" data-elec="current_max_df">
+      <strong>{{ elec_form.current_max_df.label_tag }}</strong>
+      {{ elec_form.current_max_df }}<br>{{ elec_form.current_max_df.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.current_max_df.help_text }}</small>
+    </div>
+  </div>
+
+  <!-- Inrush & Standby -->
+  <div class="row mb-3">
+    <div class="col-md-6" data-elec="inrush_current_max_df">
+      <strong>{{ elec_form.inrush_current_max_df.label_tag }}</strong>
+      {{ elec_form.inrush_current_max_df }}<br>{{ elec_form.inrush_current_max_df.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.inrush_current_max_df.help_text }}</small>
+    </div>
+    <div class="col-md-6" data-elec="standby_power_consumption">
+      <strong>{{ elec_form.standby_power_consumption.label_tag }}</strong>
+      {{ elec_form.standby_power_consumption }}<br>{{ elec_form.standby_power_consumption.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.standby_power_consumption.help_text }}</small>
+    </div>
+  </div>
+
+  <!-- Power consumption -->
+  <div class="row mb-3">
+    <div class="col-md-6" data-elec="power_consumption_nominal_df">
+      <strong>{{ elec_form.power_consumption_nominal_df.label_tag }}</strong>
+      {{ elec_form.power_consumption_nominal_df }}<br>{{ elec_form.power_consumption_nominal_df.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.power_consumption_nominal_df.help_text }}</small>
+    </div>
+    <div class="col-md-6" data-elec="power_consumption_max_df">
+      <strong>{{ elec_form.power_consumption_max_df.label_tag }}</strong>
+      {{ elec_form.power_consumption_max_df }}<br>{{ elec_form.power_consumption_max_df.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.power_consumption_max_df.help_text }}</small>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6" data-elec="power_consumption_units">
+      <strong>{{ elec_form.power_consumption_units.label_tag }}</strong>
+      {{ elec_form.power_consumption_units }}<br>{{ elec_form.power_consumption_units.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.power_consumption_units.help_text }}</small>
+    </div>
+  </div>
+
+  <!-- Voltage regulation -->
+  <div class="row mb-3" data-elec="voltage_regulation_uf">
+    <div class="col-md-6">
+      <strong>{{ elec_form.voltage_regulation_uf.label_tag }}</strong>
+      {{ elec_form.voltage_regulation_uf }}<br>{{ elec_form.voltage_regulation_uf.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.voltage_regulation_uf.help_text }}</small>
+    </div>
+  </div>
+
+  <!-- Voltage range (Min/Max/Accuracy) -->
+  <div class="mb-3" data-elec-group="voltage_range">
+    <h5>Output voltage range</h5>
+    <div class="row">
+      <div class="col-md-4">{{ elec_form.voltage_min.label_tag }}{{ elec_form.voltage_min }}{{ elec_form.voltage_min.errors }}</div>
+      <div class="col-md-4">{{ elec_form.voltage_max.label_tag }}{{ elec_form.voltage_max }}{{ elec_form.voltage_max.errors }}</div>
+      <div class="col-md-4">{{ elec_form.voltage_acc.label_tag }}{{ elec_form.voltage_acc }}{{ elec_form.voltage_acc.errors }}</div>
+    </div>
+    <small class="form-text text-muted">{{ elec_form.fields.voltage_range_uf.help_text }}</small>
+  </div>
+
+  <!-- Output current nominal -->
+  <div class="row mb-3" data-elec="output_current_nominal_uf">
+    <div class="col-md-6">
+      <strong>{{ elec_form.output_current_nominal_uf.label_tag }}</strong>
+      {{ elec_form.output_current_nominal_uf }}<br>{{ elec_form.output_current_nominal_uf.errors }}
+      <small class="form-text text-muted">{{ elec_form.fields.output_current_nominal_uf.help_text }}</small>
+    </div>
+  </div>
+
+  <!-- Output current max (value + duration) -->
+  <div class="mb-3" data-elec-group="output_current_max">
+    <h5>Output current max</h5>
+    <div class="row">
+      <div class="col-md-6">{{ elec_form.output_max_curr.label_tag }}{{ elec_form.output_max_curr }}{{ elec_form.output_max_curr.errors }}</div>
+      <div class="col-md-6">{{ elec_form.output_max_curr_duration.label_tag }}{{ elec_form.output_max_curr_duration }}{{ elec_form.output_max_curr_duration.errors }}</div>
+    </div>
+    <small class="form-text text-muted">{{ elec_form.fields.output_current_max_uf.help_text }}</small>
+  </div>
+
+  <!-- Rated/Max Power Output (genset style) -->
+  <div class="mb-3" data-elec-group="power_output_nominal">
+    <h5>Rated Power Output</h5>
+    <div class="row">
+      <div class="col">{{ elec_form.pow_nom_gen_kva.label_tag }}{{ elec_form.pow_nom_gen_kva }}{{ elec_form.pow_nom_gen_kva.errors }}</div>
+      <div class="col">{{ elec_form.pow_nom_gen_kw.label_tag }}{{ elec_form.pow_nom_gen_kw }}{{ elec_form.pow_nom_gen_kw.errors }}</div>
+      <div class="col">{{ elec_form.pow_nom_runtime_h.label_tag }}{{ elec_form.pow_nom_runtime_h }}{{ elec_form.pow_nom_runtime_h.errors }}</div>
+    </div>
+    <small class="form-text">{{ elec_form.power_output_nominal_uf.help_text }}</small>
+  </div>
+
+  <div class="mb-3" data-elec-group="power_output_max">
+    <h5>Max Power Output</h5>
+    <div class="row">
+      <div class="col">{{ elec_form.pow_max_gen_kva.label_tag }}{{ elec_form.pow_max_gen_kva }}{{ elec_form.pow_max_gen_kva.errors }}</div>
+      <div class="col">{{ elec_form.pow_max_gen_kw.label_tag }}{{ elec_form.pow_max_gen_kw }}{{ elec_form.pow_max_gen_kw.errors }}</div>
+      <div class="col">{{ elec_form.pow_max_runtime_h.label_tag }}{{ elec_form.pow_max_runtime_h }}{{ elec_form.pow_max_runtime_h.errors }}</div>
+    </div>
+    <small class="form-text">{{ elec_form.power_output_max_uf.help_text }}</small>
+  </div>
+
+  <!-- Power Factor -->
+  <div class="mb-3" data-elec="power_factor">
+    <strong>{{ elec_form.power_factor.label_tag }}</strong>
+    {{ elec_form.power_factor }}<br>{{ elec_form.power_factor.errors }}
+    <small class="form-text text-muted">{{ elec_form.fields.power_factor.help_text }}</small>
+  </div>
+
+  <!-- Hidden JSONs (keep rendered; JS disables when section hidden) -->
+  {{ elec_form.voltage_range_uf }}
+  {{ elec_form.output_current_max_uf }}
+  {{ elec_form.power_output_nominal_uf }}
+  {{ elec_form.power_output_max_uf }}
+</div>
+
+
+    <div id="block-bess" class="{% if 'bess' not in required_forms %}d-none{% endif %}"
+    {% if 'bess' not in required_forms %}style="display:none"{% endif %}>
+        <h4>BESS Specs</h4>
+        {{ bess_form.as_p }}
     </div>
 
-    <div id="block-bess"
-         class="{% if 'bess' not in required_forms %}d-none{% endif %}"
-         {% if 'bess' not in required_forms %}style="display:none"{% endif %}>
-      <h4>BESS Specs</h4>
-      {{ bess_form.as_p }}
+    <div id="block-pv" class="{% if 'pv' not in required_forms %}d-none{% endif %}"
+        {% if 'pv' not in required_forms %}style="display:none"{% endif %}>
+        <h4>PV Module Specs</h4>
+        {% if pv_form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ pv_form.non_field_errors }}
+        </div>
+        {% endif %}
+        <div class="row g-3">
+            {% for field in pv_form %}
+                <div class="col-md-4">
+                    <strong>{{ field.label_tag }}</strong>
+                    {{ field }}<br>{{ field.errors }}
+                    {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
+        </div>
     </div>
 
-    <div id="block-inv"
-         class="{% if 'inv' not in required_forms %}d-none{% endif %}"
-         {% if 'inv' not in required_forms %}style="display:none"{% endif %}>
-      <h4>Inverter Specs</h4>
-      {{ inv_form.as_p }}
-    </div>
+    <div id="block-inv" class="{% if 'inv' not in required_forms %}d-none{% endif %}"
+    {% if 'inv' not in required_forms %}style="display:none"{% endif %}>
+        {% if inv_form.errors %}
+        <div class="alert alert-danger">
+            {{ inv_form.errors }}
+        </div>
+        {% endif %}
 
-    <div id="block-pv"
-         class="{% if 'pv' not in required_forms %}d-none{% endif %}"
-         {% if 'pv' not in required_forms %}style="display:none"{% endif %}>
-      <h4>PV Module Specs</h4>
-      {{ pv_form.as_p }}
+        <h4>Inverter Specs</h4>
+        {% if inv_form.non_field_errors %}
+        <div class="alert alert-danger">{{ inv_form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <strong>{{ inv_form.max_apparent_feed_in_power_kva.label_tag }}</strong>
+                {{ inv_form.max_apparent_feed_in_power_kva }}{{ inv_form.max_apparent_feed_in_power_kva.errors }}
+            </div>
+            <div class="col-md-4">
+                <strong>{{ inv_form.nominal_active_power_kw.label_tag }}</strong>
+                {{ inv_form.nominal_active_power_kw }}{{ inv_form.nominal_active_power_kw.errors }}
+            </div>
+            <div class="col-md-4">
+                <strong>{{ inv_form.peak_active_power_kw.label_tag }}</strong>
+                {{ inv_form.peak_active_power_kw }}{{ inv_form.peak_active_power_kw.errors }}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <strong>{{ inv_form.phase_configuration.label_tag }}</strong>
+                {{ inv_form.phase_configuration }}{{ inv_form.phase_configuration.errors }}
+            </div>
+            <div class="col-md-4">
+                <strong>{{ inv_form.frequency.label_tag }}</strong>
+                {{ inv_form.frequency }}{{ inv_form.frequency.errors }}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <strong>{{ inv_form.standby_power_consumption.label_tag }}</strong>
+                {{ inv_form.standby_power_consumption }}{{ inv_form.standby_power_consumption.errors }}
+            </div>
+            <div class="col-md-4">
+                <strong>{{ inv_form.power_factor.label_tag }}</strong>
+                {{ inv_form.power_factor }}{{ inv_form.power_factor.errors }}
+            </div>
+        </div>
+
+        <h5>Nominal AC (optional)</h5>
+        <div class="row mb-3">
+            <div class="col-md-4" data-inv="ac_l1_v">
+                {{ inv_form.nominal_ac_voltage_l1.label_tag }}
+                {{ inv_form.nominal_ac_voltage_l1 }}{{ inv_form.nominal_ac_voltage_l1.errors }}
+            </div>
+            <div class="col-md-4" data-inv="ac_l1_v">
+                {{ inv_form.nominal_ac_voltage_l2.label_tag }}
+                {{ inv_form.nominal_ac_voltage_l2 }}{{ inv_form.nominal_ac_voltage_l2.errors }}
+            </div>
+            <div class="col-md-4" data-inv="ac_l1_v">
+                {{ inv_form.nominal_ac_voltage_l3.label_tag }}
+                {{ inv_form.nominal_ac_voltage_l3 }}{{ inv_form.nominal_ac_voltage_l3.errors }}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-4" data-inv="ac_l1_i">
+                {{ inv_form.nominal_ac_current_l1.label_tag }}
+                {{ inv_form.nominal_ac_current_l1 }}{{ inv_form.nominal_ac_current_l1.errors }}
+            </div>
+            <div class="col-md-4" data-inv="ac_l1_i">
+                {{ inv_form.nominal_ac_current_l2.label_tag }}
+                {{ inv_form.nominal_ac_current_l2 }}{{ inv_form.nominal_ac_current_l2.errors }}
+            </div>
+            <div class="col-md-4" data-inv="ac_l1_i">
+                {{ inv_form.nominal_ac_current_l3.label_tag }}
+                {{ inv_form.nominal_ac_current_l3 }}{{ inv_form.nominal_ac_current_l3.errors }}
+            </div>
+        </div>
+
+
+        <h5>Nominal DC voltage range (V)</h5>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                {{ inv_form.inv_nom_dc_min.label_tag }} {{ inv_form.inv_nom_dc_min }}
+                {{ inv_form.inv_nom_dc_min.errors }}
+            </div>
+            <div class="col-md-4">
+                {{ inv_form.inv_nom_dc_max.label_tag }} {{ inv_form.inv_nom_dc_max }}
+                {{ inv_form.inv_nom_dc_max.errors }}
+            </div>
+        </div>
+        {{ inv_form.nom_dc_voltage_range }} {# hidden input that we fill in clean() #}
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <strong>{{ inv_form.max_nominal_dc_current_a.label_tag }}</strong>
+                {{ inv_form.max_nominal_dc_current_a }}{{ inv_form.max_nominal_dc_current_a.errors }}
+            </div>
+        </div>
     </div>
 
     <div id="block-scc"
@@ -219,67 +481,196 @@
 </form>
 
 <script>
-  // Classification mapping
+  // ----------------------------
+  // Classification mapping (UPPERCASE keys)
+  // ----------------------------
   const MAP = {
-    "HVAC":                {title: "HVAC Specs",                           forms: ["elec"]},
-    "EVSE":                {title: "EVSE Specs",                           forms: ["elec"]},
-    "WATER HEATER":        {title: "Water Heater Specs",                   forms: ["elec"]},
-    "WHITE APPLIANCE":     {title: "White Appliance Specs",                forms: ["elec"]},
-    "ENERGY METER":        {title: "Energy Meter Specs",                   forms: ["meter"]},
-    "BATTERY SYSTEM":      {title: "BESS + Inverter Specs",                forms: ["bess","inv"]},
-    "PV SYSTEM":           {title: "PV Module + Inverter Specs",           forms: ["pv","inv"]},
-    "GENSET SYSTEM":       {title: "Genset Electrical Specs",              forms: ["elec"]},
-    "PV & BAT SYSTEM":     {title: "PV + BESS + SCC + Inverter Specs",     forms: ["pv","bess","scc","inv"]},
-    "GENSET & BAT SYSTEM": {title: "Genset + BESS + Inverter Specs",       forms: ["elec","bess","inv"]}
+    "HVAC":                { title: "HVAC Specs",                       forms: ["elec"] },
+    "EVSE":                { title: "EVSE Specs",                       forms: ["elec"] },
+    "WATER HEATER":        { title: "Water Heater Specs",               forms: ["elec"] },
+    "WHITE APPLIANCE":     { title: "White Appliance Specs",            forms: ["elec"] },
+    "ENERGY METER":        { title: "Energy Meter Specs",               forms: ["meter"] },
+    "BATTERY SYSTEM":      { title: "BESS & Inverter Specs",            forms: ["bess","inv"] },
+    "PV SYSTEM":           { title: "PV Module & Inverter Specs",       forms: ["pv","inv"] },
+    "GENSET SYSTEM":       { title: "Genset Electrical Specs",          forms: ["elec"] },
+    "PV & BAT SYSTEM":     { title: "PV & BESS & SCC & Inverter Specs", forms: ["pv","bess","scc","inv"] },
+    "GENSET & BAT SYSTEM": { title: "Genset & BESS & Inverter Specs",   forms: ["elec","bess","inv"] }
   };
 
+  const ALL_CODES = ["elec","bess","inv","pv","scc","meter"];
+
+  // ----------------------------
+  // Section show/hide helper
+  // ----------------------------
   function show(code, yes) {
-    const el = document.getElementById('block-' + code);
+    const el = document.getElementById("block-" + code);
     if (!el) return;
     if (yes) {
-      el.classList.remove('d-none');
-      el.style.display = '';
-      el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = false);
+      el.classList.remove("d-none");
+      el.style.display = "";
+      el.querySelectorAll("input, select, textarea, button").forEach(i => i.disabled = false);
     } else {
-      el.classList.add('d-none');
-      el.style.display = 'none';
-      el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
+      el.classList.add("d-none");
+      el.style.display = "none";
+      el.querySelectorAll("input, select, textarea, button").forEach(i => i.disabled = true);
     }
   }
 
   function setLayoutFor(clsText) {
-    const cfg = MAP[clsText] || {title: "Specifications", forms: []};
-    const titleEl = document.getElementById('subform-title');
+    const key = (clsText || "").toString().trim().toUpperCase();
+    const cfg = MAP[key] || { title: "Specifications", forms: [] };
+
+    const titleEl = document.getElementById("subform-title");
     if (titleEl) titleEl.textContent = cfg.title;
 
-    const all = ["elec","bess","inv","pv","scc","meter"];
-    all.forEach(code => show(code, cfg.forms.includes(code)));
+    ALL_CODES.forEach(code => show(code, cfg.forms.includes(code)));
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    // Initial toggle
+  // ----------------------------
+  // Electrical block field filtering (your existing logic, unchanged)
+  // ----------------------------
+  const ELEC_FULL_SET = [
+    "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
+    "current_nominal_df","current_min_df","current_max_df",
+    "inrush_current_max_df","standby_power_consumption",
+    "power_consumption_nominal_df","power_consumption_max_df","power_consumption_units",
+    "voltage_regulation_uf","output_current_nominal_uf","power_factor"
+  ];
+  const ELEC_ALLOWED_BY_CLASS = {
+    "HVAC": new Set([
+      "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
+      "current_nominal_df","current_min_df","current_max_df",
+      "inrush_current_max_df","standby_power_consumption",
+      "power_consumption_nominal_df","power_consumption_units",
+      "voltage_regulation_uf","power_factor"
+    ]),
+    "EVSE": new Set([
+      "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
+      "current_nominal_df","current_min_df","current_max_df",
+      "standby_power_consumption",
+      "power_consumption_nominal_df","power_consumption_units"
+    ]),
+    "WATER HEATER": new Set([
+      "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
+      "current_nominal_df","current_min_df","current_max_df",
+      "inrush_current_max_df","standby_power_consumption",
+      "power_consumption_nominal_df","power_consumption_units",
+      "power_factor"
+    ]),
+    "WHITE APPLIANCE": new Set([
+      "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
+      "current_nominal_df","current_min_df","current_max_df",
+      "inrush_current_max_df","standby_power_consumption",
+      "power_consumption_nominal_df","power_consumption_units",
+      "voltage_regulation_uf","power_factor"
+    ])
+  };
+
+  function toggleElectricalFields(clsText) {
+    const container = document.getElementById("block-elec");
+    if (!container || container.classList.contains("d-none")) return;
+
+    const key = (clsText || "").toString().trim().toUpperCase();
+    const allowed = ELEC_ALLOWED_BY_CLASS[key] || new Set(ELEC_FULL_SET);
+
+    // Toggle individual fields
+    container.querySelectorAll("[data-elec]").forEach(node => {
+      const k = node.getAttribute("data-elec");
+      const on = allowed.has(k);
+      node.style.display = on ? "" : "none";
+      node.querySelectorAll("input,select,textarea").forEach(i => i.disabled = !on);
+    });
+
+    // Toggle grouped sections (on for classes not listed above)
+    container.querySelectorAll("[data-elec-group]").forEach(group => {
+      const on = !(key in ELEC_ALLOWED_BY_CLASS);
+      group.style.display = on ? "" : "none";
+      group.querySelectorAll("input,select,textarea").forEach(i => i.disabled = !on);
+    });
+  }
+
+  // Wrap setLayoutFor to also apply electrical filtering
+  const _origSetLayoutFor = setLayoutFor;
+  setLayoutFor = function(clsText) {
+    _origSetLayoutFor(clsText);
+    toggleElectricalFields(clsText);
+  };
+
+  // ----------------------------
+  // Inverter: phase-aware L2/L3 toggle (robust)
+  // Works with either data-inv markers OR field names.
+  // ----------------------------
+  (function(){
+    const invBlock = document.getElementById("block-inv");
+    if (!invBlock) return;
+
+    // Phase selector (select or input)
+    const phaseInput = invBlock.querySelector('select[name$="phase_configuration"], input[name$="phase_configuration"]');
+
+    // Prefer data-inv markers if present…
+    let v2 = invBlock.querySelector('[data-inv="ac_l2_v"]');
+    let v3 = invBlock.querySelector('[data-inv="ac_l3_v"]');
+    let i2 = invBlock.querySelector('[data-inv="ac_l2_i"]');
+    let i3 = invBlock.querySelector('[data-inv="ac_l3_i"]');
+
+    // …otherwise fall back to containers found via field names.
+    function nearestCol(node) {
+      return node?.closest(".col-md-4, .col-4, .col") || node?.parentElement || null;
+    }
+    if (!v2) v2 = nearestCol(invBlock.querySelector('input[name$="nominal_ac_voltage_l2"], select[name$="nominal_ac_voltage_l2"]'));
+    if (!v3) v3 = nearestCol(invBlock.querySelector('input[name$="nominal_ac_voltage_l3"], select[name$="nominal_ac_voltage_l3"]'));
+    if (!i2) i2 = nearestCol(invBlock.querySelector('input[name$="nominal_ac_current_l2"], select[name$="nominal_ac_current_l2"]'));
+    if (!i3) i3 = nearestCol(invBlock.querySelector('input[name$="nominal_ac_current_l3"], select[name$="nominal_ac_current_l3"]'));
+
+    const l2l3Cols = [v2,v3,i2,i3].filter(Boolean);
+
+    function isThreePhase(val) {
+      const t = (val || "").toString().trim().toUpperCase();
+      return t === "3" || t.includes("3PH") || t.includes("THREE");
+    }
+
+    function syncInvAC(){
+      const is3 = isThreePhase(phaseInput?.value);
+      l2l3Cols.forEach(col => {
+        col.style.display = is3 ? "" : "none";
+        col.querySelectorAll("input,select,textarea").forEach(i => i.disabled = !is3);
+      });
+    }
+
+    phaseInput?.addEventListener("change", syncInvAC);
+    document.addEventListener("DOMContentLoaded", syncInvAC);
+    syncInvAC();
+  })();
+
+  // ----------------------------
+  // Init on load + on classification change
+  // ----------------------------
+  document.addEventListener("DOMContentLoaded", function () {
     const cls = document.getElementById("id_classification");
     if (cls) {
       const initText = cls.options[cls.selectedIndex]?.text?.trim().toUpperCase();
       setLayoutFor(initText || "");
-      cls.addEventListener('change', () => {
+      cls.addEventListener("change", () => {
         const text = cls.options[cls.selectedIndex].text.trim().toUpperCase();
         setLayoutFor(text);
       });
+    } else {
+      setLayoutFor("");
     }
 
-    // Add-attribute button script
+    // Add-attribute button script (unchanged)
     const select = document.getElementById("id_devices_attribute");
     const textarea = document.getElementById("id_dacq_attributes");
     const button = document.getElementById("add-attribute");
     if (select && textarea && button) {
-      button.addEventListener('click', function () {
+      button.addEventListener("click", function () {
         const attr = select.options[select.selectedIndex].text;
         if (attr && !textarea.value.includes(attr)) {
-          textarea.value += (textarea.value ? '\n' : '') + attr;
+          textarea.value += (textarea.value ? "\n" : "") + attr;
         }
       });
     }
   });
 </script>
+
 {% endblock %}

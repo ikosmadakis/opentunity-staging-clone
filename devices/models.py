@@ -194,30 +194,34 @@ class BESSSpecs(models.Model):
 
 
 class InverterSpecs(models.Model):
-    asset = models.OneToOneField(Asset, on_delete=models.CASCADE, related_name='inverter_specs')
+    asset = models.OneToOneField('Asset', on_delete=models.CASCADE, related_name='inverter_specs')
 
-    model_name = models.TextField(blank=True, null=True)
-    phase_configuration = models.IntegerField(blank=True, null=True)
-    frequency = models.IntegerField(blank=True, null=True)
+    # new mandatory integer fields
+    max_apparent_feed_in_power_kva = models.IntegerField()
+    nominal_active_power_kw        = models.IntegerField()
+    peak_active_power_kw           = models.IntegerField()
 
-    standby_power_consumption = models.FloatField(blank=True, null=True)
+    # existing/misc
+    phase_configuration            = models.IntegerField()
+    frequency                      = models.FloatField()
+    standby_power_consumption      = models.FloatField()
 
-    # AC side (nominal)
-    voltage_ac_l1_nom = models.FloatField(blank=True, null=True)
-    voltage_ac_l2_nom = models.FloatField(blank=True, null=True)
-    voltage_ac_l3_nom = models.FloatField(blank=True, null=True)
-    current_ac_l1_nom = models.FloatField(blank=True, null=True)
-    current_ac_l2_nom = models.FloatField(blank=True, null=True)
-    current_ac_l3_nom = models.FloatField(blank=True, null=True)
+    # changed: dc current renamed and required
+    max_nominal_dc_current_a       = models.FloatField()
 
-    # DC side (nominal)
-    voltage_dc_nom = models.FloatField(blank=True, null=True)
-    current_dc_nom = models.FloatField(blank=True, null=True)
+    # changed: dc nominal voltage -> JSON
+    nom_dc_voltage_range           = models.JSONField()
 
-    power_factor = models.FloatField(blank=True, null=True)
+    # optional AC values (Float, optional)
+    nominal_ac_voltage_l1          = models.FloatField(null=True, blank=True)
+    nominal_ac_voltage_l2          = models.FloatField(null=True, blank=True)
+    nominal_ac_voltage_l3          = models.FloatField(null=True, blank=True)
+    nominal_ac_current_l1          = models.FloatField(null=True, blank=True)
+    nominal_ac_current_l2          = models.FloatField(null=True, blank=True)
+    nominal_ac_current_l3          = models.FloatField(null=True, blank=True)
 
-    def __str__(self):
-        return f"Inverter Specs for Asset {self.asset_id}"
+    power_factor                   = models.FloatField()
+
 
 class PVModuleSpecs(models.Model):
     asset = models.OneToOneField(Asset, on_delete=models.CASCADE, related_name='pv_module_specs')

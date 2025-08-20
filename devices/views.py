@@ -151,103 +151,132 @@ def dashboard(request):
 
 @login_required
 def add_device(request):
+    """
+    Add a new device + the required spec subforms (elec/bess/inv/pv/scc/meter).
+    - Robustly derives the classification key (TYPE/NAME/str) in UPPERCASE.
+    - Binds only the required subforms on POST; others stay unbound/disabled.
+    - Always includes all forms in the context with stable prefixes so the template/JS can toggle.
+    """
+    def _class_key_from_asset_form_valid(asset_form) -> str:
+        # Use cleaned_data; when valid this is safest and doesn’t hit the DB twice.
+        cls = asset_form.cleaned_data.get("classification")
+        if not cls:
+            return ""
+        for attr in ("type", "name", "label"):
+            val = getattr(cls, attr, None)
+            if val:
+                return str(val).strip().upper()
+        return str(cls).strip().upper()
+
     if request.method == 'POST':
         asset_form = AssetForm(request.POST)
-        # instantiate all forms (some will stay empty)
-        elec_form  = ElectricalSpecsForm(request.POST, prefix='elec')
-        bess_form  = BESSSpecsForm(request.POST, prefix='bess')
-        inv_form   = InverterSpecsForm(request.POST, prefix='inv')
-        pv_form    = PVModuleSpecsForm(request.POST, prefix='pv')
-        scc_form   = SCCSpecsForm(request.POST, prefix='scc')
-        meter_form = EnergyMeterSpecsForm(request.POST, prefix='meter')
 
+        # If the main form is invalid, render with unbound spec forms.
+        # (Your front-end JS will still auto-show the right blocks from the user's selection.)
         if not asset_form.is_valid():
             messages.error(request, "Please correct the errors in the main asset form.")
-            return render(request, 'add_device.html', locals())
+            return render(request, 'add_device.html', {
+                'asset_form': asset_form,
+                'elec_form':  ElectricalSpecsForm(prefix='elec'),
+                'bess_form':  BESSSpecsForm(prefix='bess'),
+                'inv_form':   InverterSpecsForm(prefix='inv'),
+                'pv_form':    PVModuleSpecsForm(prefix='pv'),
+                'scc_form':   SCCSpecsForm(prefix='scc'),
+                'meter_form': EnergyMeterSpecsForm(prefix='meter'),
+                'subform_title': 'Specifications',
+                'required_forms': [],  # server-side initial state; JS will reveal based on classification select
+            })
 
-        asset = asset_form.save(commit=False)
-        cls_type = (asset.classification.type or '').strip().upper()
-        spec_cfg = CLASS_TO_FORMS.get(cls_type, {'forms': []})
+        # Main form is valid → determine which spec forms are required from classification
+        cls_key = _class_key_from_asset_form_valid(asset_form)
+        spec_cfg = CLASS_TO_FORMS.get(cls_key, {'title': 'Specifications', 'forms': []})
+        required_codes = set(spec_cfg['forms'])
 
-        # Validate exactly the required forms for this classification
+        # Bind ONLY required forms with POST; keep others unbound so they won’t validate/fail
+        elec_form  = ElectricalSpecsForm(request.POST if 'elec'  in required_codes else None, prefix='elec')
+        bess_form  = BESSSpecsForm(     request.POST if 'bess'  in required_codes else None, prefix='bess')
+        inv_form   = InverterSpecsForm( request.POST if 'inv'   in required_codes else None, prefix='inv')
+        pv_form    = PVModuleSpecsForm( request.POST if 'pv'    in required_codes else None, prefix='pv')
+        scc_form   = SCCSpecsForm(      request.POST if 'scc'   in required_codes else None, prefix='scc')
+        meter_form = EnergyMeterSpecsForm(request.POST if 'meter' in required_codes else None, prefix='meter')
+
+        # Validate only the required forms
         form_ok = True
         errors  = []
 
-        def must_valid(form, name):
+        def must_valid(form, label):
             nonlocal form_ok
             if not form.is_valid():
                 form_ok = False
-                errors.append(name)
+                errors.append(label)
 
         for code in spec_cfg['forms']:
             if   code == 'elec':  must_valid(elec_form,  'Electrical specs')
             elif code == 'bess':  must_valid(bess_form,  'BESS specs')
-            elif code == 'inv':   must_valid(inv_form,   'Inverter specs')
+            elif code == 'inv':
+                if not inv_form.is_valid():
+                    # Keep this print for quick debugging during pilots
+                    print("INV ERRORS:", inv_form.errors.as_json())
+                    form_ok = False
+                    errors.append('Inverter specs')
             elif code == 'pv':    must_valid(pv_form,    'PV module specs')
             elif code == 'scc':   must_valid(scc_form,   'SCC specs')
             elif code == 'meter': must_valid(meter_form, 'Energy meter specs')
 
         if not form_ok:
             messages.error(request, "Please correct the errors in: " + ", ".join(errors))
+            # Re-render, keeping bound forms for the required set so field errors show;
+            # non-required forms are fresh/unbound to avoid spurious validation.
             return render(request, 'add_device.html', {
                 'asset_form': asset_form,
-                'elec_form':  elec_form,
-                'bess_form':  bess_form,
-                'inv_form':   inv_form,
-                'pv_form':    pv_form,
-                'scc_form':   scc_form,
-                'meter_form': meter_form,
+                'elec_form':  elec_form  if 'elec'  in required_codes else ElectricalSpecsForm(prefix='elec'),
+                'bess_form':  bess_form  if 'bess'  in required_codes else BESSSpecsForm(prefix='bess'),
+                'inv_form':   inv_form   if 'inv'   in required_codes else InverterSpecsForm(prefix='inv'),
+                'pv_form':    pv_form    if 'pv'    in required_codes else PVModuleSpecsForm(prefix='pv'),
+                'scc_form':   scc_form   if 'scc'   in required_codes else SCCSpecsForm(prefix='scc'),
+                'meter_form': meter_form if 'meter' in required_codes else EnergyMeterSpecsForm(prefix='meter'),
                 'subform_title': spec_cfg.get('title', 'Specifications'),
                 'required_forms': spec_cfg['forms'],
             })
 
-        # Save everything in one transaction
+        # All good → save everything in one transaction
         with transaction.atomic():
             contributor, _ = ContentContributor.objects.get_or_create(user=request.user)
+            asset = asset_form.save(commit=False)
             asset.record_contributor = contributor
             asset.save()
 
             for code in spec_cfg['forms']:
                 if   code == 'elec':
-                    s = elec_form.save(commit=False); s.asset = asset; s.save()
+                    s = elec_form.save(commit=False);  s.asset = asset; s.save()
                 elif code == 'bess':
-                    s = bess_form.save(commit=False); s.asset = asset; s.save()
+                    s = bess_form.save(commit=False);  s.asset = asset; s.save()
                 elif code == 'inv':
-                    s = inv_form.save(commit=False);  s.asset = asset; s.save()
+                    # inv_form.clean() should have built nom_dc_voltage_range from Min/Max V
+                    s = inv_form.save(commit=False);   s.asset = asset; s.save()
                 elif code == 'pv':
-                    s = pv_form.save(commit=False);   s.asset = asset; s.save()
+                    s = pv_form.save(commit=False);    s.asset = asset; s.save()
                 elif code == 'scc':
-                    s = scc_form.save(commit=False);  s.asset = asset; s.save()
+                    s = scc_form.save(commit=False);   s.asset = asset; s.save()
                 elif code == 'meter':
                     s = meter_form.save(commit=False); s.asset = asset; s.save()
 
         messages.success(request, "🎉 Your device has been added successfully!")
         return redirect('dashboard')
 
-    else:
-        asset_form = AssetForm()
-        elec_form  = ElectricalSpecsForm(prefix='elec')
-        bess_form  = BESSSpecsForm(prefix='bess')
-        inv_form   = InverterSpecsForm(prefix='inv')
-        pv_form    = PVModuleSpecsForm(prefix='pv')
-        scc_form   = SCCSpecsForm(prefix='scc')
-        meter_form = EnergyMeterSpecsForm(prefix='meter')
-
-        # initial title/forms before classification selected
-        subform_title = 'Specifications'
-        required_forms = []
-
+    # GET
     return render(request, 'add_device.html', {
-        'asset_form': asset_form,
-        'elec_form':  elec_form,
-        'bess_form':  bess_form,
-        'inv_form':   inv_form,
-        'pv_form':    pv_form,
-        'scc_form':   scc_form,
-        'meter_form': meter_form,
-        'subform_title': subform_title,
-        'required_forms': required_forms,
+        'asset_form': AssetForm(),
+        'elec_form':  ElectricalSpecsForm(prefix='elec'),
+        'bess_form':  BESSSpecsForm(prefix='bess'),
+        'inv_form':   InverterSpecsForm(prefix='inv'),
+        'pv_form':    PVModuleSpecsForm(prefix='pv'),
+        'scc_form':   SCCSpecsForm(prefix='scc'),
+        'meter_form': EnergyMeterSpecsForm(prefix='meter'),
+        'subform_title': 'Specifications',
+        'required_forms': [],
     })
+
 
 def signup(request):
     if request.method == 'POST':
@@ -286,8 +315,8 @@ def asset_detail(request, pk):
     })
 
 @login_required
-def asset_edit(request, asset_id):
-    asset = get_object_or_404(Asset, pk=asset_id)
+def asset_edit(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
     # Enforce ownership
     contributor = getattr(asset, 'record_contributor', None)
     if not contributor or contributor.user != request.user:
@@ -340,14 +369,13 @@ def asset_edit(request, asset_id):
             for code in spec_cfg['forms']:
                 model_cls, _, attr_name, prefix = SPEC_FORMS[code]
                 f = bound_forms[code]
-                inst = _get_instance(asset, attr_name)
                 obj = f.save(commit=False)
                 # Attach / reattach OneToOne
                 obj.asset = asset
                 obj.save()
 
         messages.success(request, "✅ Asset updated successfully.")
-        return redirect('asset_detail', asset_id=asset.id)
+        return redirect('asset_detail', pk=asset.id)
 
     # GET: render prefilled forms
     else:
