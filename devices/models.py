@@ -110,6 +110,7 @@ class Asset(models.Model):
     flexibility               = models.ForeignKey(Flexibility, on_delete=models.PROTECT)
     communication             = models.ForeignKey(Communication, on_delete=models.PROTECT)
     communication_protocol    = models.ForeignKey(CommunicationProtocol, on_delete=models.PROTECT)
+    modbus_register_map       = models.JSONField(blank=True, null=True, help_text="Crucial device/classification-specific Modbus registers (telemetry & controls).")
     dacq_actuation            = models.TextField(blank=True, null=True, verbose_name="Data Acquisition Actuation")
     devices_attribute         = models.ForeignKey(DevicesAttributes, on_delete=models.PROTECT, blank=True, null=True, verbose_name="Available Attributes")
     dacq_attributes           = models.TextField(blank=True, null=True, verbose_name="Monitored Attributes")

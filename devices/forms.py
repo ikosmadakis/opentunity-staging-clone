@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Asset, ElectricalSpecs, BESSSpecs, ContentContributor, Units, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
+import json
 
 class JSONTextarea(forms.Textarea):
     def format_value(self, value):
@@ -10,7 +11,37 @@ class JSONTextarea(forms.Textarea):
             return ''
         return super().format_value(value)
 
+class JSONTextField(forms.JSONField):
+    def prepare_value(self, value):
+        # If no value (None) -> render empty string so placeholder shows
+        if value is None:
+            return ""
+        return super().prepare_value(value)
+
 class AssetForm(forms.ModelForm):
+    # Optional JSON field, shown only when protocol supports MODBUS (UI toggles; server re-checks)
+    modbus_register_map = JSONTextField(
+        required=False,
+        label="Modbus Register Map",
+        help_text="Paste a valid JSON object describing telemetry & control registers.",
+        widget=forms.Textarea(attrs={
+            "rows": 12,
+            "placeholder": (
+                'e.g. \n'
+                '{\n'
+                '  "EVSE": {\n'
+                '    "Telemetry": {\n'
+                '      "Total power (W)": {"unit_id":1,"fc":3,"addr":5014,"type":"uint16","scale":1.0,"access":"RO","semantics":"Instantaneous total active power"}\n'
+                '    },\n'
+                '    "Controls": {\n'
+                '      "Start/stop charging": {"unit_id":1,"fc":6,"addr":5010,"type":"uint16","scale":1.0,"access":"RW","range":"0/1"}\n'
+                '    }\n'
+                '  }\n'
+                '}'
+            )
+        })
+    )
+
     # ————— Upward fields (as before) —————
     power_generation      = forms.FloatField(label="Power generation", required=False, initial=0.0)
     power_generation_unit = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
@@ -21,106 +52,54 @@ class AssetForm(forms.ModelForm):
     load_reduction_unit   = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
     down_duration         = forms.FloatField(label="Duration", required=False, initial=0.0)
     down_duration_unit    = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
-    # ————— Minimum regulation step fields —————
+    # ————— Minimum regulation step —————
     min_step            = forms.FloatField(label="Step", required=False, initial=0.0)
     min_step_unit       = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
     min_duration        = forms.FloatField(label="Duration", required=False, initial=0.0)
     min_duration_unit   = forms.ModelChoiceField(label="Units", queryset=Units.objects.all(), required=False)
-    # ————— Storage temperature fields —————
+    # ————— Storage temperature —————
     storage_temp_min   = forms.FloatField(label="Min temperature", required=False, initial=-10)
     storage_temp_max   = forms.FloatField(label="Max temperature", required=False, initial=60)
     storage_temp_unit  = forms.ModelChoiceField(label="Unit", queryset=Units.objects.all(), required=False)
-    # ─── Operating temperature range ───
+    # ——— Operating temperature ———
     op_temp_min    = forms.FloatField(label="Min temperature", required=False, initial=-10)
     op_temp_max    = forms.FloatField(label="Max temperature", required=False, initial=45)
     op_temp_unit   = forms.ModelChoiceField(label="Unit", queryset=Units.objects.all(), required=False)
-    # ─── Relative humidity range ───
+    # ——— Relative humidity ———
     rh_min         = forms.FloatField(label="Min humidity", required=False, initial=10.0)
     rh_max         = forms.FloatField(label="Max humidity", required=False, initial=95.0)
     rh_unit        = forms.ModelChoiceField(label="Unit", queryset=Units.objects.all(), required=False)
-    # ─── Dimensions ───
-    dim_length     = forms.FloatField(label="Length (mm)", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 200'}),)
-    dim_width      = forms.FloatField(label="Width (mm)", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 150'}),)
-    dim_height     = forms.FloatField(label="Height (mm)", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 100'}),)
-    # ─── Weight ───
-    wt_value       = forms.FloatField(label="Weight", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 25.5'}),)
+    # ——— Dimensions ———
+    dim_length     = forms.FloatField(label="Length (mm)", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 200'}))
+    dim_width      = forms.FloatField(label="Width (mm)",  required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 150'}))
+    dim_height     = forms.FloatField(label="Height (mm)", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 100'}))
+    # ——— Weight ———
+    wt_value       = forms.FloatField(label="Weight", required=False, widget=forms.NumberInput(attrs={'placeholder': 'e.g. 25.5'}))
     wt_unit        = forms.ModelChoiceField(label="Unit", queryset=Units.objects.all(), required=False)
+
     class Meta:
         model = Asset
         exclude = ['record_insertion_date', 'record_contributor']
         widgets = {
             'opentunity_did': forms.HiddenInput(),
-            # 'opentunity_did': forms.TextInput(attrs={
-            #     'placeholder': 'e.g. 1234-5678-9012-3456',
-            # }),
-            'gtin': forms.TextInput(attrs={
-                'placeholder': 'e.g. 00012345600012',
-            }),
-            'model_name': forms.TextInput(attrs={
-                'placeholder': 'e.g. aroTherm Plus 7kW',
-            }),
-            'batch_name': forms.TextInput(attrs={
-                'placeholder': 'e.g. BN123456789XYZ',
-            }),
-            'serial_number': forms.TextInput(attrs={
-                'placeholder': 'e.g. SN123456789XYZ',
-            }),
-            'commissioning_date': forms.DateInput(attrs={
-                'placeholder': 'e.g. 2024-05-18',
-                'type': 'date',
-            }),
-            'release_year': forms.NumberInput(attrs={
-                'placeholder': 'e.g. 2024',
-            }),
-            'description': forms.Textarea(attrs={
-                'placeholder': 'e.g. A battery energy storage system adjusting its energy output by discharging 5 MW during peak demand and charging 3 MW during surplus supply, responding dynamically to electricity pricing.',
-                'rows': 3,
-            }),
-            'compliance_checklist': forms.Textarea(attrs={
-                'placeholder': 'e.g. \n'
-                '* Low Voltage Directive (LVD): 2014/35/EU, compliant with harmonized standards EN IEC 60598-1:2021+A1:2022, EN IEC 60598-2-1:2021, EN 62471:2008. \n'
-                '* Electromagnetic Compatibility (EMC) Directive: 2014/30/EU, compliant with harmonized standards EN IEC 55015:2019+A11:2020, EN IEC 61547:2009. \n'
-                '* Restriction of Hazardous Substances (RoHS) Directive: 2011/65/EU, compliant with harmonized standard EN IEC 63000:2018. \n'
-                '* Ecodesign for light sources and separate control gears: (EU) 2019/2020, compliant with relevant parts of EN IEC 62612:2023, EN IEC 62442-1:2020. \n'
-                '* Energy labelling of light sources: (EU) 2019/2015, compliant with relevant parts of EN IEC 62612:2023. \n',
-                'rows': 4,
-            }),
-            'dacq_actuation': forms.Textarea(attrs={
-                'placeholder': (
-                    'e.g. Go into the settings menu, scroll down to Services, '
-                    'then enable the Modbus-TCP service and set_port = 502, '
-                    'and set_access = "read_only".'
-                ),
-                'rows': 3,
-            }),
-            'devices_attribute': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'dacq_attributes': forms.Textarea(attrs={
-                'placeholder': (
-                    'e.g. Active Power (P), in Watt; '
-                    'Temperature (T), in Celsius; '
-                    'Voltage Line 1 (V_l1), in Volt; etc.'
-                ),
-                'rows': 3,
-            }),
-            'control_actuation': forms.Textarea(attrs={
-                'placeholder': (
-                    'e.g. Go into the settings menu, scroll down to Services, '
-                    'then enable the Modbus-TCP service and set_port = 502, '
-                    'and set_access = "write_only".'
-                ),
-                'rows': 3,
-            }),
+            'gtin': forms.TextInput(attrs={'placeholder': 'e.g. 00012345600012'}),
+            'model_name': forms.TextInput(attrs={'placeholder': 'e.g. aroTherm Plus 7kW'}),
+            'batch_name': forms.TextInput(attrs={'placeholder': 'e.g. BN123456789XYZ'}),
+            'serial_number': forms.TextInput(attrs={'placeholder': 'e.g. SN123456789XYZ'}),
+            'commissioning_date': forms.DateInput(attrs={'placeholder': 'e.g. 2024-05-18','type': 'date'}),
+            'release_year': forms.NumberInput(attrs={'placeholder': 'e.g. 2024'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g. A battery energy storage system ...'}),
+            'compliance_checklist': forms.Textarea(attrs={'rows': 4, 'placeholder': 'e.g. LVD/EMC/RED…'}),
+            'dacq_actuation': forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g. enable Modbus-TCP on port 502…'}),
+            # NOTE: do NOT put 'modbus_register_map' here (field is explicitly declared above; Meta.widgets would be ignored)
+            'devices_attribute': forms.Select(attrs={'class': 'form-select'}),
+            'dacq_attributes': forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g. Active Power (W); Temperature (°C); …'}),
+            'control_actuation': forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g. write-only control steps…'}),
             'maximum_upward_regulation': forms.HiddenInput(),
             'maximum_downward_regulation': forms.HiddenInput(),
             'minimum_regulation_step': forms.HiddenInput(),
-            'ip_rating': forms.TextInput(attrs={
-                'placeholder': 'e.g. IP65',
-            }),
-            'form_factor': forms.TextInput(attrs={
-                'placeholder': 'e.g. Rack-mounted',
-            }),
+            'ip_rating': forms.TextInput(attrs={'placeholder': 'e.g. IP65'}),
+            'form_factor': forms.TextInput(attrs={'placeholder': 'e.g. Rack-mounted'}),
             'storage_temperature': forms.HiddenInput(),
             'operating_temperature_range': forms.HiddenInput(),
             'relative_humidity_range': forms.HiddenInput(),
@@ -128,6 +107,7 @@ class AssetForm(forms.ModelForm):
             'weight': forms.HiddenInput(),
         }
         labels = {
+            'modbus_register_map': 'Modbus Register Map',
             'gtin': 'GTIN',
             'batch_name': 'Batch Name',
             'model_name': 'Model Name',
@@ -204,6 +184,9 @@ class AssetForm(forms.ModelForm):
                 'how data is formatted, transmitted, and interpreted, ensuring that devices on a '
                 'bus system can understand each other.'
             ),
+            'modbus_register_map':(
+                'Paste a valid JSON object describing telemetry & control registers.'
+            ),
             'dacq_actuation': (
                 'To retrieve data of an asset over a bus system (e.g. Ethernet) with a specified '
                 'protocol (e.g. Modbus TCP), the process involves several steps. Refers to a DACQ '
@@ -278,6 +261,18 @@ class AssetForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Order Unit choices (nicer UX)
+        unit_fields = [
+            'power_generation_unit','duration_unit',
+            'load_reduction_unit','down_duration_unit',
+            'min_step_unit','min_duration_unit',
+            'storage_temp_unit','op_temp_unit','rh_unit','wt_unit'
+        ]
+        uq = Units.objects.order_by('symbol')
+        for uf in unit_fields:
+            if uf in self.fields:
+                self.fields[uf].queryset = uq
+
         # Populate upward‐initials
         upd = getattr(self.instance, 'maximum_upward_regulation', None)
         if isinstance(upd, dict):
@@ -294,77 +289,89 @@ class AssetForm(forms.ModelForm):
             self.fields['down_duration'].initial       = dwd.get('duration')
             self.fields['down_duration_unit'].initial  = dwd.get('t_unit')
 
-        # — initialize minimum step fields if editing an instance —
+        # Minimum regulation step
         mrs = getattr(self.instance, 'minimum_regulation_step', None)
         if isinstance(mrs, dict):
             self.fields['min_step'].initial          = mrs.get('step')
-            # note the JSON uses key "s_unit" for the unit symbol
             self.fields['min_step_unit'].initial     = mrs.get('s_unit')
             self.fields['min_duration'].initial      = mrs.get('duration')
             self.fields['min_duration_unit'].initial = mrs.get('t_unit')
 
-        # Initialize storage_temperature if editing:
+        # Storage temperature
         st = getattr(self.instance, 'storage_temperature', None)
         if isinstance(st, dict):
             self.fields['storage_temp_min'].initial  = st.get('min')
             self.fields['storage_temp_max'].initial  = st.get('max')
-            # we store unit symbol in JSON
-            # find the Units object matching that symbol
-            unit_symbol = st.get('unit')
-            if unit_symbol:
-                try:
-                    self.fields['storage_temp_unit'].initial = Units.objects.get(symbol=unit_symbol)
-                except Units.DoesNotExist:
-                    pass
+            sym = st.get('unit')
+            if sym:
+                try: self.fields['storage_temp_unit'].initial = Units.objects.get(symbol=sym)
+                except Units.DoesNotExist: pass
 
-        # operating_temperature_range
+        # Operating temperature range
         op = getattr(self.instance, 'operating_temperature_range', None)
         if isinstance(op, dict):
             self.fields['op_temp_min'].initial  = op.get('min')
             self.fields['op_temp_max'].initial  = op.get('max')
-            # find Units object by symbol
-            if op.get('unit'):
-                try:
-                    self.fields['op_temp_unit'].initial = Units.objects.get(symbol=op['unit'])
-                except Units.DoesNotExist:
-                    pass
+            sym = op.get('unit')
+            if sym:
+                try: self.fields['op_temp_unit'].initial = Units.objects.get(symbol=sym)
+                except Units.DoesNotExist: pass
 
-        # relative_humidity_range
+        # Relative humidity range
         rh = getattr(self.instance, 'relative_humidity_range', None)
         if isinstance(rh, dict):
             self.fields['rh_min'].initial = rh.get('min')
             self.fields['rh_max'].initial = rh.get('max')
-            if rh.get('unit'):
-                try:
-                    self.fields['rh_unit'].initial = Units.objects.get(symbol=rh['unit'])
-                except Units.DoesNotExist:
-                    pass
+            sym = rh.get('unit')
+            if sym:
+                try: self.fields['rh_unit'].initial = Units.objects.get(symbol=sym)
+                except Units.DoesNotExist: pass
 
-        # dimensions
+        # Dimensions
         dim = getattr(self.instance, 'dimensions', None)
         if isinstance(dim, dict):
             self.fields['dim_length'].initial = dim.get('length_mm')
             self.fields['dim_width'].initial  = dim.get('width_mm')
             self.fields['dim_height'].initial = dim.get('height_mm')
 
-        # weight
+        # Weight
         wt = getattr(self.instance, 'weight', None)
         if isinstance(wt, dict):
             self.fields['wt_value'].initial = wt.get('weight')
-            if wt.get('units'):
-                try:
-                    self.fields['wt_unit'].initial = Units.objects.get(symbol=wt['units'])
-                except Units.DoesNotExist:
-                    pass
+            sym = wt.get('units')
+            if sym:
+                try: self.fields['wt_unit'].initial = Units.objects.get(symbol=sym)
+                except Units.DoesNotExist: pass
+
+    # Minimal sanity / size guard
+    def clean_modbus_register_map(self):
+        data = self.cleaned_data.get("modbus_register_map")
+        if not data:
+            return None
+        if not isinstance(data, dict):
+            raise forms.ValidationError("Provide a JSON object (e.g., {...}).")
+        if len(json.dumps(data)) > 500_000:
+            raise forms.ValidationError("JSON too large (limit ~500 KB).")
+        return data
 
     def clean(self):
         cleaned = super().clean()
 
+        # Gate Modbus map by selected protocol (server-side safety)
+        proto = cleaned.get('communication_protocol')
+        supported = set()
+        if proto and isinstance(getattr(proto, 'type', None), dict):
+            supported = {str(s).upper() for s in proto.type.get('supported_com_protocols', [])}
+        if not (('MODBUS TCP' in supported) or ('MODBUS RTU' in supported)):
+            cleaned['modbus_register_map'] = None
+
         # Pack upward
-        pg  = cleaned.get('power_generation')
-        pgu = cleaned.get('power_generation_unit')
-        du  = cleaned.get('duration')
-        duu = cleaned.get('duration_unit')
+        pg, pgu, du, duu = (
+            cleaned.get('power_generation'),
+            cleaned.get('power_generation_unit'),
+            cleaned.get('duration'),
+            cleaned.get('duration_unit'),
+        )
         if pg is not None or du is not None:
             cleaned['maximum_upward_regulation'] = {
                 'power_generation': pg or 0,
@@ -374,10 +381,12 @@ class AssetForm(forms.ModelForm):
             }
 
         # Pack downward
-        lr   = cleaned.get('load_reduction')
-        lru  = cleaned.get('load_reduction_unit')
-        dd   = cleaned.get('down_duration')
-        ddu  = cleaned.get('down_duration_unit')
+        lr, lru, dd, ddu = (
+            cleaned.get('load_reduction'),
+            cleaned.get('load_reduction_unit'),
+            cleaned.get('down_duration'),
+            cleaned.get('down_duration_unit'),
+        )
         if lr is not None or dd is not None:
             cleaned['maximum_downward_regulation'] = {
                 'load_reduction': lr or 0,
@@ -386,11 +395,13 @@ class AssetForm(forms.ModelForm):
                 't_unit':         ddu.symbol if ddu else None,
             }
 
-        # — pack minimum regulation step —
-        step    = cleaned.get('min_step')
-        step_u  = cleaned.get('min_step_unit')
-        dur     = cleaned.get('min_duration')
-        dur_u   = cleaned.get('min_duration_unit')
+        # Minimum regulation step
+        step, step_u, dur, dur_u = (
+            cleaned.get('min_step'),
+            cleaned.get('min_step_unit'),
+            cleaned.get('min_duration'),
+            cleaned.get('min_duration_unit'),
+        )
         if step is not None or dur is not None:
             cleaned['minimum_regulation_step'] = {
                 'step':     step or 0,
@@ -399,69 +410,32 @@ class AssetForm(forms.ModelForm):
                 't_unit':   dur_u.symbol if dur_u else None,
             }
 
-        # Pack storage_temperature:
-        mn   = cleaned.get('storage_temp_min')
-        mx   = cleaned.get('storage_temp_max')
-        ut   = cleaned.get('storage_temp_unit')
+        # Storage temperature
+        mn, mx, ut = cleaned.get('storage_temp_min'), cleaned.get('storage_temp_max'), cleaned.get('storage_temp_unit')
         if mn is not None or mx is not None:
-            cleaned['storage_temperature'] = {
-                'min':  mn if mn is not None else 0,
-                'max':  mx if mx is not None else 0,
-                'unit': ut.symbol if ut else None,
-            }
+            cleaned['storage_temperature'] = {'min': mn or 0, 'max': mx or 0, 'unit': ut.symbol if ut else None}
 
-        # pack operating_temperature_range
-        mn, mx, ut = (
-            cleaned.get('op_temp_min'),
-            cleaned.get('op_temp_max'),
-            cleaned.get('op_temp_unit'),
-        )
+        # Operating temperature
+        mn, mx, ut = cleaned.get('op_temp_min'), cleaned.get('op_temp_max'), cleaned.get('op_temp_unit')
         if mn is not None or mx is not None:
-            cleaned['operating_temperature_range'] = {
-                'min':  mn if mn is not None else 0,
-                'max':  mx if mx is not None else 0,
-                'unit': ut.symbol if ut else None,
-            }
+            cleaned['operating_temperature_range'] = {'min': mn or 0, 'max': mx or 0, 'unit': ut.symbol if ut else None}
 
-        # pack relative_humidity_range
-        rmin, rmax, runit = (
-            cleaned.get('rh_min'),
-            cleaned.get('rh_max'),
-            cleaned.get('rh_unit'),
-        )
+        # Relative humidity
+        rmin, rmax, runit = cleaned.get('rh_min'), cleaned.get('rh_max'), cleaned.get('rh_unit')
         if rmin is not None or rmax is not None:
-            cleaned['relative_humidity_range'] = {
-                'min':  rmin if rmin is not None else 0,
-                'max':  rmax if rmax is not None else 0,
-                'unit': runit.symbol if runit else None,
-            }
+            cleaned['relative_humidity_range'] = {'min': rmin or 0, 'max': rmax or 0, 'unit': runit.symbol if runit else None}
 
-        # pack dimensions
-        l, w, h = (
-            cleaned.get('dim_length'),
-            cleaned.get('dim_width'),
-            cleaned.get('dim_height'),
-        )
+        # Dimensions
+        l, w, h = cleaned.get('dim_length'), cleaned.get('dim_width'), cleaned.get('dim_height')
         if l is not None or w is not None or h is not None:
-            cleaned['dimensions'] = {
-                'length_mm': l if l is not None else 0,
-                'width_mm':  w if w is not None else 0,
-                'height_mm': h if h is not None else 0,
-            }
+            cleaned['dimensions'] = {'length_mm': l or 0, 'width_mm': w or 0, 'height_mm': h or 0}
 
-        # pack weight
-        val, vunit = (
-            cleaned.get('wt_value'),
-            cleaned.get('wt_unit'),
-        )
+        # Weight
+        val, vunit = cleaned.get('wt_value'), cleaned.get('wt_unit')
         if val is not None:
-            cleaned['weight'] = {
-                'weight': val,
-                'units':  vunit.symbol if vunit else None,
-            }
+            cleaned['weight'] = {'weight': val, 'units': vunit.symbol if vunit else None}
 
         return cleaned
-
 class ElectricalSpecsForm(forms.ModelForm):
     # ─── Discrete fields for voltage_range_uf ───
     voltage_min = forms.FloatField(label="Min (V)", required=False, initial=0.0)

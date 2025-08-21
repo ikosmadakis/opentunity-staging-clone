@@ -18,7 +18,7 @@
     <div class="mb-3"><strong>{{ asset_form.manufacturer.label_tag }}</strong>{{ asset_form.manufacturer }}<br>{{ asset_form.manufacturer.errors }}</div>
     <small class="text-muted">{{ asset_form.manufacturer.help_text }}</small><br><br>
 
-    <div class="mb-3"><strong>{{ asset_form.model_name.label_tag }}</strong><br>{{ asset_form.model_name }}<br>{{ asset_form.model_name.errors }}</div>
+    <div class="mb-3"><strong>{{ asset_form.model_name.label_tag }}</strong>{{ asset_form.model_name }}<br>{{ asset_form.model_name.errors }}</div>
     <small class="text-muted">{{ asset_form.model_name.help_text }}</small><br><br>
 
     <div class="mb-3"><strong>{{ asset_form.batch_name.label_tag }}</strong>{{ asset_form.batch_name }}<br>{{ asset_form.batch_name.errors }}</div>
@@ -33,7 +33,7 @@
     <div class="mb-3"><strong>{{ asset_form.classification.label_tag }}</strong>{{ asset_form.classification }}<br>{{ asset_form.classification.errors }}</div>
     <small class="text-muted">{{ asset_form.classification.help_text }}</small><br><br>
 
-    <div class="mb-3"><strong>{{ asset_form.description.label_tag }}</strong>{{ asset_form.description }}<br>{{ asset_form.description.errors }}</div>
+    <div class="mb-3"><strong>{{ asset_form.description.label_tag }}</strong><br>{{ asset_form.description }}<br>{{ asset_form.description.errors }}</div>
     <small class="text-muted">{{ asset_form.description.help_text }}</small><br><br>
 
     <div class="mb-3"><strong>{{ asset_form.commissioning_date.label_tag }}</strong>{{ asset_form.commissioning_date }}<br>{{ asset_form.commissioning_date.errors }}</div>
@@ -54,20 +54,33 @@
     <div class="mb-3"><strong>{{ asset_form.communication_protocol.label_tag }}</strong>{{ asset_form.communication_protocol }}<br>{{ asset_form.communication_protocol.errors }}</div>
     <small class="text-muted">{{ asset_form.communication_protocol.help_text }}</small><br><br>
 
-    {# --- ATTRIBUTE SELECTION AND MONITORED ATTRIBUTES --- #}
-    <div class="mb-3">
-        <strong><label for="id_devices_attribute" class="form-label">Attributes:</label></strong>
-        {{ asset_form.devices_attribute }}
-        <button type="button" id="add-attribute" class="btn btn-outline-secondary btn-sm ms-2">Add Attribute</button>
-        {{ asset_form.devices_attribute.errors }}
+    <div id="block-modbus-map" class="d-none" style="display:none">
+        <div class="row mb-3"><strong>{{ asset_form.modbus_register_map.label_tag }}</strong><br>{{ asset_form.modbus_register_map }}<br>{{ asset_form.modbus_register_map.errors }}</div>
+        <small class="text-muted">{{ asset_form.modbus_register_map.help_text }}</small><br><br>
     </div>
-    <div class="mb-3"><strong>{{ asset_form.dacq_attributes.label_tag }}</strong>{{ asset_form.dacq_attributes }}<br>{{ asset_form.dacq_attributes.errors }}</div>
-    <small class="text-muted">{{ asset_form.dacq_attributes.help_text }}</small><br><br>
+    {{ comproto_meta|json_script:"comproto-data" }}
 
-    <div class="mb-3"><strong>{{ asset_form.dacq_actuation.label_tag }}</strong>{{ asset_form.dacq_actuation }}<br>{{ asset_form.dacq_actuation.errors }}</div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <strong><label for="id_devices_attribute" class="form-label"> Select attributes:</label></strong>
+            {{ asset_form.devices_attribute }}<br>
+            <button type="button" id="add-attribute" class="btn btn-outline-secondary btn-sm ms-2">Add Attribute</button>
+            {{ asset_form.devices_attribute.errors }}
+        </div>
+        <div class="col-md-4">
+            <strong>{{ asset_form.dacq_attributes.label_tag }}</strong><br>
+            {{ asset_form.dacq_attributes }}<br>{{ asset_form.dacq_attributes.errors }}<br>
+        </div>
+        <small class="text-muted">{{ asset_form.dacq_attributes.help_text }}</small><br><br>
+    </div>
+
+
+
+    <div class="mb-3"><strong>{{ asset_form.dacq_actuation.label_tag }}</strong><br>{{ asset_form.dacq_actuation }}<br>{{ asset_form.dacq_actuation.errors }}</div>
     <small class="text-muted">{{ asset_form.dacq_actuation.help_text }}</small><br><br>
 
-    <div class="mb-3"><strong>{{ asset_form.control_actuation.label_tag }}</strong>{{ asset_form.control_actuation }}<br>{{ asset_form.control_actuation.errors }}</div>
+    <div class="mb-3"><strong>{{ asset_form.control_actuation.label_tag }}</strong><br>{{ asset_form.control_actuation }}<br>{{ asset_form.control_actuation.errors }}</div>
     <small class="text-muted">{{ asset_form.control_actuation.help_text }}</small><br><br>
 
     <div class="mb-3"><strong>{{ asset_form.regulation.label_tag }}</strong>{{ asset_form.regulation }}<br>{{ asset_form.regulation.errors }}</div>
@@ -86,7 +99,7 @@
     <small class="text-muted">{{ asset_form.regulation_response_time_accuracy.help_text }}</small><br><br>
 
     {# -- upward / downward / min step / env / dims / weight / form factor (unchanged) -- #}
-    <h4>Maximum upward regulation</h4>
+    <h5>Maximum upward regulation</h5>
     <div class="row mb-3">
       <div class="col">{{ asset_form.power_generation.label_tag }}{{ asset_form.power_generation }}{{ asset_form.power_generation.errors }}</div>
       <div class="col">{{ asset_form.power_generation_unit.label_tag }}{{ asset_form.power_generation_unit }}{{ asset_form.power_generation_unit.errors }}</div>
@@ -97,7 +110,7 @@
     </div>
     {{ asset_form.maximum_upward_regulation }}<small class="form-text text-muted">{{ asset_form.maximum_upward_regulation.help_text }}</small><br><br>
 
-    <h4>Maximum downward regulation</h4>
+    <h5>Maximum downward regulation</h5>
     <div class="row mb-3">
       <div class="col">{{ asset_form.load_reduction.label_tag }}{{ asset_form.load_reduction }}{{ asset_form.load_reduction.errors }}</div>
       <div class="col">{{ asset_form.load_reduction_unit.label_tag }}{{ asset_form.load_reduction_unit }}{{ asset_form.load_reduction_unit.errors }}</div>
@@ -108,7 +121,7 @@
     </div>
     {{ asset_form.maximum_downward_regulation }}<small class="form-text text-muted">{{ asset_form.maximum_downward_regulation.help_text }}</small><br><br>
 
-    <h4>Minimum regulation step</h4>
+    <h5>Minimum regulation step</h5>
     <div class="row mb-3">
       <div class="col">{{ asset_form.min_step.label_tag }}{{ asset_form.min_step }}{{ asset_form.min_step.errors }}</div>
       <div class="col">{{ asset_form.min_step_unit.label_tag }}{{ asset_form.min_step_unit }}{{ asset_form.min_step_unit.errors }}</div>
@@ -122,7 +135,7 @@
     <div class="mb-3"><strong>{{ asset_form.ip_rating.label_tag }}</strong>{{ asset_form.ip_rating }}<br>{{ asset_form.ip_rating.errors }}</div>
     <small class="text-muted">{{ asset_form.ip_rating.help_text }}</small><br><br>
 
-    <h4>Storage temperature</h4>
+    <h5>Storage temperature</h5>
     <div class="row mb-3">
         <div class="col">{{ asset_form.storage_temp_min.label_tag }}{{ asset_form.storage_temp_min }}<br>{{ asset_form.storage_temp_min.errors }}</div>
         <div class="col">{{ asset_form.storage_temp_max.label_tag }}{{ asset_form.storage_temp_max }}<br>{{ asset_form.storage_temp_max.errors }}</div>
@@ -130,7 +143,7 @@
     </div>
     {{ asset_form.storage_temperature }}<small class="form-text text-muted">{{ asset_form.storage_temperature.help_text }}</small><br><br>
 
-    <h4>Operating temperature range</h4>
+    <h5>Operating temperature range</h5>
     <div class="row mb-3">
         <div class="col">{{ asset_form.op_temp_min.label_tag }}{{ asset_form.op_temp_min }}<br>{{ asset_form.op_temp_min.errors }}</div>
         <div class="col">{{ asset_form.op_temp_max.label_tag }}{{ asset_form.op_temp_max }}<br>{{ asset_form.op_temp_max.errors }}</div>
@@ -138,7 +151,7 @@
     </div>
     {{ asset_form.operating_temperature_range }}<small class="form-text text-muted">{{ asset_form.operating_temperature_range.help_text }}</small><br><br>
 
-    <h4>Relative humidity range</h4>
+    <h5>Relative humidity range</h5>
     <div class="row mb-3">
         <div class="col">{{ asset_form.rh_min.label_tag }}{{ asset_form.rh_min }}<br>{{ asset_form.rh_min.errors }}</div>
         <div class="col">{{ asset_form.rh_max.label_tag }}{{ asset_form.rh_max }}<br>{{ asset_form.rh_max.errors }}</div>
@@ -146,7 +159,7 @@
     </div>
     {{ asset_form.relative_humidity_range }}<small class="form-text text-muted">{{ asset_form.relative_humidity_range.help_text }}</small><br><br>
 
-    <h4>Dimensions</h4>
+    <h5>Dimensions</h5>
     <div class="row mb-3">
         <div class="col">{{ asset_form.dim_length.label_tag }}{{ asset_form.dim_length }}<br>{{ asset_form.dim_length.errors }}</div>
         <div class="col">{{ asset_form.dim_width.label_tag }}{{ asset_form.dim_width }}<br>{{ asset_form.dim_width.errors }}</div>
@@ -154,7 +167,7 @@
     </div>
     {{ asset_form.dimensions }}<small class="form-text text-muted">{{ asset_form.dimensions.help_text }}</small><br><br>
 
-    <h4>Weight</h4>
+    <h5>Weight</h5>
     <div class="row mb-3">
         <div class="col">{{ asset_form.wt_value.label_tag }}{{ asset_form.wt_value }}<br>{{ asset_form.wt_value.errors }}</div>
         <div class="col">{{ asset_form.wt_unit.label_tag }}{{ asset_form.wt_unit }}<br>{{ asset_form.wt_unit.errors }}</div>
@@ -502,6 +515,42 @@
   // ----------------------------
   // Section show/hide helper
   // ----------------------------
+  function _loadComprotoMap() {
+    const el = document.getElementById("comproto-data");
+    if (!el) return {};
+    try { return JSON.parse(el.textContent); } catch { return {}; }
+  }
+  const COMPROTO = _loadComprotoMap();
+
+  function _selectedComprotoId() {
+    // robust: match either plain or prefixed name
+    const sel = document.querySelector('select[name$="communication_protocol"]');
+    return sel ? sel.value : null;
+  }
+
+  function _protocolHasModbus(meta) {
+    if (!meta || typeof meta !== 'object') return false;
+    const arr = (meta.supported_com_protocols || []).map(String).map(s => s.toUpperCase());
+    return arr.includes("MODBUS TCP") || arr.includes("MODBUS RTU");
+  }
+
+  function toggleModbusRegisterMap() {
+    const id = _selectedComprotoId();
+    const meta = id && COMPROTO[id] ? COMPROTO[id] : null;
+    const on = _protocolHasModbus(meta);
+    const box = document.getElementById("block-modbus-map");
+    if (!box) return;
+    if (on) {
+      box.classList.remove("d-none");
+      box.style.display = "";
+      box.querySelectorAll("textarea,input,select").forEach(n => n.disabled = false);
+    } else {
+      box.classList.add("d-none");
+      box.style.display = "none";
+      box.querySelectorAll("textarea,input,select").forEach(n => n.disabled = true);
+    }
+  }
+
   function show(code, yes) {
     const el = document.getElementById("block-" + code);
     if (!el) return;
@@ -657,6 +706,12 @@
     } else {
       setLayoutFor("");
     }
+
+    // initialize based on current selection
+    toggleModbusRegisterMap();
+    // watch for changes in the Communication Protocol select
+    const sel = document.querySelector('select[name$="communication_protocol"]');
+    if (sel) sel.addEventListener("change", toggleModbusRegisterMap);
 
     // Add-attribute button script (unchanged)
     const select = document.getElementById("id_devices_attribute");

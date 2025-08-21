@@ -13,7 +13,7 @@ from PIL import Image
 from django.conf import settings
 from django.http import HttpResponse
 from devices.forms import SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm, InverterSpecsForm, PVModuleSpecsForm, SCCSpecsForm, EnergyMeterSpecsForm
-from devices.models import ContentContributor, Asset, ElectricalSpecs, BESSSpecs, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
+from devices.models import ContentContributor, Asset, CommunicationProtocol,  ElectricalSpecs, BESSSpecs, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
 
 CLASS_TO_FORMS = {
     'HVAC': {
@@ -147,7 +147,12 @@ def dashboard(request):
     })
 
 
-
+def _comproto_meta():
+    meta = {}
+    for cp in CommunicationProtocol.objects.all():
+        # cp.type is a JSONField that (per your data model) holds {"supported_com_protocols": [...], ...}
+        meta[cp.id] = cp.type or {}
+    return meta
 
 @login_required
 def add_device(request):
@@ -185,6 +190,7 @@ def add_device(request):
                 'meter_form': EnergyMeterSpecsForm(prefix='meter'),
                 'subform_title': 'Specifications',
                 'required_forms': [],  # server-side initial state; JS will reveal based on classification select
+                'comproto_meta': _comproto_meta(),
             })
 
         # Main form is valid → determine which spec forms are required from classification
@@ -237,6 +243,7 @@ def add_device(request):
                 'meter_form': meter_form if 'meter' in required_codes else EnergyMeterSpecsForm(prefix='meter'),
                 'subform_title': spec_cfg.get('title', 'Specifications'),
                 'required_forms': spec_cfg['forms'],
+                'comproto_meta': _comproto_meta(),
             })
 
         # All good → save everything in one transaction
@@ -275,6 +282,7 @@ def add_device(request):
         'meter_form': EnergyMeterSpecsForm(prefix='meter'),
         'subform_title': 'Specifications',
         'required_forms': [],
+        'comproto_meta': _comproto_meta(),
     })
 
 

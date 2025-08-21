@@ -31,6 +31,7 @@ class AssetSerializer(serializers.ModelSerializer):
     flexibility = serializers.SerializerMethodField()
     communication = serializers.SerializerMethodField()
     communication_protocol = serializers.SerializerMethodField()
+    modbus_register_map = serializers.JSONField(required=False, allow_null=True)
     regulation = serializers.SerializerMethodField()
     regulation_response_time_unit = serializers.SerializerMethodField()
 
