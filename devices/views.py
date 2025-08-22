@@ -59,17 +59,24 @@ CLASS_TO_FORMS = {
 }
 
 SPEC_FORMS = {
-    'elec':  (ElectricalSpecs, ElectricalSpecsForm,  'electricalspecs',   'elec'),
-    'bess':  (BESSSpecs,       BESSSpecsForm,        'bessspecs',         'bess'),
-    'inv':   (InverterSpecs,   InverterSpecsForm,    'inverter_specs',    'inv'),
-    'pv':    (PVModuleSpecs,   PVModuleSpecsForm,    'pv_module_specs',   'pv'),
-    'scc':   (SCCSpecs,        SCCSpecsForm,         'scc_specs',         'scc'),
-    'meter': (EnergyMeterSpecs,EnergyMeterSpecsForm, 'meter_specs',       'meter'),
+    'elec':  (ElectricalSpecs, ElectricalSpecsForm,  'elec_specs',      'elec'),
+    'bess':  (BESSSpecs,       BESSSpecsForm,        'bess_specs',      'bess'),
+    'inv':   (InverterSpecs,   InverterSpecsForm,    'inverter_specs',  'inv'),
+    'pv':    (PVModuleSpecs,   PVModuleSpecsForm,    'pv_module_specs', 'pv'),
+    'scc':   (SCCSpecs,        SCCSpecsForm,         'scc_specs',       'scc'),
+    'meter': (EnergyMeterSpecs,EnergyMeterSpecsForm, 'meter_specs',     'meter'),
 }
 
+
 def _get_instance(asset, attr_name):
-    """Return existing OneToOne instance if present, else None."""
-    return getattr(asset, attr_name, None)
+    inst = getattr(asset, attr_name, None)
+    if inst is None:
+        # legacy fallbacks
+        for alt in ('electricalspecs', 'bessspecs'):
+            if attr_name in ('elec_specs', 'bess_specs') and hasattr(asset, alt):
+                return getattr(asset, alt)
+    return inst
+
 
 def _delete_obsolete_specs(asset, keep_codes):
     """Remove OneToOne specs no longer applicable after a classification change."""
@@ -313,14 +320,20 @@ def signup(request):
 
 @login_required
 def asset_detail(request, pk):
-    asset = get_object_or_404(
-        Asset,
-        pk=pk,
-        record_contributor__user=request.user
+    asset = (
+        Asset.objects
+        .select_related(
+            'record_contributor__user',
+            'manufacturer', 'deployment', 'classification',
+            'flexibility', 'communication', 'communication_protocol',
+            'regulation', 'regulation_response_time_unit',
+            'elec_specs', 'bess_specs', 'inverter_specs',
+            'pv_module_specs', 'scc_specs', 'meter_specs',
+        )
+        .get(pk=pk, record_contributor__user=request.user)
     )
-    return render(request, 'devices/asset_detail.html', {
-        'asset': asset
-    })
+    return render(request, 'devices/asset_detail.html', {'asset': asset})
+
 
 @login_required
 def asset_edit(request, pk):
@@ -344,10 +357,11 @@ def asset_edit(request, pk):
         # but since it's a FK, we rely on asset_form.cleaned_data after validation.
         # So first validate the asset_form minimally to read classification.
         if not asset_form.is_valid():
+            print("ASSET ERRORS:", asset_form.errors.as_json())
             # Re-render with existing instances + current_cfg
             ctx = _build_edit_context(asset, asset_form, current_cfg)
             messages.error(request, "Please correct the errors in the main asset form.")
-            return render(request, 'asset_edit.html', ctx)
+            return render(request, 'devices/asset_edit.html', ctx)
 
         # Now we can read the *new* classification selected by the user
         new_cls = (asset_form.cleaned_data['classification'].type or '').strip().upper()
@@ -362,7 +376,7 @@ def asset_edit(request, pk):
         if not form_ok:
             ctx = _build_edit_context(asset, asset_form, spec_cfg, bound_forms)
             messages.error(request, "Please correct the errors in: " + ", ".join(errs))
-            return render(request, 'asset_edit.html', ctx)
+            return render(request, 'devices/asset_edit.html', ctx)
 
         # Save everything atomically
         with transaction.atomic():
@@ -389,7 +403,7 @@ def asset_edit(request, pk):
     else:
         asset_form = AssetForm(instance=asset)
         ctx = _build_edit_context(asset, asset_form, current_cfg)
-        return render(request, 'asset_edit.html', ctx)
+        return render(request, 'devices/asset_edit.html', ctx)
 
 
 # ---- helpers used inside asset_edit ----
@@ -412,21 +426,33 @@ def _build_unbound_spec_forms(asset):
 
 def _validate_required_spec_forms(forms_dict, required_codes):
     ok, errs = True, []
+    labels = {
+        'elec':  'Electrical specs',
+        'bess':  'BESS specs',
+        'inv':   'Inverter specs',
+        'pv':    'PV module specs',
+        'scc':   'SCC specs',
+        'meter': 'Energy meter specs',
+    }
     for code in required_codes:
         f = forms_dict.get(code)
-        if not f or not f.is_valid():
+        valid = bool(f and f.is_valid())
+        if not valid:
             ok = False
-            # Human labels for messages
-            label = {
-                'elec':  'Electrical specs',
-                'bess':  'BESS specs',
-                'inv':   'Inverter specs',
-                'pv':    'PV module specs',
-                'scc':   'SCC specs',
-                'meter': 'Energy meter specs',
-            }.get(code, code)
-            errs.append(label)
+            errs.append(labels.get(code, code))
+            try:
+                if f:
+                    print(f"{code.upper()} ERRORS:", f.errors.as_json())
+                    nfe = getattr(f, 'non_field_errors', lambda: [])()
+                    if nfe:
+                        print(f"{code.upper()} NON_FIELD_ERRORS:", nfe.as_text())
+                else:
+                    print(f"{code.upper()} ERROR: form missing in forms_dict")
+            except Exception as e:
+                print(f"{code.upper()} ERROR LOGGING FAILED:", e)
     return ok, errs
+
+
 
 def _build_edit_context(asset, asset_form, spec_cfg, bound_forms=None):
     """Prepare template context for GET or invalid POST."""

@@ -33,149 +33,6 @@
     <div class="mb-3"><strong>{{ asset_form.classification.label_tag }}</strong>{{ asset_form.classification }}<br>{{ asset_form.classification.errors }}</div>
     <small class="text-muted">{{ asset_form.classification.help_text }}</small><br><br>
 
-    <div class="mb-3"><strong>{{ asset_form.description.label_tag }}</strong><br>{{ asset_form.description }}<br>{{ asset_form.description.errors }}</div>
-    <small class="text-muted">{{ asset_form.description.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.commissioning_date.label_tag }}</strong>{{ asset_form.commissioning_date }}<br>{{ asset_form.commissioning_date.errors }}</div>
-    <small class="text-muted">{{ asset_form.commissioning_date.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.compliance_checklist.label_tag }}</strong><br>{{ asset_form.compliance_checklist }}<br>{{ asset_form.compliance_checklist.errors }}</div>
-    <small class="text-muted">{{ asset_form.compliance_checklist.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.release_year.label_tag }}</strong>{{ asset_form.release_year }}<br>{{ asset_form.release_year.errors }}</div>
-    <small class="text-muted">{{ asset_form.release_year.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.flexibility.label_tag }}</strong>{{ asset_form.flexibility }}<br>{{ asset_form.flexibility.errors }}</div>
-    <small class="text-muted">{{ asset_form.flexibility.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.communication.label_tag }}</strong>{{ asset_form.communication }}<br>{{ asset_form.communication.errors }}</div>
-    <small class="text-muted">{{ asset_form.communication.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.communication_protocol.label_tag }}</strong>{{ asset_form.communication_protocol }}<br>{{ asset_form.communication_protocol.errors }}</div>
-    <small class="text-muted">{{ asset_form.communication_protocol.help_text }}</small><br><br>
-
-    <div id="block-modbus-map" class="d-none" style="display:none">
-        <div class="row mb-3"><strong>{{ asset_form.modbus_register_map.label_tag }}</strong><br>{{ asset_form.modbus_register_map }}<br>{{ asset_form.modbus_register_map.errors }}</div>
-        <small class="text-muted">{{ asset_form.modbus_register_map.help_text }}</small><br><br>
-    </div>
-    {{ comproto_meta|json_script:"comproto-data" }}
-
-
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <strong><label for="id_devices_attribute" class="form-label"> Select attributes:</label></strong>
-            {{ asset_form.devices_attribute }}<br>
-            <button type="button" id="add-attribute" class="btn btn-outline-secondary btn-sm ms-2">Add Attribute</button>
-            {{ asset_form.devices_attribute.errors }}
-        </div>
-        <div class="col-md-4">
-            <strong>{{ asset_form.dacq_attributes.label_tag }}</strong><br>
-            {{ asset_form.dacq_attributes }}<br>{{ asset_form.dacq_attributes.errors }}<br>
-        </div>
-        <small class="text-muted">{{ asset_form.dacq_attributes.help_text }}</small><br><br>
-    </div>
-
-
-
-    <div class="mb-3"><strong>{{ asset_form.dacq_actuation.label_tag }}</strong><br>{{ asset_form.dacq_actuation }}<br>{{ asset_form.dacq_actuation.errors }}</div>
-    <small class="text-muted">{{ asset_form.dacq_actuation.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.control_actuation.label_tag }}</strong><br>{{ asset_form.control_actuation }}<br>{{ asset_form.control_actuation.errors }}</div>
-    <small class="text-muted">{{ asset_form.control_actuation.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.regulation.label_tag }}</strong>{{ asset_form.regulation }}<br>{{ asset_form.regulation.errors }}</div>
-    <small class="text-muted">{{ asset_form.regulation.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.regulation_response_time_upward.label_tag }}</strong>{{ asset_form.regulation_response_time_upward }}<br>{{ asset_form.regulation_response_time_upward.errors }}</div>
-    <small class="text-muted">{{ asset_form.regulation_response_time_upward.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.regulation_response_time_downward.label_tag }}</strong>{{ asset_form.regulation_response_time_downward }}<br>{{ asset_form.regulation_response_time_downward.errors }}</div>
-    <small class="text-muted">{{ asset_form.regulation_response_time_downward.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.regulation_response_time_unit.label_tag }}</strong>{{ asset_form.regulation_response_time_unit }}<br>{{ asset_form.regulation_response_time_unit.errors }}</div>
-    <small class="text-muted">{{ asset_form.regulation_response_time_unit.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.regulation_response_time_accuracy.label_tag }}</strong>{{ asset_form.regulation_response_time_accuracy }}<br>{{ asset_form.regulation_response_time_accuracy.errors }}</div>
-    <small class="text-muted">{{ asset_form.regulation_response_time_accuracy.help_text }}</small><br><br>
-
-    {# -- upward / downward / min step / env / dims / weight / form factor (unchanged) -- #}
-    <h5>Maximum upward regulation</h5>
-    <div class="row mb-3">
-      <div class="col">{{ asset_form.power_generation.label_tag }}{{ asset_form.power_generation }}{{ asset_form.power_generation.errors }}</div>
-      <div class="col">{{ asset_form.power_generation_unit.label_tag }}{{ asset_form.power_generation_unit }}{{ asset_form.power_generation_unit.errors }}</div>
-    </div>
-    <div class="row mb-3">
-      <div class="col">{{ asset_form.duration.label_tag }}{{ asset_form.duration }}{{ asset_form.duration.errors }}</div>
-      <div class="col">{{ asset_form.duration_unit.label_tag }}{{ asset_form.duration_unit }}{{ asset_form.duration_unit.errors }}</div>
-    </div>
-    {{ asset_form.maximum_upward_regulation }}<small class="form-text text-muted">{{ asset_form.maximum_upward_regulation.help_text }}</small><br><br>
-
-    <h5>Maximum downward regulation</h5>
-    <div class="row mb-3">
-      <div class="col">{{ asset_form.load_reduction.label_tag }}{{ asset_form.load_reduction }}{{ asset_form.load_reduction.errors }}</div>
-      <div class="col">{{ asset_form.load_reduction_unit.label_tag }}{{ asset_form.load_reduction_unit }}{{ asset_form.load_reduction_unit.errors }}</div>
-    </div>
-    <div class="row mb-3">
-      <div class="col">{{ asset_form.down_duration.label_tag }}{{ asset_form.down_duration }}{{ asset_form.down_duration.errors }}</div>
-      <div class="col">{{ asset_form.down_duration_unit.label_tag }}{{ asset_form.down_duration_unit }}{{ asset_form.down_duration_unit.errors }}</div>
-    </div>
-    {{ asset_form.maximum_downward_regulation }}<small class="form-text text-muted">{{ asset_form.maximum_downward_regulation.help_text }}</small><br><br>
-
-    <h5>Minimum regulation step</h5>
-    <div class="row mb-3">
-      <div class="col">{{ asset_form.min_step.label_tag }}{{ asset_form.min_step }}{{ asset_form.min_step.errors }}</div>
-      <div class="col">{{ asset_form.min_step_unit.label_tag }}{{ asset_form.min_step_unit }}{{ asset_form.min_step_unit.errors }}</div>
-    </div>
-    <div class="row mb-3">
-      <div class="col">{{ asset_form.min_duration.label_tag }}{{ asset_form.min_duration }}{{ asset_form.min_duration.errors }}</div>
-      <div class="col">{{ asset_form.min_duration_unit.label_tag }}{{ asset_form.min_duration_unit }}{{ asset_form.min_duration_unit.errors }}</div>
-    </div>
-    {{ asset_form.minimum_regulation_step }}<small class="form-text text-muted">{{ asset_form.minimum_regulation_step.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.ip_rating.label_tag }}</strong>{{ asset_form.ip_rating }}<br>{{ asset_form.ip_rating.errors }}</div>
-    <small class="text-muted">{{ asset_form.ip_rating.help_text }}</small><br><br>
-
-    <h5>Storage temperature</h5>
-    <div class="row mb-3">
-        <div class="col">{{ asset_form.storage_temp_min.label_tag }}{{ asset_form.storage_temp_min }}<br>{{ asset_form.storage_temp_min.errors }}</div>
-        <div class="col">{{ asset_form.storage_temp_max.label_tag }}{{ asset_form.storage_temp_max }}<br>{{ asset_form.storage_temp_max.errors }}</div>
-        <div class="col">{{ asset_form.storage_temp_unit.label_tag }}{{ asset_form.storage_temp_unit }}<br>{{ asset_form.storage_temp_unit.errors }}</div>
-    </div>
-    {{ asset_form.storage_temperature }}<small class="form-text text-muted">{{ asset_form.storage_temperature.help_text }}</small><br><br>
-
-    <h5>Operating temperature range</h5>
-    <div class="row mb-3">
-        <div class="col">{{ asset_form.op_temp_min.label_tag }}{{ asset_form.op_temp_min }}<br>{{ asset_form.op_temp_min.errors }}</div>
-        <div class="col">{{ asset_form.op_temp_max.label_tag }}{{ asset_form.op_temp_max }}<br>{{ asset_form.op_temp_max.errors }}</div>
-        <div class="col">{{ asset_form.op_temp_unit.label_tag }}{{ asset_form.op_temp_unit }}<br>{{ asset_form.op_temp_unit.errors }}</div>
-    </div>
-    {{ asset_form.operating_temperature_range }}<small class="form-text text-muted">{{ asset_form.operating_temperature_range.help_text }}</small><br><br>
-
-    <h5>Relative humidity range</h5>
-    <div class="row mb-3">
-        <div class="col">{{ asset_form.rh_min.label_tag }}{{ asset_form.rh_min }}<br>{{ asset_form.rh_min.errors }}</div>
-        <div class="col">{{ asset_form.rh_max.label_tag }}{{ asset_form.rh_max }}<br>{{ asset_form.rh_max.errors }}</div>
-        <div class="col">{{ asset_form.rh_unit.label_tag }}{{ asset_form.rh_unit }}<br>{{ asset_form.rh_unit.errors }}</div>
-    </div>
-    {{ asset_form.relative_humidity_range }}<small class="form-text text-muted">{{ asset_form.relative_humidity_range.help_text }}</small><br><br>
-
-    <h5>Dimensions</h5>
-    <div class="row mb-3">
-        <div class="col">{{ asset_form.dim_length.label_tag }}{{ asset_form.dim_length }}<br>{{ asset_form.dim_length.errors }}</div>
-        <div class="col">{{ asset_form.dim_width.label_tag }}{{ asset_form.dim_width }}<br>{{ asset_form.dim_width.errors }}</div>
-        <div class="col">{{ asset_form.dim_height.label_tag }}{{ asset_form.dim_height }}<br>{{ asset_form.dim_height.errors }}</div>
-    </div>
-    {{ asset_form.dimensions }}<small class="form-text text-muted">{{ asset_form.dimensions.help_text }}</small><br><br>
-
-    <h5>Weight</h5>
-    <div class="row mb-3">
-        <div class="col">{{ asset_form.wt_value.label_tag }}{{ asset_form.wt_value }}<br>{{ asset_form.wt_value.errors }}</div>
-        <div class="col">{{ asset_form.wt_unit.label_tag }}{{ asset_form.wt_unit }}<br>{{ asset_form.wt_unit.errors }}</div>
-    </div>
-    {{ asset_form.weight }}<small class="form-text text-muted">{{ asset_form.weight.help_text }}</small><br><br>
-
-    <div class="mb-3"><strong>{{ asset_form.form_factor.label_tag }}</strong>{{ asset_form.form_factor }}<br>{{ asset_form.form_factor.errors }}</div>
-    <small class="text-muted">{{ asset_form.form_factor.help_text }}</small><br><br>
 
     {# =========================
        DYNAMIC SUB-FORM SECTION
@@ -488,6 +345,156 @@
       <h4>Energy Meter Specs</h4>
       {{ meter_form.as_p }}
     </div>
+
+
+
+
+
+
+    <div class="mb-3"><strong>{{ asset_form.description.label_tag }}</strong><br>{{ asset_form.description }}<br>{{ asset_form.description.errors }}</div>
+    <small class="text-muted">{{ asset_form.description.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.commissioning_date.label_tag }}</strong>{{ asset_form.commissioning_date }}<br>{{ asset_form.commissioning_date.errors }}</div>
+    <small class="text-muted">{{ asset_form.commissioning_date.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.compliance_checklist.label_tag }}</strong><br>{{ asset_form.compliance_checklist }}<br>{{ asset_form.compliance_checklist.errors }}</div>
+    <small class="text-muted">{{ asset_form.compliance_checklist.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.release_year.label_tag }}</strong>{{ asset_form.release_year }}<br>{{ asset_form.release_year.errors }}</div>
+    <small class="text-muted">{{ asset_form.release_year.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.flexibility.label_tag }}</strong>{{ asset_form.flexibility }}<br>{{ asset_form.flexibility.errors }}</div>
+    <small class="text-muted">{{ asset_form.flexibility.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.communication.label_tag }}</strong>{{ asset_form.communication }}<br>{{ asset_form.communication.errors }}</div>
+    <small class="text-muted">{{ asset_form.communication.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.communication_protocol.label_tag }}</strong>{{ asset_form.communication_protocol }}<br>{{ asset_form.communication_protocol.errors }}</div>
+    <small class="text-muted">{{ asset_form.communication_protocol.help_text }}</small><br><br>
+
+    <div id="block-modbus-map" class="d-none" style="display:none">
+        <div class="row mb-3"><strong>{{ asset_form.modbus_register_map.label_tag }}</strong><br>{{ asset_form.modbus_register_map }}<br>{{ asset_form.modbus_register_map.errors }}</div>
+        <small class="text-muted">{{ asset_form.modbus_register_map.help_text }}</small><br><br>
+    </div>
+    {{ comproto_meta|json_script:"comproto-data" }}
+
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <strong><label for="id_devices_attribute" class="form-label"> Select attributes:</label></strong>
+            {{ asset_form.devices_attribute }}<br>
+            <button type="button" id="add-attribute" class="btn btn-outline-secondary btn-sm ms-2">Add Attribute</button>
+            {{ asset_form.devices_attribute.errors }}
+        </div>
+        <div class="col-md-4">
+            <strong>{{ asset_form.dacq_attributes.label_tag }}</strong><br>
+            {{ asset_form.dacq_attributes }}<br>{{ asset_form.dacq_attributes.errors }}<br>
+        </div>
+        <small class="text-muted">{{ asset_form.dacq_attributes.help_text }}</small><br><br>
+    </div>
+
+
+
+    <div class="mb-3"><strong>{{ asset_form.dacq_actuation.label_tag }}</strong><br>{{ asset_form.dacq_actuation }}<br>{{ asset_form.dacq_actuation.errors }}</div>
+    <small class="text-muted">{{ asset_form.dacq_actuation.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.control_actuation.label_tag }}</strong><br>{{ asset_form.control_actuation }}<br>{{ asset_form.control_actuation.errors }}</div>
+    <small class="text-muted">{{ asset_form.control_actuation.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.regulation.label_tag }}</strong>{{ asset_form.regulation }}<br>{{ asset_form.regulation.errors }}</div>
+    <small class="text-muted">{{ asset_form.regulation.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.regulation_response_time_upward.label_tag }}</strong>{{ asset_form.regulation_response_time_upward }}<br>{{ asset_form.regulation_response_time_upward.errors }}</div>
+    <small class="text-muted">{{ asset_form.regulation_response_time_upward.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.regulation_response_time_downward.label_tag }}</strong>{{ asset_form.regulation_response_time_downward }}<br>{{ asset_form.regulation_response_time_downward.errors }}</div>
+    <small class="text-muted">{{ asset_form.regulation_response_time_downward.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.regulation_response_time_unit.label_tag }}</strong>{{ asset_form.regulation_response_time_unit }}<br>{{ asset_form.regulation_response_time_unit.errors }}</div>
+    <small class="text-muted">{{ asset_form.regulation_response_time_unit.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.regulation_response_time_accuracy.label_tag }}</strong>{{ asset_form.regulation_response_time_accuracy }}<br>{{ asset_form.regulation_response_time_accuracy.errors }}</div>
+    <small class="text-muted">{{ asset_form.regulation_response_time_accuracy.help_text }}</small><br><br>
+
+    {# -- upward / downward / min step / env / dims / weight / form factor (unchanged) -- #}
+    <h5>Maximum upward regulation</h5>
+    <div class="row mb-3">
+      <div class="col">{{ asset_form.power_generation.label_tag }}{{ asset_form.power_generation }}{{ asset_form.power_generation.errors }}</div>
+      <div class="col">{{ asset_form.power_generation_unit.label_tag }}{{ asset_form.power_generation_unit }}{{ asset_form.power_generation_unit.errors }}</div>
+    </div>
+    <div class="row mb-3">
+      <div class="col">{{ asset_form.duration.label_tag }}{{ asset_form.duration }}{{ asset_form.duration.errors }}</div>
+      <div class="col">{{ asset_form.duration_unit.label_tag }}{{ asset_form.duration_unit }}{{ asset_form.duration_unit.errors }}</div>
+    </div>
+    {{ asset_form.maximum_upward_regulation }}<small class="form-text text-muted">{{ asset_form.maximum_upward_regulation.help_text }}</small><br><br>
+
+    <h5>Maximum downward regulation</h5>
+    <div class="row mb-3">
+      <div class="col">{{ asset_form.load_reduction.label_tag }}{{ asset_form.load_reduction }}{{ asset_form.load_reduction.errors }}</div>
+      <div class="col">{{ asset_form.load_reduction_unit.label_tag }}{{ asset_form.load_reduction_unit }}{{ asset_form.load_reduction_unit.errors }}</div>
+    </div>
+    <div class="row mb-3">
+      <div class="col">{{ asset_form.down_duration.label_tag }}{{ asset_form.down_duration }}{{ asset_form.down_duration.errors }}</div>
+      <div class="col">{{ asset_form.down_duration_unit.label_tag }}{{ asset_form.down_duration_unit }}{{ asset_form.down_duration_unit.errors }}</div>
+    </div>
+    {{ asset_form.maximum_downward_regulation }}<small class="form-text text-muted">{{ asset_form.maximum_downward_regulation.help_text }}</small><br><br>
+
+    <h5>Minimum regulation step</h5>
+    <div class="row mb-3">
+      <div class="col">{{ asset_form.min_step.label_tag }}{{ asset_form.min_step }}{{ asset_form.min_step.errors }}</div>
+      <div class="col">{{ asset_form.min_step_unit.label_tag }}{{ asset_form.min_step_unit }}{{ asset_form.min_step_unit.errors }}</div>
+    </div>
+    <div class="row mb-3">
+      <div class="col">{{ asset_form.min_duration.label_tag }}{{ asset_form.min_duration }}{{ asset_form.min_duration.errors }}</div>
+      <div class="col">{{ asset_form.min_duration_unit.label_tag }}{{ asset_form.min_duration_unit }}{{ asset_form.min_duration_unit.errors }}</div>
+    </div>
+    {{ asset_form.minimum_regulation_step }}<small class="form-text text-muted">{{ asset_form.minimum_regulation_step.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.ip_rating.label_tag }}</strong>{{ asset_form.ip_rating }}<br>{{ asset_form.ip_rating.errors }}</div>
+    <small class="text-muted">{{ asset_form.ip_rating.help_text }}</small><br><br>
+
+    <h5>Storage temperature</h5>
+    <div class="row mb-3">
+        <div class="col">{{ asset_form.storage_temp_min.label_tag }}{{ asset_form.storage_temp_min }}<br>{{ asset_form.storage_temp_min.errors }}</div>
+        <div class="col">{{ asset_form.storage_temp_max.label_tag }}{{ asset_form.storage_temp_max }}<br>{{ asset_form.storage_temp_max.errors }}</div>
+        <div class="col">{{ asset_form.storage_temp_unit.label_tag }}{{ asset_form.storage_temp_unit }}<br>{{ asset_form.storage_temp_unit.errors }}</div>
+    </div>
+    {{ asset_form.storage_temperature }}<small class="form-text text-muted">{{ asset_form.storage_temperature.help_text }}</small><br><br>
+
+    <h5>Operating temperature range</h5>
+    <div class="row mb-3">
+        <div class="col">{{ asset_form.op_temp_min.label_tag }}{{ asset_form.op_temp_min }}<br>{{ asset_form.op_temp_min.errors }}</div>
+        <div class="col">{{ asset_form.op_temp_max.label_tag }}{{ asset_form.op_temp_max }}<br>{{ asset_form.op_temp_max.errors }}</div>
+        <div class="col">{{ asset_form.op_temp_unit.label_tag }}{{ asset_form.op_temp_unit }}<br>{{ asset_form.op_temp_unit.errors }}</div>
+    </div>
+    {{ asset_form.operating_temperature_range }}<small class="form-text text-muted">{{ asset_form.operating_temperature_range.help_text }}</small><br><br>
+
+    <h5>Relative humidity range</h5>
+    <div class="row mb-3">
+        <div class="col">{{ asset_form.rh_min.label_tag }}{{ asset_form.rh_min }}<br>{{ asset_form.rh_min.errors }}</div>
+        <div class="col">{{ asset_form.rh_max.label_tag }}{{ asset_form.rh_max }}<br>{{ asset_form.rh_max.errors }}</div>
+        <div class="col">{{ asset_form.rh_unit.label_tag }}{{ asset_form.rh_unit }}<br>{{ asset_form.rh_unit.errors }}</div>
+    </div>
+    {{ asset_form.relative_humidity_range }}<small class="form-text text-muted">{{ asset_form.relative_humidity_range.help_text }}</small><br><br>
+
+    <h5>Dimensions</h5>
+    <div class="row mb-3">
+        <div class="col">{{ asset_form.dim_length.label_tag }}{{ asset_form.dim_length }}<br>{{ asset_form.dim_length.errors }}</div>
+        <div class="col">{{ asset_form.dim_width.label_tag }}{{ asset_form.dim_width }}<br>{{ asset_form.dim_width.errors }}</div>
+        <div class="col">{{ asset_form.dim_height.label_tag }}{{ asset_form.dim_height }}<br>{{ asset_form.dim_height.errors }}</div>
+    </div>
+    {{ asset_form.dimensions }}<small class="form-text text-muted">{{ asset_form.dimensions.help_text }}</small><br><br>
+
+    <h5>Weight</h5>
+    <div class="row mb-3">
+        <div class="col">{{ asset_form.wt_value.label_tag }}{{ asset_form.wt_value }}<br>{{ asset_form.wt_value.errors }}</div>
+        <div class="col">{{ asset_form.wt_unit.label_tag }}{{ asset_form.wt_unit }}<br>{{ asset_form.wt_unit.errors }}</div>
+    </div>
+    {{ asset_form.weight }}<small class="form-text text-muted">{{ asset_form.weight.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.form_factor.label_tag }}</strong>{{ asset_form.form_factor }}<br>{{ asset_form.form_factor.errors }}</div>
+    <small class="text-muted">{{ asset_form.form_factor.help_text }}</small><br><br>
+
 
     <button type="submit" class="btn btn-primary">Submit</button>
     <a href="{% url 'dashboard' %}" class="btn btn-secondary ms-2">Cancel</a>

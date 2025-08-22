@@ -14,80 +14,7 @@
       <tr><th>Serial Number</th>        <td>{{ asset.serial_number|default:"—" }}</td></tr>
       <tr><th>Deployment</th>           <td>{{ asset.deployment.primary_environment|default:"—" }}</td></tr>
       <tr><th>Classification</th>       <td>{{ asset.classification.type|default:"—" }}</td></tr>
-      <tr><th>Description</th>          <td>{{ asset.description|default:"—" }}</td></tr>
-      <tr><th>Commissioning Date</th>   <td>{{ asset.commissioning_date|date:"Y-m-d"|default:"—" }}</td></tr>
-      <tr><th>Compliance Checklist</th> <td><pre>{{ asset.compliance_checklist|default:"—" }}</pre></td></tr>
-      <tr><th>Release Year</th>         <td>{{ asset.release_year|default:"—" }}</td></tr>
-      <tr><th>Flexibility</th>          <td>{{ asset.flexibility.type|default:"—" }}</td></tr>
-      <tr><th>Communication</th>        <td><pre>{{ asset.communication.type|default:"—" }}</pre></td></tr>
-      <tr><th>Communication Protocol</th> <td><pre>{{ asset.communication_protocol.type|default:"—" }}</pre></td></tr>
-      <tr><th>Data Acquisition Actuation</th> <td>{{ asset.dacq_actuation|default:"—" }}</td></tr>
-      <tr><th>Attributes</th>           <td>{{ asset.devices_attribute.attribute|default:"—" }}</td></tr>
-      <tr><th>Monitored Attributes</th> <td><pre>{{ asset.dacq_attributes|default:"—" }}</pre></td></tr>
-      <tr><th>Control Actuation</th>    <td>{{ asset.control_actuation|default:"—" }}</td></tr>
-      <tr><th>Regulation</th>           <td>{{ asset.regulation.type|default:"—" }}</td></tr>
-      <tr>
-        <th>Regulation Response Time (Upward)</th>
-        <td>
-          {{ asset.regulation_response_time_upward|default:"—" }}
-          {% if asset.regulation_response_time_unit %}{{ asset.regulation_response_time_unit.symbol }}{% endif %}
-        </td>
-      </tr>
-      <tr>
-        <th>Regulation Response Time (Downward)</th>
-        <td>
-          {{ asset.regulation_response_time_downward|default:"—" }}
-          {% if asset.regulation_response_time_unit %}{{ asset.regulation_response_time_unit.symbol }}{% endif %}
-        </td>
-      </tr>
-      <tr>
-        <th>Response Time Accuracy (%)</th>
-        <td>{{ asset.regulation_response_time_accuracy|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Maximum Upward Regulation</th>
-        <td><pre>{{ asset.maximum_upward_regulation|default:"—" }}</pre></td>
-      </tr>
-      <tr>
-        <th>Maximum Downward Regulation</th>
-        <td><pre>{{ asset.maximum_downward_regulation|default:"—" }}</pre></td>
-      </tr>
-      <tr>
-        <th>Minimum Regulation Step</th>
-        <td><pre>{{ asset.minimum_regulation_step|default:"—" }}</pre></td>
-      </tr>
-      <tr>
-        <th>IP Rating</th>
-        <td>{{ asset.ip_rating|default:"—" }}</td>
-      </tr>
-      <tr>
-        <th>Storage Temperature</th>
-        <td><pre>{{ asset.storage_temperature|default:"—" }}</pre></td>
-      </tr>
-      <tr>
-        <th>Operating Temperature Range</th>
-        <td><pre>{{ asset.operating_temperature_range|default:"—" }}</pre></td>
-      </tr>
-      <tr>
-        <th>Relative Humidity Range</th>
-        <td><pre>{{ asset.relative_humidity_range|default:"—" }}</pre></td>
-      </tr>
-      <tr>
-        <th>Dimensions</th>
-        <td><pre>{{ asset.dimensions|default:"—" }}</pre></td>
-      </tr>
-      <tr>
-        <th>Weight</th>
-        <td><pre>{{ asset.weight|default:"—" }}</pre></td>
-      </tr>
-      <tr>
-        <th>Form Factor</th>
-        <td>{{ asset.form_factor|default:"—" }}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  {# ELECTRICAL SPECS #}
+        {# ELECTRICAL SPECS #}
   {% if asset.elec_specs %}
     <h3>Electrical Specs</h3>
     <table>
@@ -207,6 +134,138 @@
     </tbody>
   </table>
 {% endif %}
+{# PV MODULE SPECS #}
+{% if asset.pv_module_specs %}
+  <h3>PV Module Specs</h3>
+  <table>
+    <tbody>
+      <tr><th>Application</th>     <td>{{ asset.pv_module_specs.application|default:"—" }}</td></tr>
+      <tr><th>Module Type</th>    <td>{{ asset.pv_module_specs.module_type|default:"—" }}</td></tr>
+      <tr><th>Module Name</th>    <td>{{ asset.pv_module_specs.module_name|default:"—" }}</td></tr>
+      <tr><th>Voc (V)</th>        <td>{{ asset.pv_module_specs.voc|default:"—" }}</td></tr>
+      <tr><th>Isc (A)</th>        <td>{{ asset.pv_module_specs.isc|default:"—" }}</td></tr>
+      <tr><th>Vmpp (V)</th>       <td>{{ asset.pv_module_specs.vmpp|default:"—" }}</td></tr>
+      <tr><th>Impp (A)</th>       <td>{{ asset.pv_module_specs.impp|default:"—" }}</td></tr>
+      <tr><th>Temp coeff Pmax</th><td>{{ asset.pv_module_specs.temp_coef_pmax|default:"—" }}</td></tr>
+      <tr><th>Temp coeff Voc</th> <td>{{ asset.pv_module_specs.temp_coef_voc|default:"—" }}</td></tr>
+      <tr><th>Temp coeff Isc</th> <td>{{ asset.pv_module_specs.temp_coef_isc|default:"—" }}</td></tr>
+      <tr><th>NOCT (°C)</th>      <td>{{ asset.pv_module_specs.noct|default:"—" }}</td></tr>
+      <tr><th>Quantity</th>       <td>{{ asset.pv_module_specs.quantity|default:"—" }}</td></tr>
+    </tbody>
+  </table>
+{% endif %}
+
+{# SCC SPECS #}
+{% if asset.scc_specs %}
+  <h3>SCC Specs</h3>
+  <table>
+    <tbody>
+      <tr><th>Model</th>           <td>{{ asset.scc_specs.model_name|default:"—" }}</td></tr>
+      <tr><th>Input Voltage (V)</th><td>{{ asset.scc_specs.voltage_input|default:"—" }}</td></tr>
+      <tr><th>Input Current (A)</th><td>{{ asset.scc_specs.current_input|default:"—" }}</td></tr>
+      <tr><th>Output Voltage (V)</th><td>{{ asset.scc_specs.voltage_output|default:"—" }}</td></tr>
+      <tr><th>Output Current (A)</th><td>{{ asset.scc_specs.current_output|default:"—" }}</td></tr>
+    </tbody>
+  </table>
+{% endif %}
+
+{# ENERGY METER SPECS #}
+{% if asset.meter_specs %}
+  <h3>Energy Meter Specs</h3>
+  <table>
+    <tbody>
+      <tr><th>Phase Configuration</th>   <td>{{ asset.meter_specs.phase_configuration|default:"—" }}</td></tr>
+      <tr><th>Frequency (Hz)</th>        <td>{{ asset.meter_specs.frequency|default:"—" }}</td></tr>
+      <tr><th>Nominal Voltage (V)</th>   <td>{{ asset.meter_specs.voltage_nominal|default:"—" }}</td></tr>
+      <tr><th>Voltage Tolerance (%)</th> <td>{{ asset.meter_specs.voltage_tolerance_df|default:"—" }}</td></tr>
+      <tr><th>Current (Nom/Min/Max)</th>
+          <td>{{ asset.meter_specs.current_nominal_df|default:"—" }} /
+              {{ asset.meter_specs.current_min_df|default:"—" }} /
+              {{ asset.meter_specs.current_max_df|default:"—" }}</td></tr>
+      <tr><th>Standby Power (W)</th>     <td>{{ asset.meter_specs.standby_power_consumption|default:"—" }}</td></tr>
+      <tr><th>Power Cons. Nominal</th>   <td>{{ asset.meter_specs.power_consumption_nominal_df|default:"—" }}</td></tr>
+      <tr><th>Units</th>                 <td>{{ asset.meter_specs.power_consumption_units.symbol|default:"—" }}</td></tr>
+      <tr><th>Accuracy Class</th>        <td>{{ asset.meter_specs.accuracy_class|default:"—" }}</td></tr>
+    </tbody>
+  </table>
+{% endif %}
+
+      <tr><th>Description</th>          <td>{{ asset.description|default:"—" }}</td></tr>
+      <tr><th>Commissioning Date</th>   <td>{{ asset.commissioning_date|date:"Y-m-d"|default:"—" }}</td></tr>
+      <tr><th>Compliance Checklist</th> <td><pre>{{ asset.compliance_checklist|default:"—" }}</pre></td></tr>
+      <tr><th>Release Year</th>         <td>{{ asset.release_year|default:"—" }}</td></tr>
+      <tr><th>Flexibility</th>          <td>{{ asset.flexibility.type|default:"—" }}</td></tr>
+      <tr><th>Communication</th>        <td><pre>{{ asset.communication.type|default:"—" }}</pre></td></tr>
+      <tr><th>Communication Protocol</th> <td><pre>{{ asset.communication_protocol.type|default:"—" }}</pre></td></tr>
+      <tr><th>Modbus Register Map</th> <td><pre>{{ asset.modbus_register_map|default:"—" }}</pre></td></tr>
+
+      <tr><th>Data Acquisition Actuation</th> <td>{{ asset.dacq_actuation|default:"—" }}</td></tr>
+      <tr><th>Attributes</th>           <td>{{ asset.devices_attribute.attribute|default:"—" }}</td></tr>
+      <tr><th>Monitored Attributes</th> <td><pre>{{ asset.dacq_attributes|default:"—" }}</pre></td></tr>
+      <tr><th>Control Actuation</th>    <td>{{ asset.control_actuation|default:"—" }}</td></tr>
+      <tr><th>Regulation</th>           <td>{{ asset.regulation.type|default:"—" }}</td></tr>
+      <tr>
+        <th>Regulation Response Time (Upward)</th>
+        <td>
+          {{ asset.regulation_response_time_upward|default:"—" }}
+          {% if asset.regulation_response_time_unit %}{{ asset.regulation_response_time_unit.symbol }}{% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Regulation Response Time (Downward)</th>
+        <td>
+          {{ asset.regulation_response_time_downward|default:"—" }}
+          {% if asset.regulation_response_time_unit %}{{ asset.regulation_response_time_unit.symbol }}{% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Response Time Accuracy (%)</th>
+        <td>{{ asset.regulation_response_time_accuracy|default:"—" }}</td>
+      </tr>
+      <tr>
+        <th>Maximum Upward Regulation</th>
+        <td><pre>{{ asset.maximum_upward_regulation|default:"—" }}</pre></td>
+      </tr>
+      <tr>
+        <th>Maximum Downward Regulation</th>
+        <td><pre>{{ asset.maximum_downward_regulation|default:"—" }}</pre></td>
+      </tr>
+      <tr>
+        <th>Minimum Regulation Step</th>
+        <td><pre>{{ asset.minimum_regulation_step|default:"—" }}</pre></td>
+      </tr>
+      <tr>
+        <th>IP Rating</th>
+        <td>{{ asset.ip_rating|default:"—" }}</td>
+      </tr>
+      <tr>
+        <th>Storage Temperature</th>
+        <td><pre>{{ asset.storage_temperature|default:"—" }}</pre></td>
+      </tr>
+      <tr>
+        <th>Operating Temperature Range</th>
+        <td><pre>{{ asset.operating_temperature_range|default:"—" }}</pre></td>
+      </tr>
+      <tr>
+        <th>Relative Humidity Range</th>
+        <td><pre>{{ asset.relative_humidity_range|default:"—" }}</pre></td>
+      </tr>
+      <tr>
+        <th>Dimensions</th>
+        <td><pre>{{ asset.dimensions|default:"—" }}</pre></td>
+      </tr>
+      <tr>
+        <th>Weight</th>
+        <td><pre>{{ asset.weight|default:"—" }}</pre></td>
+      </tr>
+      <tr>
+        <th>Form Factor</th>
+        <td>{{ asset.form_factor|default:"—" }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+
 
 
   <p>

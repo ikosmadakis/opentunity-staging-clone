@@ -1,798 +1,271 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-  <h2>Edit Device: {{ asset.model_name }}</h2>
+<h2>Edit Device #{{ asset.id }}: {{ asset.model_name }}</h2>
+{{ asset_form.non_field_errors }}
+<form method="post" action="{% url 'asset_edit' asset.id %}">
+  {% csrf_token %}
 
-  <form method="post" action="{% url 'asset_edit' asset.id %}">
-    {% csrf_token %}
-
-    {% if asset_form.non_field_errors %}
-      <div class="alert alert-danger">
-        {{ asset_form.non_field_errors }}
-      </div>
-    {% endif %}
-
-    {# --- ASSET FORM FIELDS --- #}
-
-    <div class="mb-3">
-        <strong>{{ asset_form.gtin.label_tag }}</strong>
-        {{ asset_form.gtin }}<br>
-        {{ asset_form.gtin.errors }}
-        <small class="text-muted">{{ asset_form.gtin.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.manufacturer.label_tag }}</strong>
-        {{ asset_form.manufacturer }}<br>
-        {{ asset_form.manufacturer.errors }}
-        <small class="text-muted">{{ asset_form.manufacturer.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.model_name.label_tag }}</strong>
-        {{ asset_form.model_name }}<br>
-        {{ asset_form.model_name.errors }}
-        <small class="text-muted">{{ asset_form.model_name.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.batch_name.label_tag }}</strong>
-        {{ asset_form.batch_name }}<br>
-        {{ asset_form.batch_name.errors }}
-        <small class="text-muted">{{ asset_form.batch_name.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.serial_number.label_tag }}</strong>
-        {{ asset_form.serial_number }}<br>
-        {{ asset_form.serial_number.errors }}
-        <small class="text-muted">{{ asset_form.serial_number.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.deployment.label_tag }}</strong>
-        {{ asset_form.deployment }}<br>
-        {{ asset_form.deployment.errors }}
-        <small class="text-muted">{{ asset_form.deployment.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.classification.label_tag }}</strong>
-        {{ asset_form.classification }}<br>
-        {{ asset_form.classification.errors }}
-        <small class="text-muted">{{ asset_form.classification.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.description.label_tag }}</strong>
-        {{ asset_form.description }}<br>
-        {{ asset_form.description.errors }}
-        <small class="text-muted">{{ asset_form.description.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.commissioning_date.label_tag }}</strong>
-        {{ asset_form.commissioning_date }}<br>
-        {{ asset_form.commissioning_date.errors }}
-        <small class="text-muted">{{ asset_form.commissioning_date.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.compliance_checklist.label_tag }}</strong>
-        {{ asset_form.compliance_checklist }}<br>
-        {{ asset_form.compliance_checklist.errors }}
-        <small class="text-muted">{{ asset_form.compliance_checklist.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.release_year.label_tag }}</strong>
-        {{ asset_form.release_year }}<br>
-        {{ asset_form.release_year.errors }}
-        <small class="text-muted">{{ asset_form.release_year.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.flexibility.label_tag }}</strong>
-        {{ asset_form.flexibility }}<br>
-        {{ asset_form.flexibility.errors }}
-        <small class="text-muted">{{ asset_form.flexibility.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.communication.label_tag }}</strong>
-        {{ asset_form.communication }}<br>
-        {{ asset_form.communication.errors }}
-        <small class="text-muted">{{ asset_form.communication.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.communication_protocol.label_tag }}</strong>
-        {{ asset_form.communication_protocol }}<br>
-        {{ asset_form.communication_protocol.errors }}
-        <small class="text-muted">{{ asset_form.communication_protocol.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong><label for="id_devices_attribute" class="form-label">Attributes:</label></strong>
-        {{ asset_form.devices_attribute }}
-        {{ asset_form.devices_attribute.errors }}
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.dacq_attributes.label_tag }}</strong>
-        {{ asset_form.dacq_attributes }}<br>
-        {{ asset_form.dacq_attributes.errors }}
-        <small class="text-muted">{{ asset_form.dacq_attributes.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.dacq_actuation.label_tag }}</strong>
-        {{ asset_form.dacq_actuation }}<br>
-        {{ asset_form.dacq_actuation.errors }}
-        <small class="text-muted">{{ asset_form.dacq_actuation.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.control_actuation.label_tag }}</strong>
-        {{ asset_form.control_actuation }}<br>
-        {{ asset_form.control_actuation.errors }}
-        <small class="text-muted">{{ asset_form.control_actuation.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.regulation.label_tag }}</strong>
-        {{ asset_form.regulation }}<br>
-        {{ asset_form.regulation.errors }}
-        <small class="text-muted">{{ asset_form.regulation.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.regulation_response_time_upward.label_tag }}</strong>
-        {{ asset_form.regulation_response_time_upward }}<br>
-        {{ asset_form.regulation_response_time_upward.errors }}
-        <small class="text-muted">{{ asset_form.regulation_response_time_upward.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.regulation_response_time_downward.label_tag }}</strong>
-        {{ asset_form.regulation_response_time_downward }}<br>
-        {{ asset_form.regulation_response_time_downward.errors }}
-        <small class="text-muted">{{ asset_form.regulation_response_time_downward.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.regulation_response_time_unit.label_tag }}</strong>
-        {{ asset_form.regulation_response_time_unit }}<br>
-        {{ asset_form.regulation_response_time_unit.errors }}
-        <small class="text-muted">{{ asset_form.regulation_response_time_unit.help_text }}</small>
-    </div>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.regulation_response_time_accuracy.label_tag }}</strong>
-        {{ asset_form.regulation_response_time_accuracy }}<br>
-        {{ asset_form.regulation_response_time_accuracy.errors }}
-        <small class="text-muted">{{ asset_form.regulation_response_time_accuracy.help_text }}</small>
-    </div>
-
-    <h4>Maximum upward regulation</h4>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.power_generation.label_tag }}
-        {{ asset_form.power_generation }}
-        {{ asset_form.power_generation.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.power_generation_unit.label_tag }}
-        {{ asset_form.power_generation_unit }}
-        {{ asset_form.power_generation_unit.errors }}
-      </div>
-    </div>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.duration.label_tag }}
-        {{ asset_form.duration }}
-        {{ asset_form.duration.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.duration_unit.label_tag }}
-        {{ asset_form.duration_unit }}
-        {{ asset_form.duration_unit.errors }}
-      </div>
-    </div>
-    {{ asset_form.maximum_upward_regulation }}
-    <small class="form-text text-muted">{{ asset_form.maximum_upward_regulation.help_text }}</small>
-    <br><br>
-
-    <h4>Maximum downward regulation</h4>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.load_reduction.label_tag }}
-        {{ asset_form.load_reduction }}
-        {{ asset_form.load_reduction.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.load_reduction_unit.label_tag }}
-        {{ asset_form.load_reduction_unit }}
-        {{ asset_form.load_reduction_unit.errors }}
-      </div>
-    </div>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.down_duration.label_tag }}
-        {{ asset_form.down_duration }}
-        {{ asset_form.down_duration.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.down_duration_unit.label_tag }}
-        {{ asset_form.down_duration_unit }}
-        {{ asset_form.down_duration_unit.errors }}
-      </div>
-    </div>
-    {{ asset_form.maximum_downward_regulation }}
-    <small class="form-text text-muted">{{ asset_form.maximum_downward_regulation.help_text }}</small>
-    <br><br>
-
-    <h4>Minimum regulation step</h4>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.min_step.label_tag }}
-        {{ asset_form.min_step }}
-        {{ asset_form.min_step.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.min_step_unit.label_tag }}
-        {{ asset_form.min_step_unit }}
-        {{ asset_form.min_step_unit.errors }}
-      </div>
-    </div>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.min_duration.label_tag }}
-        {{ asset_form.min_duration }}
-        {{ asset_form.min_duration.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.min_duration_unit.label_tag }}
-        {{ asset_form.min_duration_unit }}
-        {{ asset_form.min_duration_unit.errors }}
-      </div>
-    </div>
-    {{ asset_form.minimum_regulation_step }}
-    <small class="form-text text-muted">{{ asset_form.minimum_regulation_step.help_text }}</small>
-    <br><br>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.ip_rating.label_tag }}</strong>
-        {{ asset_form.ip_rating }}<br>
-        {{ asset_form.ip_rating.errors }}
-        <small class="text-muted">{{ asset_form.ip_rating.help_text }}</small>
-    </div>
-
-    <h4>Storage temperature</h4>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.storage_temp_min.label_tag }}
-        {{ asset_form.storage_temp_min }}
-        {{ asset_form.storage_temp_min.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.storage_temp_max.label_tag }}
-        {{ asset_form.storage_temp_max }}
-        {{ asset_form.storage_temp_max.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.storage_temp_unit.label_tag }}
-        {{ asset_form.storage_temp_unit }}
-        {{ asset_form.storage_temp_unit.errors }}
-      </div>
-    </div>
-    {{ asset_form.storage_temperature }}
-    <small class="form-text text-muted">{{ asset_form.storage_temperature.help_text }}</small>
-    <br><br>
-
-    <h4>Operating temperature range</h4>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.op_temp_min.label_tag }}
-        {{ asset_form.op_temp_min }}
-        {{ asset_form.op_temp_min.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.op_temp_max.label_tag }}
-        {{ asset_form.op_temp_max }}
-        {{ asset_form.op_temp_max.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.op_temp_unit.label_tag }}
-        {{ asset_form.op_temp_unit }}
-        {{ asset_form.op_temp_unit.errors }}
-      </div>
-    </div>
-    {{ asset_form.operating_temperature_range }}
-    <small class="form-text text-muted">{{ asset_form.operating_temperature_range.help_text }}</small>
-    <br><br>
-
-    <h4>Relative humidity range</h4>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.rh_min.label_tag }}
-        {{ asset_form.rh_min }}
-        {{ asset_form.rh_min.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.rh_max.label_tag }}
-        {{ asset_form.rh_max }}
-        {{ asset_form.rh_max.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.rh_unit.label_tag }}
-        {{ asset_form.rh_unit }}
-        {{ asset_form.rh_unit.errors }}
-      </div>
-    </div>
-    {{ asset_form.relative_humidity_range }}
-    <small class="form-text text-muted">{{ asset_form.relative_humidity_range.help_text }}</small>
-    <br><br>
-
-    <h4>Dimensions</h4>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.dim_length.label_tag }}
-        {{ asset_form.dim_length }}
-        {{ asset_form.dim_length.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.dim_width.label_tag }}
-        {{ asset_form.dim_width }}
-        {{ asset_form.dim_width.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.dim_height.label_tag }}
-        {{ asset_form.dim_height }}
-        {{ asset_form.dim_height.errors }}
-      </div>
-    </div>
-    {{ asset_form.dimensions }}
-    <small class="form-text text-muted">{{ asset_form.dimensions.help_text }}</small>
-    <br><br>
-
-    <h4>Weight</h4>
-    <div class="row mb-3">
-      <div class="col">
-        {{ asset_form.wt_value.label_tag }}
-        {{ asset_form.wt_value }}
-        {{ asset_form.wt_value.errors }}
-      </div>
-      <div class="col">
-        {{ asset_form.wt_unit.label_tag }}
-        {{ asset_form.wt_unit }}
-        {{ asset_form.wt_unit.errors }}
-      </div>
-    </div>
-    {{ asset_form.weight }}
-    <small class="form-text text-muted">{{ asset_form.weight.help_text }}</small>
-    <br><br>
-
-    <div class="mb-3">
-        <strong>{{ asset_form.form_factor.label_tag }}</strong>
-        {{ asset_form.form_factor }}<br>
-        {{ asset_form.form_factor.errors }}
-        <small class="text-muted">{{ asset_form.form_factor.help_text }}</small>
-    </div>
-
-    {# =========================
-       DYNAMIC SUB-FORM SECTION
-       ========================= #}
-
-    <h3 id="subform-title">{{ subform_title }}</h3>
-
-    <div id="block-elec"
-     class="{% if 'elec' not in required_forms %}d-none{% endif %}"
-     {% if 'elec' not in required_forms %}style="display:none"{% endif %}>
-  <h3>Electrical Specs</h3>
-  {% if elec_form.non_field_errors %}
-    <div class="alert alert-danger">{{ elec_form.non_field_errors }}</div>
-  {% endif %}
-
-  <!-- Phase & Frequency -->
-  <div class="row mb-3">
-    <div class="col-md-6" data-elec="phase_configuration">
-      <strong>{{ elec_form.phase_configuration.label_tag }}</strong>
-      {{ elec_form.phase_configuration }}<br>{{ elec_form.phase_configuration.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.phase_configuration.help_text }}</small>
-    </div>
-    <div class="col-md-6" data-elec="frequency">
-      <strong>{{ elec_form.frequency.label_tag }}</strong>
-      {{ elec_form.frequency }}<br>{{ elec_form.frequency.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.frequency.help_text }}</small>
-    </div>
-  </div>
-
-  <!-- Nominal Voltage & Tolerance -->
-  <div class="row mb-3">
-    <div class="col-md-6" data-elec="voltage_nominal">
-      <strong>{{ elec_form.voltage_nominal.label_tag }}</strong>
-      {{ elec_form.voltage_nominal }}<br>{{ elec_form.voltage_nominal.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.voltage_nominal.help_text }}</small>
-    </div>
-    <div class="col-md-6" data-elec="voltage_tolerance_df">
-      <strong>{{ elec_form.voltage_tolerance_df.label_tag }}</strong>
-      {{ elec_form.voltage_tolerance_df }}<br>{{ elec_form.voltage_tolerance_df.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.voltage_tolerance_df.help_text }}</small>
-    </div>
-  </div>
-
-  <!-- Current fields -->
-  <div class="row mb-3">
-    <div class="col-md-4" data-elec="current_nominal_df">
-      <strong>{{ elec_form.current_nominal_df.label_tag }}</strong>
-      {{ elec_form.current_nominal_df }}<br>{{ elec_form.current_nominal_df.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.current_nominal_df.help_text }}</small>
-    </div>
-    <div class="col-md-4" data-elec="current_min_df">
-      <strong>{{ elec_form.current_min_df.label_tag }}</strong>
-      {{ elec_form.current_min_df }}<br>{{ elec_form.current_min_df.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.current_min_df.help_text }}</small>
-    </div>
-    <div class="col-md-4" data-elec="current_max_df">
-      <strong>{{ elec_form.current_max_df.label_tag }}</strong>
-      {{ elec_form.current_max_df }}<br>{{ elec_form.current_max_df.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.current_max_df.help_text }}</small>
-    </div>
-  </div>
-
-  <!-- Inrush & Standby -->
-  <div class="row mb-3">
-    <div class="col-md-6" data-elec="inrush_current_max_df">
-      <strong>{{ elec_form.inrush_current_max_df.label_tag }}</strong>
-      {{ elec_form.inrush_current_max_df }}<br>{{ elec_form.inrush_current_max_df.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.inrush_current_max_df.help_text }}</small>
-    </div>
-    <div class="col-md-6" data-elec="standby_power_consumption">
-      <strong>{{ elec_form.standby_power_consumption.label_tag }}</strong>
-      {{ elec_form.standby_power_consumption }}<br>{{ elec_form.standby_power_consumption.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.standby_power_consumption.help_text }}</small>
-    </div>
-  </div>
-
-  <!-- Power consumption -->
-  <div class="row mb-3">
-    <div class="col-md-6" data-elec="power_consumption_nominal_df">
-      <strong>{{ elec_form.power_consumption_nominal_df.label_tag }}</strong>
-      {{ elec_form.power_consumption_nominal_df }}<br>{{ elec_form.power_consumption_nominal_df.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.power_consumption_nominal_df.help_text }}</small>
-    </div>
-    <div class="col-md-6" data-elec="power_consumption_max_df">
-      <strong>{{ elec_form.power_consumption_max_df.label_tag }}</strong>
-      {{ elec_form.power_consumption_max_df }}<br>{{ elec_form.power_consumption_max_df.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.power_consumption_max_df.help_text }}</small>
-    </div>
-  </div>
-
-  <div class="row mb-3">
-    <div class="col-md-6" data-elec="power_consumption_units">
-      <strong>{{ elec_form.power_consumption_units.label_tag }}</strong>
-      {{ elec_form.power_consumption_units }}<br>{{ elec_form.power_consumption_units.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.power_consumption_units.help_text }}</small>
-    </div>
-  </div>
-
-  <!-- Voltage regulation -->
-  <div class="row mb-3" data-elec="voltage_regulation_uf">
-    <div class="col-md-6">
-      <strong>{{ elec_form.voltage_regulation_uf.label_tag }}</strong>
-      {{ elec_form.voltage_regulation_uf }}<br>{{ elec_form.voltage_regulation_uf.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.voltage_regulation_uf.help_text }}</small>
-    </div>
-  </div>
-
-  <!-- Voltage range (Min/Max/Accuracy) -->
-  <div class="mb-3" data-elec-group="voltage_range">
-    <h5>Output voltage range</h5>
-    <div class="row">
-      <div class="col-md-4">{{ elec_form.voltage_min.label_tag }}{{ elec_form.voltage_min }}{{ elec_form.voltage_min.errors }}</div>
-      <div class="col-md-4">{{ elec_form.voltage_max.label_tag }}{{ elec_form.voltage_max }}{{ elec_form.voltage_max.errors }}</div>
-      <div class="col-md-4">{{ elec_form.voltage_acc.label_tag }}{{ elec_form.voltage_acc }}{{ elec_form.voltage_acc.errors }}</div>
-    </div>
-    <small class="form-text text-muted">{{ elec_form.fields.voltage_range_uf.help_text }}</small>
-  </div>
-
-  <!-- Output current nominal -->
-  <div class="row mb-3" data-elec="output_current_nominal_uf">
-    <div class="col-md-6">
-      <strong>{{ elec_form.output_current_nominal_uf.label_tag }}</strong>
-      {{ elec_form.output_current_nominal_uf }}<br>{{ elec_form.output_current_nominal_uf.errors }}
-      <small class="form-text text-muted">{{ elec_form.fields.output_current_nominal_uf.help_text }}</small>
-    </div>
-  </div>
-
-  <!-- Output current max (value + duration) -->
-  <div class="mb-3" data-elec-group="output_current_max">
-    <h5>Output current max</h5>
-    <div class="row">
-      <div class="col-md-6">{{ elec_form.output_max_curr.label_tag }}{{ elec_form.output_max_curr }}{{ elec_form.output_max_curr.errors }}</div>
-      <div class="col-md-6">{{ elec_form.output_max_curr_duration.label_tag }}{{ elec_form.output_max_curr_duration }}{{ elec_form.output_max_curr_duration.errors }}</div>
-    </div>
-    <small class="form-text text-muted">{{ elec_form.fields.output_current_max_uf.help_text }}</small>
-  </div>
-
-  <!-- Rated/Max Power Output (genset style) -->
-  <div class="mb-3" data-elec-group="power_output_nominal">
-    <h5>Rated Power Output</h5>
-    <div class="row">
-      <div class="col">{{ elec_form.pow_nom_gen_kva.label_tag }}{{ elec_form.pow_nom_gen_kva }}{{ elec_form.pow_nom_gen_kva.errors }}</div>
-      <div class="col">{{ elec_form.pow_nom_gen_kw.label_tag }}{{ elec_form.pow_nom_gen_kw }}{{ elec_form.pow_nom_gen_kw.errors }}</div>
-      <div class="col">{{ elec_form.pow_nom_runtime_h.label_tag }}{{ elec_form.pow_nom_runtime_h }}{{ elec_form.pow_nom_runtime_h.errors }}</div>
-    </div>
-    <small class="form-text">{{ elec_form.power_output_nominal_uf.help_text }}</small>
-  </div>
-
-  <div class="mb-3" data-elec-group="power_output_max">
-    <h5>Max Power Output</h5>
-    <div class="row">
-      <div class="col">{{ elec_form.pow_max_gen_kva.label_tag }}{{ elec_form.pow_max_gen_kva }}{{ elec_form.pow_max_gen_kva.errors }}</div>
-      <div class="col">{{ elec_form.pow_max_gen_kw.label_tag }}{{ elec_form.pow_max_gen_kw }}{{ elec_form.pow_max_gen_kw.errors }}</div>
-      <div class="col">{{ elec_form.pow_max_runtime_h.label_tag }}{{ elec_form.pow_max_runtime_h }}{{ elec_form.pow_max_runtime_h.errors }}</div>
-    </div>
-    <small class="form-text">{{ elec_form.power_output_max_uf.help_text }}</small>
-  </div>
-
-  <!-- Power Factor -->
-  <div class="mb-3" data-elec="power_factor">
-    <strong>{{ elec_form.power_factor.label_tag }}</strong>
-    {{ elec_form.power_factor }}<br>{{ elec_form.power_factor.errors }}
-    <small class="form-text text-muted">{{ elec_form.fields.power_factor.help_text }}</small>
-  </div>
-
-  <!-- Hidden JSONs (keep rendered; JS disables when hidden) -->
-  {{ elec_form.voltage_range_uf }}
-  {{ elec_form.output_current_max_uf }}
-  {{ elec_form.power_output_nominal_uf }}
-  {{ elec_form.power_output_max_uf }}
-</div>
-
-
-    <div id="block-bess" class="{% if 'bess' not in required_forms %}d-none{% endif %}">
-      <h3>BESS Specs</h3>
-      {% if bess_form.non_field_errors %}
-        <div class="alert alert-danger">{{ bess_form.non_field_errors }}</div>
-      {% endif %}
-      {{ bess_form.as_p }}
-    </div>
-
-    <div id="block-inv"
-     class="{% if 'inv' not in required_forms %}d-none{% endif %}"
-     {% if 'inv' not in required_forms %}style="display:none"{% endif %}>
-  <h4>Inverter Specs</h4>
-  {% if inv_form.non_field_errors %}
-    <div class="alert alert-danger">{{ inv_form.non_field_errors }}</div>
-  {% endif %}
-
-  <div class="row mb-3">
-    <div class="col-md-4">
-      <strong>{{ inv_form.max_apparent_feed_in_power_kva.label_tag }}</strong>
-      {{ inv_form.max_apparent_feed_in_power_kva }}{{ inv_form.max_apparent_feed_in_power_kva.errors }}
-    </div>
-    <div class="col-md-4">
-      <strong>{{ inv_form.nominal_active_power_kw.label_tag }}</strong>
-      {{ inv_form.nominal_active_power_kw }}{{ inv_form.nominal_active_power_kw.errors }}
-    </div>
-    <div class="col-md-4">
-      <strong>{{ inv_form.peak_active_power_kw.label_tag }}</strong>
-      {{ inv_form.peak_active_power_kw }}{{ inv_form.peak_active_power_kw.errors }}
-    </div>
-  </div>
-
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <strong>{{ inv_form.phase_configuration.label_tag }}</strong>
-      {{ inv_form.phase_configuration }}{{ inv_form.phase_configuration.errors }}
-    </div>
-    <div class="col-md-6">
-      <strong>{{ inv_form.frequency.label_tag }}</strong>
-      {{ inv_form.frequency }}{{ inv_form.frequency.errors }}
-    </div>
+  {# ---------- MAIN ASSET FIELDS ---------- #}
+  <h3>General</h3>
+  <div class="mb-3">
+    <strong>{{ asset_form.gtin.label_tag }}</strong>
+    {{ asset_form.gtin }}<br>{{ asset_form.gtin.errors }}
+    <small class="text-muted">{{ asset_form.gtin.help_text }}</small>
   </div>
 
   <div class="mb-3">
-    <strong>{{ inv_form.standby_power_consumption.label_tag }}</strong>
-    {{ inv_form.standby_power_consumption }}{{ inv_form.standby_power_consumption.errors }}
-  </div>
-
-  <h5>Nominal AC (optional)</h5>
-  <div class="row mb-3">
-    <div class="col-md-4">
-      <strong>{{ inv_form.voltage_ac_l1_nom.label_tag }}</strong>
-      {{ inv_form.voltage_ac_l1_nom }}{{ inv_form.voltage_ac_l1_nom.errors }}
-    </div>
-    <div class="col-md-4">
-      <strong>{{ inv_form.voltage_ac_l2_nom.label_tag }}</strong>
-      {{ inv_form.voltage_ac_l2_nom }}{{ inv_form.voltage_ac_l2_nom.errors }}
-    </div>
-    <div class="col-md-4">
-      <strong>{{ inv_form.voltage_ac_l3_nom.label_tag }}</strong>
-      {{ inv_form.voltage_ac_l3_nom }}{{ inv_form.voltage_ac_l3_nom.errors }}
-    </div>
-  </div>
-  <div class="row mb-3">
-    <div class="col-md-4">
-      <strong>{{ inv_form.current_ac_l1_nom.label_tag }}</strong>
-      {{ inv_form.current_ac_l1_nom }}{{ inv_form.current_ac_l1_nom.errors }}
-    </div>
-    <div class="col-md-4">
-      <strong>{{ inv_form.current_ac_l2_nom.label_tag }}</strong>
-      {{ inv_form.current_ac_l2_nom }}{{ inv_form.current_ac_l2_nom.errors }}
-    </div>
-    <div class="col-md-4">
-      <strong>{{ inv_form.current_ac_l3_nom.label_tag }}</strong>
-      {{ inv_form.current_ac_l3_nom }}{{ inv_form.current_ac_l3_nom.errors }}
-    </div>
-  </div>
-
-  <h4>Nominal DC voltage range (V)</h4>
-<div class="row mb-3">
-  <div class="col">
-    {{ inv_form.inv_nom_dc_min.label_tag }} {{ inv_form.inv_nom_dc_min }}
-    {{ inv_form.inv_nom_dc_min.errors }}
-  </div>
-  <div class="col">
-    {{ inv_form.inv_nom_dc_max.label_tag }} {{ inv_form.inv_nom_dc_max }}
-    {{ inv_form.inv_nom_dc_max.errors }}
-  </div>
-</div>
-
-{{ inv_form.nom_dc_voltage_range }} {# hidden input that we fill in clean() #}
-
-
-  <div class="mb-3">
-    <strong>{{ inv_form.max_nominal_dc_current_a.label_tag }}</strong>
-    {{ inv_form.max_nominal_dc_current_a }}{{ inv_form.max_nominal_dc_current_a.errors }}
+    <strong>{{ asset_form.manufacturer.label_tag }}</strong>
+    {{ asset_form.manufacturer }}<br>{{ asset_form.manufacturer.errors }}
+    <small class="text-muted">{{ asset_form.manufacturer.help_text }}</small>
   </div>
 
   <div class="mb-3">
-    <strong>{{ inv_form.power_factor.label_tag }}</strong>
-    {{ inv_form.power_factor }}{{ inv_form.power_factor.errors }}
+    <strong>{{ asset_form.model_name.label_tag }}</strong>
+    {{ asset_form.model_name }}<br>{{ asset_form.model_name.errors }}
   </div>
-</div>
 
-    <div id="block-pv" class="{% if 'pv' not in required_forms %}d-none{% endif %}">
-      <h3>PV Module Specs</h3>
-      {{ pv_form.as_p }}
-    </div>
+  <div class="mb-3">
+    <strong>{{ asset_form.batch_name.label_tag }}</strong>
+    {{ asset_form.batch_name }}<br>{{ asset_form.batch_name.errors }}
+  </div>
 
-    <div id="block-scc" class="{% if 'scc' not in required_forms %}d-none{% endif %}">
-      <h3>SCC Specs</h3>
-      {{ scc_form.as_p }}
-    </div>
+  <div class="mb-3">
+    <strong>{{ asset_form.serial_number.label_tag }}</strong>
+    {{ asset_form.serial_number }}<br>{{ asset_form.serial_number.errors }}
+  </div>
 
-    <div id="block-meter" class="{% if 'meter' not in required_forms %}d-none{% endif %}">
-      <h3>Energy Meter Specs</h3>
-      {{ meter_form.as_p }}
-    </div>
+  <div class="mb-3">
+    <strong>{{ asset_form.deployment.label_tag }}</strong>
+    {{ asset_form.deployment }}<br>{{ asset_form.deployment.errors }}
+  </div>
 
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-    <a href="{% url 'asset_detail' asset.id %}" class="btn btn-secondary ms-2">Cancel</a>
-  </form>
+  <div class="mb-3">
+    <strong>{{ asset_form.classification.label_tag }}</strong>
+    {{ asset_form.classification }}<br>{{ asset_form.classification.errors }}
+    <small class="text-muted">{{ asset_form.classification.help_text }}</small>
+  </div>
 
-  <script>
-  // --- Dynamic title & block visibility mapping (same as add page) ---
-  const MAP = {
-    "HVAC":                {title: "HVAC Specs",                           forms: ["elec"]},
-    "EVSE":                {title: "EVSE Specs",                           forms: ["elec"]},
-    "WATER HEATER":        {title: "Water Heater Specs",                   forms: ["elec"]},
-    "WHITE APPLIANCE":     {title: "White Appliance Specs",                forms: ["elec"]},
-    "ENERGY METER":        {title: "Energy Meter Specs",                   forms: ["meter"]},
-    "BATTERY SYSTEM":      {title: "BESS + Inverter Specs",                forms: ["bess","inv"]},
-    "PV SYSTEM":           {title: "PV Module + Inverter Specs",           forms: ["pv","inv"]},
-    "GENSET SYSTEM":       {title: "Genset Electrical Specs",              forms: ["elec"]},
-    "PV & BAT SYSTEM":     {title: "PV + BESS + SCC + Inverter Specs",     forms: ["pv","bess","scc","inv"]},
-    "GENSET & BAT SYSTEM": {title: "Genset + BESS + Inverter Specs",       forms: ["elec","bess","inv"]}
+  <div class="mb-3">
+    <strong>{{ asset_form.description.label_tag }}</strong>
+    {{ asset_form.description }}<br>{{ asset_form.description.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.commissioning_date.label_tag }}</strong>
+    {{ asset_form.commissioning_date }}<br>{{ asset_form.commissioning_date.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.compliance_checklist.label_tag }}</strong>
+    {{ asset_form.compliance_checklist }}<br>{{ asset_form.compliance_checklist.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.release_year.label_tag }}</strong>
+    {{ asset_form.release_year }}<br>{{ asset_form.release_year.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.flexibility.label_tag }}</strong>
+    {{ asset_form.flexibility }}<br>{{ asset_form.flexibility.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.communication.label_tag }}</strong>
+    {{ asset_form.communication }}<br>{{ asset_form.communication.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.communication_protocol.label_tag }}</strong>
+    {{ asset_form.communication_protocol }}<br>{{ asset_form.communication_protocol.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.modbus_register_map.label_tag }}</strong>
+    {{ asset_form.modbus_register_map }}<br>{{ asset_form.modbus_register_map.errors }}
+    <small class="text-muted">{{ asset_form.modbus_register_map.help_text }}</small>
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.dacq_actuation.label_tag }}</strong>
+    {{ asset_form.dacq_actuation }}<br>{{ asset_form.dacq_actuation.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.devices_attribute.label_tag }}</strong>
+    {{ asset_form.devices_attribute }}<br>{{ asset_form.devices_attribute.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.dacq_attributes.label_tag }}</strong>
+    {{ asset_form.dacq_attributes }}<br>{{ asset_form.dacq_attributes.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.control_actuation.label_tag }}</strong>
+    {{ asset_form.control_actuation }}<br>{{ asset_form.control_actuation.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.regulation.label_tag }}</strong>
+    {{ asset_form.regulation }}<br>{{ asset_form.regulation.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.regulation_response_time_upward.label_tag }}</strong>
+    {{ asset_form.regulation_response_time_upward }}<br>{{ asset_form.regulation_response_time_upward.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.regulation_response_time_downward.label_tag }}</strong>
+    {{ asset_form.regulation_response_time_downward }}<br>{{ asset_form.regulation_response_time_downward.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.regulation_response_time_unit.label_tag }}</strong>
+    {{ asset_form.regulation_response_time_unit }}<br>{{ asset_form.regulation_response_time_unit.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.regulation_response_time_accuracy.label_tag }}</strong>
+    {{ asset_form.regulation_response_time_accuracy }}<br>{{ asset_form.regulation_response_time_accuracy.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.maximum_upward_regulation.label_tag }}</strong>
+    {{ asset_form.maximum_upward_regulation }}<br>{{ asset_form.maximum_upward_regulation.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.maximum_downward_regulation.label_tag }}</strong>
+    {{ asset_form.maximum_downward_regulation }}<br>{{ asset_form.maximum_downward_regulation.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.minimum_regulation_step.label_tag }}</strong>
+    {{ asset_form.minimum_regulation_step }}<br>{{ asset_form.minimum_regulation_step.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.ip_rating.label_tag }}</strong>
+    {{ asset_form.ip_rating }}<br>{{ asset_form.ip_rating.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.storage_temperature.label_tag }}</strong>
+    {{ asset_form.storage_temperature }}<br>{{ asset_form.storage_temperature.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.operating_temperature_range.label_tag }}</strong>
+    {{ asset_form.operating_temperature_range }}<br>{{ asset_form.operating_temperature_range.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.relative_humidity_range.label_tag }}</strong>
+    {{ asset_form.relative_humidity_range }}<br>{{ asset_form.relative_humidity_range.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.dimensions.label_tag }}</strong>
+    {{ asset_form.dimensions }}<br>{{ asset_form.dimensions.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.weight.label_tag }}</strong>
+    {{ asset_form.weight }}<br>{{ asset_form.weight.errors }}
+  </div>
+
+  <div class="mb-3">
+    <strong>{{ asset_form.form_factor.label_tag }}</strong>
+    {{ asset_form.form_factor }}<br>{{ asset_form.form_factor.errors }}
+  </div>
+
+  <hr>
+
+  {# ---------- SPEC SUB-FORMS (shown based on classification) ---------- #}
+  <h3 id="spec-title">{{ subform_title }}</h3>
+
+  <div id="spec-elec" class="spec-block" style="display:none;">
+    <h4>Electrical Specs</h4>
+    {{ elec_form.non_field_errors }}
+    {{ elec_form.as_p }}
+  </div>
+
+  <div id="spec-bess" class="spec-block" style="display:none;">
+    <h4>BESS Specs</h4>
+    {{ bess_form.non_field_errors }}
+    {{ bess_form.as_p }}
+  </div>
+
+  <div id="spec-inv" class="spec-block" style="display:none;">
+    <h4>Inverter Specs</h4>
+    {{ inv_form.non_field_errors }}
+    {{ inv_form.as_p }}
+  </div>
+
+  <div id="spec-pv" class="spec-block" style="display:none;">
+    <h4>PV Module Specs</h4>
+    {{ pv_form.non_field_errors }}
+    {{ pv_form.as_p }}
+  </div>
+
+  <div id="spec-scc" class="spec-block" style="display:none;">
+    <h4>SCC Specs</h4>
+    {{ scc_form.non_field_errors }}
+    {{ scc_form.as_p }}
+  </div>
+
+  <div id="spec-meter" class="spec-block" style="display:none;">
+    <h4>Energy Meter Specs</h4>
+    {{ meter_form.non_field_errors }}
+    {{ meter_form.as_p }}
+  </div>
+
+  <p>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{% url 'asset_detail' asset.id %}" class="btn btn-secondary">Cancel</a>
+  </p>
+</form>
+
+<script>
+  // Client-side mapping mirrors server CLASS_TO_FORMS; safe duplication for UX.
+  const CLASS_TO_FORMS = {
+    "HVAC":               ["elec"],
+    "EVSE":               ["elec"],
+    "WATER HEATER":       ["elec"],
+    "WHITE APPLIANCE":    ["elec"],
+    "ENERGY METER":       ["meter"],
+    "BATTERY SYSTEM":     ["bess","inv"],
+    "PV SYSTEM":          ["pv","inv"],
+    "GENSET SYSTEM":      ["elec"],
+    "PV & BAT SYSTEM":    ["pv","bess","scc","inv"],
+    "GENSET & BAT SYSTEM":["elec","bess","inv"]
   };
 
-  function show(code, yes) {
-    const el = document.getElementById('block-' + code);
-    if (!el) return;
-    if (yes) {
-      el.classList.remove('d-none');
-      el.style.display = '';
-      el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = false);
-    } else {
-      el.classList.add('d-none');
-      el.style.display = 'none';
-      el.querySelectorAll('input, select, textarea').forEach(i => i.disabled = true);
-    }
-  }
-
-  function baseSetLayoutFor(clsText) {
-    const cfg = MAP[clsText] || {title: "Specifications", forms: []};
-    const titleEl = document.getElementById('subform-title');
-    if (titleEl) titleEl.textContent = cfg.title;
-
-    const all = ["elec","bess","inv","pv","scc","meter"];
-    all.forEach(code => show(code, cfg.forms.includes(code)));
-  }
-
-  // --- Per-field filtering for Electrical block ---
-  const ELEC_FULL_SET = [
-    "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
-    "current_nominal_df","current_min_df","current_max_df",
-    "inrush_current_max_df","standby_power_consumption",
-    "power_consumption_nominal_df","power_consumption_max_df","power_consumption_units",
-    "voltage_regulation_uf","output_current_nominal_uf","power_factor"
-  ];
-  // Grouped sections (each wraps multiple inputs)
-  const ELEC_GROUPS = ["voltage_range","output_current_max","power_output_nominal","power_output_max"];
-
-  // Reduced sets for four classes
-  const ELEC_ALLOWED_BY_CLASS = {
-    "HVAC": new Set([
-      "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
-      "current_nominal_df","current_min_df","current_max_df",
-      "inrush_current_max_df","standby_power_consumption",
-      "power_consumption_nominal_df","power_consumption_units",
-      "voltage_regulation_uf","power_factor"
-    ]),
-    "EVSE": new Set([
-      "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
-      "current_nominal_df","current_min_df","current_max_df",
-      "standby_power_consumption",
-      "power_consumption_nominal_df","power_consumption_units"
-    ]),
-    "WATER HEATER": new Set([
-      "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
-      "current_nominal_df","current_min_df","current_max_df",
-      "inrush_current_max_df","standby_power_consumption",
-      "power_consumption_nominal_df","power_consumption_units",
-      "power_factor"
-    ]),
-    "WHITE APPLIANCE": new Set([
-      "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
-      "current_nominal_df","current_min_df","current_max_df",
-      "inrush_current_max_df","standby_power_consumption",
-      "power_consumption_nominal_df","power_consumption_units",
-      "voltage_regulation_uf","power_factor"
-    ])
-  };
-
-  function toggleElectricalFields(clsText) {
-    const container = document.getElementById("block-elec");
-    if (!container || container.classList.contains("d-none")) return;
-
-    const reduced = ELEC_ALLOWED_BY_CLASS[clsText];
-    const allowed = reduced || new Set(ELEC_FULL_SET);
-
-    // individual fields
-    document.querySelectorAll('#block-elec [data-elec]').forEach(node => {
-      const key = node.getAttribute('data-elec');
-      const on  = allowed.has(key);
-      node.style.display = on ? '' : 'none';
-      node.querySelectorAll('input,select,textarea').forEach(i => i.disabled = !on);
-    });
-
-    // grouped sections (only for non-reduced classes)
-    const groupsOn = !reduced;
-    document.querySelectorAll('#block-elec [data-elec-group]').forEach(group => {
-      group.style.display = groupsOn ? '' : 'none';
-      group.querySelectorAll('input,select,textarea').forEach(i => i.disabled = !groupsOn);
+  function showBlocks(keys) {
+    // hide all
+    document.querySelectorAll(".spec-block").forEach(div => div.style.display = "none");
+    // show required
+    (keys || []).forEach(code => {
+      const el = document.getElementById("spec-" + code);
+      if (el) el.style.display = "";
     });
   }
 
-  function setLayoutFor(clsText) {
-    baseSetLayoutFor(clsText);
-    toggleElectricalFields(clsText);
-  }
+  // 1) Server-side initial state (most accurate)
+  const initial = {{ required_forms|safe }};
+  showBlocks(initial);
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const cls = document.getElementById("id_classification");
-    if (cls) {
-      const initText = cls.options[cls.selectedIndex]?.text?.trim().toUpperCase() || "";
-      setLayoutFor(initText);
-      cls.addEventListener('change', () => {
-        const text = cls.options[cls.selectedIndex].text.trim().toUpperCase();
-        setLayoutFor(text);
-      });
-    }
-  });
+  // 2) Also react to user changing classification (UX only; server validates on POST)
+  const clsSel = document.getElementById("id_classification");
+  if (clsSel) {
+    clsSel.addEventListener("change", () => {
+      const selectedText = clsSel.options[clsSel.selectedIndex]?.text?.trim().toUpperCase() || "";
+      showBlocks(CLASS_TO_FORMS[selectedText] || []);
+    });
+  }
 </script>
-
 {% endblock %}
