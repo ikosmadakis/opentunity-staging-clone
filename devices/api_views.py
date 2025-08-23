@@ -1,24 +1,23 @@
-from rest_framework import viewsets, status
+from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from .models import Asset
 from .serializers import AssetSerializer
 from rest_framework.routers import DefaultRouter
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from .api_auth import ApiKeyOnlyAuthentication, RequireValidApiKey
 
-
-class AssetViewSet(viewsets.ReadOnlyModelViewSet):  # Only GET is allowed
+class AssetViewSet(ReadOnlyModelViewSet):
     queryset = Asset.objects.all()
+    # queryset = (Asset.objects
+    #             .select_related('manufacturer','deployment','classification','flexibility',
+    #                             'communication','communication_protocol')
+    #             .all())
     serializer_class = AssetSerializer
-    permission_classes = [IsAuthenticated]
 
-    # def retrieve(self, request, *args, **kwargs):
-    #     print("DEBUG: request.user =", request.user)
-    #     print("DEBUG: user.is_authenticated =", request.user.is_authenticated)
-    #     asset = self.get_object()
-    #     print("DEBUG: asset.record_contributor =", asset.record_contributor)
-    #     print("DEBUG: asset.record_contributor.user =", asset.record_contributor.user)
-    #     return super().retrieve(request, *args, **kwargs)
+    # ✅ Only our API-key auth; sessions won't apply
+    authentication_classes = (ApiKeyOnlyAuthentication,)
+    permission_classes = (RequireValidApiKey,)
 
     def list(self, request, *args, **kwargs):
         # You can return 404 or 403 or a custom message

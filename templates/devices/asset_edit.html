@@ -4,7 +4,7 @@
 {% block content %}
 <h2>Edit Device #{{ asset.id }}: {{ asset.model_name }}</h2>
 {{ asset_form.non_field_errors }}
-<form method="post" action="{% url 'asset_edit' asset.id %}">
+<form id="asset-edit-form" method="post" action="{% url 'asset_edit' asset.id %}">
   {% csrf_token %}
 
   {# ---------- MAIN ASSET FIELDS ---------- #}
@@ -230,8 +230,11 @@
   </p>
 </form>
 
+{# JSON-safe injection of the required codes coming from the server #}
+{{ required_forms|json_script:"requiredFormsData" }}
+
 <script>
-  // Client-side mapping mirrors server CLASS_TO_FORMS; safe duplication for UX.
+  // Client-side mapping mirrors server CLASS_TO_FORMS
   const CLASS_TO_FORMS = {
     "HVAC":               ["elec"],
     "EVSE":               ["elec"],
@@ -245,27 +248,41 @@
     "GENSET & BAT SYSTEM":["elec","bess","inv"]
   };
 
-  function showBlocks(keys) {
-    // hide all
-    document.querySelectorAll(".spec-block").forEach(div => div.style.display = "none");
-    // show required
-    (keys || []).forEach(code => {
-      const el = document.getElementById("spec-" + code);
-      if (el) el.style.display = "";
+  const ALL_CODES = ["elec","bess","inv","pv","scc","meter"];
+
+  function setBlockEnabled(code, enabled) {
+    const block = document.getElementById("spec-" + code);
+    if (!block) return;
+    block.style.display = enabled ? "" : "none";
+    // Key: disable inputs in hidden blocks so the browser won't validate them
+    block.querySelectorAll("input, select, textarea").forEach(el => {
+      el.disabled = !enabled;
     });
   }
 
-  // 1) Server-side initial state (most accurate)
-  const initial = {{ required_forms|safe }};
-  showBlocks(initial);
+  function applyRequiredSet(codes) {
+    ALL_CODES.forEach(code => setBlockEnabled(code, (codes || []).includes(code)));
+  }
 
-  // 2) Also react to user changing classification (UX only; server validates on POST)
+  // Initial from server (accurate for current classification)
+  const initial = JSON.parse(document.getElementById("requiredFormsData").textContent);
+  applyRequiredSet(initial);
+
+  // React to user changing the classification (UX only; server still validates)
   const clsSel = document.getElementById("id_classification");
   if (clsSel) {
     clsSel.addEventListener("change", () => {
       const selectedText = clsSel.options[clsSel.selectedIndex]?.text?.trim().toUpperCase() || "";
-      showBlocks(CLASS_TO_FORMS[selectedText] || []);
+      applyRequiredSet(CLASS_TO_FORMS[selectedText] || []);
     });
   }
+
+  // Safety: just before submit, re-apply enable/disable based on current selection
+  const form = document.getElementById("asset-edit-form");
+  form.addEventListener("submit", () => {
+    const selectedText = clsSel?.options[clsSel.selectedIndex]?.text?.trim().toUpperCase() || "";
+    applyRequiredSet(CLASS_TO_FORMS[selectedText] || initial || []);
+  });
 </script>
+
 {% endblock %}

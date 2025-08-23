@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.urls import reverse
 from django.shortcuts import render, redirect
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
@@ -88,8 +89,7 @@ def _delete_obsolete_specs(asset, keep_codes):
 
 def api_qr_view(request, asset_id):
     asset = get_object_or_404(Asset, pk=asset_id)
-    url = f"https://opentunity.pythonanywhere.com/api/assets/{asset.id}/enter-api-key/"
-
+    url = request.build_absolute_uri(reverse('asset_api_key_entry', args=[asset.id]))
     # Generate QR code
     qr = qrcode.QRCode(
         version=1,
@@ -451,6 +451,7 @@ def _validate_required_spec_forms(forms_dict, required_codes):
             except Exception as e:
                 print(f"{code.upper()} ERROR LOGGING FAILED:", e)
     return ok, errs
+
 
 
 
