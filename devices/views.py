@@ -238,7 +238,11 @@ def add_device(request):
                 errors.append(label)
 
         for code in spec_cfg['forms']:
-            if   code == 'elec':  must_valid(elec_form,  'Electrical specs')
+            if   code == 'elec':
+                if not elec_form.is_valid():
+                    print("ELEC ERRORS:", elec_form.errors.as_json())
+                    form_ok = False
+                    errors.append('Electrical specs')
             elif code == 'bess':  must_valid(bess_form,  'BESS specs')
             elif code == 'inv':
                 if not inv_form.is_valid():

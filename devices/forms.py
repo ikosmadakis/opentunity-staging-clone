@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Asset, ElectricalSpecs, BESSSpecs, ContentContributor, Units, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
+from .models import Asset, ElectricalSpecs, BESSSpecs, ContentContributor, Units, VoltageRegulationOption, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
 import json
 
 class JSONTextarea(forms.Textarea):
@@ -436,6 +436,18 @@ class AssetForm(forms.ModelForm):
             cleaned['weight'] = {'weight': val, 'units': vunit.symbol if vunit else None}
 
         return cleaned
+
+def _default_power_units():
+    # Prefer kW, then W; fall back to first Units row.
+    return (Units.objects.filter(symbol__iexact='kW').first()
+            or Units.objects.filter(symbol__iexact='W').first()
+            or Units.objects.first())
+
+def _default_vreg_option():
+    # Ensure "Not Sure" exists; use any if not.
+    obj, _ = VoltageRegulationOption.objects.get_or_create(name='Not Sure')
+    return obj
+
 class ElectricalSpecsForm(forms.ModelForm):
     # ─── Discrete fields for voltage_range_uf ───
     voltage_min = forms.FloatField(label="Min (V)", required=False, initial=0.0)
@@ -560,6 +572,35 @@ class ElectricalSpecsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Make core numeric inputs optional with practical initials for EVSE
+        loosen = [
+            'phase_configuration','frequency','voltage_nominal','voltage_tolerance_df',
+            'current_nominal_df','current_min_df','current_max_df','inrush_current_max_df',
+            'power_consumption_nominal_df','power_consumption_max_df','standby_power_consumption',
+            'output_current_nominal_uf','power_factor',
+        ]
+        for f in loosen:
+            if f in self.fields:
+                self.fields[f].required = False
+
+        # 🔧 Make these FK selects optional so clean() can inject defaults
+        self.fields['voltage_regulation_uf'].required = False
+        self.fields['power_consumption_units'].required = False
+
+        # (optional) give a visible initial to reduce user friction
+        if not self.fields['voltage_regulation_uf'].initial:
+            try:
+                self.fields['voltage_regulation_uf'].initial = _default_vreg_option()
+            except Exception:
+                pass
+
+        # pragmatic EVSE defaults
+        self.fields['phase_configuration'].initial = self.fields['phase_configuration'].initial or 1
+        self.fields['frequency'].initial           = self.fields['frequency'].initial           or 50
+        self.fields['voltage_nominal'].initial     = self.fields['voltage_nominal'].initial     or 230
+        self.fields['power_factor'].initial        = self.fields['power_factor'].initial        or 1.0
+        self.fields['standby_power_consumption'].initial = self.fields['standby_power_consumption'].initial or 0.0
+
         # ─── Unpack voltage_range_uf JSON ───
         vr = getattr(self.instance, 'voltage_range_uf', None)
         if isinstance(vr, dict):
@@ -626,6 +667,31 @@ class ElectricalSpecsForm(forms.ModelForm):
             'runtime_hours_max':   cleaned.get('pow_max_runtime_h') or 0.0,
         }
         cleaned['power_output_max_uf'] = {'genset': mx}
+
+        # Fill missing numeric fields with benign defaults so Model validation passes
+        zeros = [
+            'voltage_tolerance_df','current_nominal_df','current_min_df','current_max_df',
+            'inrush_current_max_df','power_consumption_nominal_df','power_consumption_max_df',
+            'standby_power_consumption','output_current_nominal_uf',
+        ]
+        for f in zeros:
+            if cleaned.get(f) in (None, ''):
+                cleaned[f] = 0.0
+
+        if cleaned.get('phase_configuration') in (None, ''):
+            cleaned['phase_configuration'] = 1
+        if cleaned.get('frequency') in (None, ''):
+            cleaned['frequency'] = 50
+        if cleaned.get('voltage_nominal') in (None, ''):
+            cleaned['voltage_nominal'] = 230
+        if cleaned.get('power_factor') in (None, ''):
+            cleaned['power_factor'] = 1.0
+
+        # Provide safe defaults for required FKs if user left them blank
+        if not cleaned.get('power_consumption_units'):
+            cleaned['power_consumption_units'] = _default_power_units()
+        if not cleaned.get('voltage_regulation_uf'):
+            cleaned['voltage_regulation_uf'] = _default_vreg_option()
 
         return cleaned
 
@@ -1000,7 +1066,6 @@ class InverterSpecsForm(forms.ModelForm):
                     self.add_error(f"nominal_ac_current_l{i+1}", "Current cannot be negative.")
 
         return cd
-
 
 class PVModuleSpecsForm(forms.ModelForm):
     class Meta:
