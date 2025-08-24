@@ -1,20 +1,20 @@
 from django.db import transaction
 from django.urls import reverse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
 from .utils import send_activation_email
 import qrcode, io, os
 from PIL import Image
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from devices.forms import SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm, InverterSpecsForm, PVModuleSpecsForm, SCCSpecsForm, EnergyMeterSpecsForm
-from devices.models import ContentContributor, Asset, CommunicationProtocol,  ElectricalSpecs, BESSSpecs, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
+from devices.models import ContentContributor, Asset, APIKey, CommunicationProtocol,  ElectricalSpecs, BESSSpecs, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
+from devices.serializers import AssetSerializer
 
 CLASS_TO_FORMS = {
     'HVAC': {
@@ -138,7 +138,21 @@ def activate(request, uidb64, token):
         return render(request, "registration/activation_invalid.html")
 
 def asset_api_key_entry(request, asset_id):
-    # This just shows the form. No auth yet.
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
+
+    apikey = request.GET.get('apikey')
+    if apikey:
+        # Validate API key
+        if not APIKey.objects.filter(key=apikey, is_active=True).exists():
+            return JsonResponse({'detail': 'Invalid or unauthorized API Key.'}, status=401)
+
+        # Return the asset JSON
+        asset = get_object_or_404(Asset, pk=asset_id)
+        data = AssetSerializer(asset).data
+        return JsonResponse(data, status=200)
+
+    # No apikey -> show the HTML form (existing behavior)
     return render(request, 'enter_api_key.html', {'asset_id': asset_id})
 
 @login_required
