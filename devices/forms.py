@@ -18,6 +18,33 @@ class JSONTextField(forms.JSONField):
             return ""
         return super().prepare_value(value)
 
+class ProfileForm(forms.ModelForm):
+    email = forms.EmailField(
+        required=True,
+        help_text="Used for login and notifications."
+    )
+
+    class Meta:
+        model = ContentContributor
+        fields = ["full_name", "role", "eori_number", "relation"]
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields["email"].initial = self.user.email
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        if commit:
+            obj.save()
+            if self.user:
+                new_email = self.cleaned_data.get("email", "").strip()
+                if new_email and new_email != self.user.email:
+                    self.user.email = new_email
+                    self.user.save(update_fields=["email"])
+        return obj
+
 class AssetForm(forms.ModelForm):
     # Optional JSON field, shown only when protocol supports MODBUS (UI toggles; server re-checks)
     modbus_register_map = JSONTextField(
@@ -81,6 +108,7 @@ class AssetForm(forms.ModelForm):
         model = Asset
         exclude = ['record_insertion_date', 'record_contributor']
         widgets = {
+            'dpp_url': forms.URLInput(attrs={'size':64, 'placeholder': 'e.g. https://example.com/01/09524810000339/10/YA12AB?17=271231'}),
             'opentunity_did': forms.HiddenInput(),
             'gtin': forms.TextInput(attrs={'placeholder': 'e.g. 00012345600012'}),
             'model_name': forms.TextInput(attrs={'placeholder': 'e.g. aroTherm Plus 7kW'}),
@@ -107,12 +135,18 @@ class AssetForm(forms.ModelForm):
             'weight': forms.HiddenInput(),
         }
         labels = {
+            'dpp_url': 'Digital Product Passport URL',
             'modbus_register_map': 'Modbus Register Map',
             'gtin': 'GTIN',
             'batch_name': 'Batch Name',
             'model_name': 'Model Name',
         }
         help_texts = {
+            'dpp_url': (
+                'The URL encoded in data carriers of Digital Product Passports, that points '
+                'to a digital record of the product characteristics describing the environmental '
+                'impact, the sustainability, and the recyclability of that product during its life-cycle. (optional)'
+            ),
             'opentunity_did': (
                 'A 16-digit unique identifier assigned to each flexibility asset '
                 'for tracking, and database management. (optional)'

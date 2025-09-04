@@ -11,6 +11,8 @@
     {% endif %}
 
     {# --- ASSET FORM FIELDS (unchanged) --- #}
+    <div class="mb-3"><strong>{{ asset_form.dpp_url.label_tag }}</strong>{{ asset_form.dpp_url }}<br>{{ asset_form.dpp_url.errors }}</div>
+    <small class="text-muted">{{ asset_form.dpp_url.help_text }}</small><br><br>
 
     <div class="mb-3"><strong>{{ asset_form.gtin.label_tag }}</strong>{{ asset_form.gtin }}<br>{{ asset_form.gtin.errors }}</div>
     <small class="text-muted">{{ asset_form.gtin.help_text }}</small><br><br>

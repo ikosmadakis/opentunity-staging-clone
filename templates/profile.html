@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>My Profile</h2>
+
+<form method="post" action="{% url 'profile' %}">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label class="form-label">Email</label>
+    {{ form.email }}
+    <div class="text-danger">{{ form.email.errors }}</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Full name</label>
+    {{ form.full_name }}
+    <div class="text-danger">{{ form.full_name.errors }}</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Role</label>
+    {{ form.role }}
+    <div class="text-danger">{{ form.role.errors }}</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">EORI number</label>
+    {{ form.eori_number }}
+    <div class="text-danger">{{ form.eori_number.errors }}</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Relation / Notes</label>
+    {{ form.relation }}
+    <div class="text-danger">{{ form.relation.errors }}</div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Save changes</button>
+  <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+</form>
+
+<hr>
+<p><strong>Security</strong></p>
+<p><a href="{% url 'password_change' %}">Change password</a></p>
+{% endblock %}

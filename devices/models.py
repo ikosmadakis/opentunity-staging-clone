@@ -93,6 +93,7 @@ class ContentContributor(models.Model):
         return self.full_name or self.user.username
 
 class Asset(models.Model):
+    dpp_url                   = models.URLField(max_length=500, blank=True, null=True)
     opentunity_did            = models.TextField(blank=True, null=True)
     record_contributor        = models.ForeignKey(ContentContributor, on_delete=models.PROTECT)
     record_insertion_date     = models.DateTimeField(auto_now_add=True)

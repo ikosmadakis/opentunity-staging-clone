@@ -4,14 +4,16 @@
   <h2>Welcome, {{ user.username }}</h2>
   <p>
     <a href="{% url 'add_device' %}">Add a Device</a> |
+    <a href="{% url 'profile' %}">Profile</a> |
     <form action="{% url 'logout' %}" method="post" style="display:inline;">
         {% csrf_token %}
         <button type="submit" class="btn btn-link p-0 align-baseline">Logout</button>
     </form>
   </p>
 
-  <h3>Your Recent Devices</h3>
-  {% if recent_assets %}
+  <h3>Your Assets</h3>
+
+  {% if page_obj and page_obj.object_list %}
     <table border="1" cellpadding="5" cellspacing="0">
       <thead>
         <tr>
@@ -24,7 +26,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for asset in recent_assets %}
+        {% for asset in page_obj %}
           <tr>
             <td>{{ asset.id }}</td>
             <td>{{ asset.model_name }}</td>
@@ -32,7 +34,14 @@
             <td>{{ asset.record_insertion_date|date:"Y-m-d H:i" }}</td>
             <td>
                 <a href="{% url 'asset_detail' asset.id %}">View</a> |
-                <a href="{% url 'asset_edit'  asset.id %}">Edit</a>
+                <a href="{% url 'asset_edit'  asset.id %}">Edit</a> |
+                <a href="#"
+                   onclick="if (confirm('Delete this asset permanently? This cannot be undone.')) { document.getElementById('del-{{ asset.id }}').submit(); } return false;">
+                    Delete
+                </a>
+                <form id="del-{{ asset.id }}" method="post" action="{% url 'asset_delete' asset.id %}" style="display:none;">
+                    {% csrf_token %}
+                </form>
             </td>
             <td align="center" valign="middle">
                 <a href="{% url 'api_qr' asset.id %}" download="api_qr_{{ asset.id }}.png">
@@ -43,6 +52,18 @@
         {% endfor %}
       </tbody>
     </table>
+
+    <div class="mt-2">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&per={{ per }}">« Prev</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&per={{ per }}">Next »</a>
+      {% endif %}
+      &nbsp;|&nbsp; Per page:
+      <a href="?per=10">10</a> · <a href="?per=25">25</a> · <a href="?per=50">50</a>
+    </div>
   {% else %}
     <p>You haven’t added any devices yet. <a href="{% url 'add_device' %}">Add one now</a>.</p>
   {% endif %}

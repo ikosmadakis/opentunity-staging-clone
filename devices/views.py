@@ -1,18 +1,20 @@
 from django.db import transaction
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
-from django.contrib.auth.tokens import default_token_generator
 from django.contrib import messages
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from .utils import send_activation_email
 import qrcode, io, os
 from PIL import Image
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
-from devices.forms import SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm, InverterSpecsForm, PVModuleSpecsForm, SCCSpecsForm, EnergyMeterSpecsForm
+from devices.forms import ProfileForm, SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm, InverterSpecsForm, PVModuleSpecsForm, SCCSpecsForm, EnergyMeterSpecsForm
 from devices.models import ContentContributor, Asset, APIKey, CommunicationProtocol,  ElectricalSpecs, BESSSpecs, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
 from devices.serializers import AssetSerializer
 
@@ -68,7 +70,6 @@ SPEC_FORMS = {
     'meter': (EnergyMeterSpecs,EnergyMeterSpecsForm, 'meter_specs',     'meter'),
 }
 
-
 def _get_instance(asset, attr_name):
     inst = getattr(asset, attr_name, None)
     if inst is None:
@@ -77,7 +78,6 @@ def _get_instance(asset, attr_name):
             if attr_name in ('elec_specs', 'bess_specs') and hasattr(asset, alt):
                 return getattr(asset, alt)
     return inst
-
 
 def _delete_obsolete_specs(asset, keep_codes):
     """Remove OneToOne specs no longer applicable after a classification change."""
@@ -122,7 +122,6 @@ def api_qr_view(request, asset_id):
     buffer.seek(0)
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
-
 def activate(request, uidb64, token):
     try:
         uid  = force_str(urlsafe_base64_decode(uidb64))
@@ -156,17 +155,46 @@ def asset_api_key_entry(request, asset_id):
     return render(request, 'enter_api_key.html', {'asset_id': asset_id})
 
 @login_required
-def dashboard(request):
-    # Pull the 10 most recent assets created by this user
-    recent_assets = (
-        Asset.objects
-             .filter(record_contributor__user=request.user)
-             .order_by('-record_insertion_date')[:10]
-    )
-    return render(request, 'dashboard.html', {
-        'recent_assets': recent_assets
-    })
+def profile(request):
+    contributor, _ = ContentContributor.objects.get_or_create(user=request.user)
+    if request.method == "POST":
+        form = ProfileForm(request.POST, instance=contributor, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ Profile updated.")
+            return redirect("profile")
+    else:
+        form = ProfileForm(instance=contributor, user=request.user)
+    return render(request, "profile.html", {"form": form})
 
+@login_required
+def dashboard(request):
+    # # Pull the 10 most recent assets created by this user
+    # recent_assets = (
+    #     Asset.objects
+    #          .filter(record_contributor__user=request.user)
+    #          .order_by('-record_insertion_date')[:10]
+    # )
+    # return render(request, 'dashboard.html', {
+    #     'recent_assets': recent_assets
+    qs = (Asset.objects
+          .filter(record_contributor__user=request.user)
+          .order_by('-record_insertion_date'))
+
+    # per-page (default 50, hard cap 50)
+    try:
+        per = int(request.GET.get('per', 10))
+    except ValueError:
+        per = 10
+    per = max(1, min(per, 50))
+
+    paginator = Paginator(qs, per)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+
+    return render(request, 'dashboard.html', {
+        'page_obj': page_obj,       # use this in template
+        'per': per,
+    })
 
 def _comproto_meta():
     meta = {}
@@ -310,7 +338,6 @@ def add_device(request):
         'comproto_meta': _comproto_meta(),
     })
 
-
 def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
@@ -351,7 +378,6 @@ def asset_detail(request, pk):
         .get(pk=pk, record_contributor__user=request.user)
     )
     return render(request, 'devices/asset_detail.html', {'asset': asset})
-
 
 @login_required
 def asset_edit(request, pk):
@@ -423,6 +449,18 @@ def asset_edit(request, pk):
         ctx = _build_edit_context(asset, asset_form, current_cfg)
         return render(request, 'devices/asset_edit.html', ctx)
 
+@login_required
+@require_POST
+def asset_delete(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
+    contributor = getattr(asset, 'record_contributor', None)
+    if not contributor or contributor.user != request.user:
+        messages.error(request, "You don't have permission to delete this asset.")
+        return redirect('dashboard')
+
+    asset.delete()  # cascades to elec/bess/inverter/pv/scc/meter specs
+    messages.success(request, "Asset deleted permanently.")
+    return redirect('dashboard')
 
 # ---- helpers used inside asset_edit ----
 
@@ -469,9 +507,6 @@ def _validate_required_spec_forms(forms_dict, required_codes):
             except Exception as e:
                 print(f"{code.upper()} ERROR LOGGING FAILED:", e)
     return ok, errs
-
-
-
 
 def _build_edit_context(asset, asset_form, spec_cfg, bound_forms=None):
     """Prepare template context for GET or invalid POST."""
