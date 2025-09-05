@@ -108,7 +108,7 @@ class AssetForm(forms.ModelForm):
         model = Asset
         exclude = ['record_insertion_date', 'record_contributor']
         widgets = {
-            'dpp_url': forms.URLInput(attrs={'size':64, 'placeholder': 'e.g. https://example.com/01/09524810000339/10/YA12AB?17=271231'}),
+            'dpp_url': forms.URLInput(attrs={'size':60, 'placeholder': 'e.g. https://example.com/01/09524810000339/10/YA12AB?17=271231'}),
             'opentunity_did': forms.HiddenInput(),
             'gtin': forms.TextInput(attrs={'placeholder': 'e.g. 00012345600012'}),
             'model_name': forms.TextInput(attrs={'placeholder': 'e.g. aroTherm Plus 7kW'}),

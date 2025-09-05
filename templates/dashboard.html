@@ -3,7 +3,7 @@
 {% block content %}
   <h2>Welcome, {{ user.username }}</h2>
   <p>
-    <a href="{% url 'add_device' %}">Add a Device</a> |
+    <a href="{% url 'add_device' %}">Add a new Asset</a> |
     <a href="{% url 'profile' %}">Profile</a> |
     <form action="{% url 'logout' %}" method="post" style="display:inline;">
         {% csrf_token %}
