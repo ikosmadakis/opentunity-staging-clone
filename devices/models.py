@@ -1,24 +1,63 @@
 from django.db import models
 from django.contrib.auth.models import User
-import secrets
+import secrets, hashlib
+from django.utils import timezone
 
 class APIKey(models.Model):
-    key = models.CharField(max_length=40, unique=True, db_index=True)
-    name = models.CharField(max_length=100, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE,
+        related_name="api_key", null=True, blank=True
+    )
+
+    # Legacy plaintext storage (kept nullable for backwards compatibility)
+    key = models.CharField(max_length=128, unique=True, null=True, blank=True, db_index=True)
+
+    # Hash-at-rest (preferred)
+    key_hash = models.CharField(max_length=64, unique=True, null=True, blank=True, db_index=True)
+
+    name        = models.CharField(max_length=100, blank=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
+    rotated_at  = models.DateTimeField(null=True, blank=True)
+    is_active   = models.BooleanField(default=True)
+
+    # Audit
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    last_used_ip = models.GenericIPAddressField(null=True, blank=True)
+
+    # ---- Key management ----
+    @staticmethod
+    def generate_raw_key() -> str:
+        # 64 hex chars (256-bit) of entropy; URL-safe and human copy/paste friendly
+        return secrets.token_hex(32)
 
     @staticmethod
-    def generate_key():
-        return secrets.token_hex(20)
+    def hash(raw: str) -> str:
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
-    def save(self, *args, **kwargs):
-        if not self.key:
-            self.key = self.generate_key()
-        super().save(*args, **kwargs)
+    def set_new_key(self) -> str:
+        """
+        Generate a new raw key, store its SHA-256 hash, mark active, update rotation time,
+        and return the raw key (to be shown once to the user).
+        """
+        raw = self.generate_raw_key()
+        self.key_hash = self.hash(raw)
+        self.rotated_at = timezone.now()
+        self.is_active = True
+        # Optional: clear legacy plaintext column to stop storing raw secrets
+        # self.key = None
+        self.save(update_fields=["key_hash", "rotated_at", "is_active"])
+        return raw
+
+    def fingerprint(self) -> str:
+        """Short identifier for admin/UI; does not reveal the key."""
+        if self.key_hash:
+            return self.key_hash[:8]
+        if self.key:
+            return self.key[:6] + "…"
+        return "–"
 
     def __str__(self):
-        return self.name or self.key
+        return self.name or f"APIKey({self.fingerprint()})"
 
 class BessApplication(models.Model):
     application_name = models.CharField(
@@ -82,12 +121,10 @@ class ContentContributor(models.Model):
     user         = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name    = models.CharField(max_length=150, blank=True)
     role         = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    eori_number  = models.CharField(
-                     max_length=30,
-                     blank=True,
-                     help_text="Your EU EORI number, e.g. GB123456789000"
-                   )
+    eori_number  = models.CharField(max_length=30, blank=True, help_text="Your EU EORI number, e.g. GB123456789000")
     relation     = models.TextField(blank=True, null=True)
+    company_name = models.CharField(max_length=255, blank=True, default="")
+    website      = models.URLField(blank=True, default="")
 
     def __str__(self):
         return self.full_name or self.user.username

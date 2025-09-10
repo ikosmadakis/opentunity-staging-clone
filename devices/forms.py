@@ -26,7 +26,21 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = ContentContributor
-        fields = ["full_name", "role", "eori_number", "relation"]
+        fields = ["full_name", "role", "eori_number", "relation", "company_name", "website"]
+        labels = {
+            "company_name": "Company name",
+            "website": "Website",
+        }
+        help_texts = {
+            "eori_number": "The Economic Operators Registration and Identification number (optional).",
+            "company_name": "The Economic Operators legal name (optional).",
+            "website": "The Economic Operator's website (optional).",
+            "relation": "Other details about the Economic Operator (optional)."
+        }
+        widgets = {
+            "company_name": forms.TextInput(attrs={"placeholder": "e.g. Bluesun Automation Ltd"}),
+            "website": forms.URLInput(attrs={"placeholder": "https://www.bluesun.pro"}),
+        }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
@@ -957,6 +971,14 @@ class SignupForm(UserCreationForm):
                      max_length=30,
                      label="EORI number (optional)"
                   )
+    company_name = forms.CharField(
+        required=False, max_length=255, label="Company name (optional)",
+        widget=forms.TextInput(attrs={'placeholder': 'e.g. Bluesun Automation Ltd'})
+    )
+    website = forms.URLField(
+        required=False, label="Website (optional)",
+        widget=forms.URLInput(attrs={'placeholder': 'https://www.bluesun.pro'})
+    )
 
     class Meta:
         model  = User
@@ -966,9 +988,12 @@ class SignupForm(UserCreationForm):
             "full_name",
             "role",
             "eori_number",
+            "company_name",
+            "website",
             "password1",
             "password2",
         ]
+
     def clean(self):
         cleaned = super().clean()
         role  = cleaned.get("role", "")

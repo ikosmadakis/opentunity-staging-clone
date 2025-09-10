@@ -1,49 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Enter API Key for Asset {{ asset_id }}</title>
+  <meta charset="utf-8" />
+  <title>Enter API Key for Asset {{ asset_id }}</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; }
+    label input { width: 42ch; }
+    pre { white-space: pre-wrap; }
+  </style>
 </head>
 <body>
-    <h2>Enter API Key for Asset {{ asset_id }}</h2>
-    <form id="api-key-form">
-        <input type="hidden" id="asset_id" value="{{ asset_id }}">
-        <label>API Key: <input type="text" id="api_key" required></label>
-        <button type="submit">Submit</button>
-    </form>
-    <div id="result"></div>
-    <script>
-        document.getElementById('api-key-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const assetId = document.getElementById('asset_id').value;
-            const apiKey = document.getElementById('api_key').value;
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = "Loading...";
+  <h2>Enter API Key for Asset {{ asset_id }}</h2>
 
-            fetch(`/api/assets/${assetId}/`, {
-                method: 'GET',
-                headers: {
-                    'Api-Key': apiKey
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 403 || response.status === 401) {
-                        throw new Error("Invalid or unauthorized API Key.");
-                    } else if (response.status === 404) {
-                        throw new Error("Asset not found.");
-                    } else {
-                        throw new Error("Unknown error occurred.");
-                    }
-                }
-                return response.json();
-            })
-            .then(data => {
-                resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-            })
-            .catch(error => {
-                resultDiv.innerHTML = `<span style="color:red">${error.message}</span>`;
-            });
-        });
-    </script>
+  <form id="api-key-form">
+    <input type="hidden" id="asset_id" value="{{ asset_id }}">
+    <label>API Key:
+      <input type="text" id="api_key" autocomplete="off" spellcheck="false" required>
+    </label>
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="result" style="margin-top:1rem;"></div>
+
+  <script>
+    const form = document.getElementById('api-key-form');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const assetId = document.getElementById('asset_id').value;
+      const rawKey  = document.getElementById('api_key').value.trim();
+      if (!rawKey) {
+        resultDiv.innerHTML = '<span style="color:red">Please enter an API key.</span>';
+        return;
+      }
+
+      resultDiv.textContent = 'Loading…';
+
+      try {
+        const url = `/api/assets/${assetId}/enter-api-key/?apikey=${encodeURIComponent(rawKey)}`;
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+
+        if (!res.ok) {
+          resultDiv.innerHTML = `<span style="color:red">${data.detail || 'Invalid or unauthorized API Key.'}</span>`;
+          return;
+        }
+        resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      } catch (err) {
+        resultDiv.innerHTML = `<span style="color:red">${err.message}</span>`;
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
@@ -136,28 +137,91 @@ def activate(request, uidb64, token):
     else:
         return render(request, "registration/activation_invalid.html")
 
+def _extract_api_key(request):
+    """Return the raw API key from headers or querystring, or None."""
+    # Authorization: Api-Key <raw>
+    auth = request.META.get("HTTP_AUTHORIZATION", "")
+    if auth:
+        parts = auth.split(None, 1)
+        if len(parts) == 2 and parts[0].lower() == "api-key":
+            return parts[1].strip()
+
+    # Common header variants sent by browsers/fetch()
+    for hdr in ("HTTP_API_KEY", "HTTP_X_API_KEY", "HTTP_APIKEY", "HTTP_X_APIKEY"):
+        v = request.META.get(hdr)
+        if v:
+            return v.strip()
+
+    # Query param (?apikey=)
+    q = request.GET.get("apikey") or request.POST.get("apikey")
+    return q.strip() if q else None
+
 def asset_api_key_entry(request, asset_id):
+    """
+    GET with a key -> return JSON.
+    No key      -> render the HTML page to paste a key.
+    Accepts Authorization/Api-Key, Api-Key, X-API-Key headers or ?apikey=.
+    Validates against key_hash (new style) OR legacy key (plaintext).
+    """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'])
 
-    apikey = request.GET.get('apikey')
-    if apikey:
-        # Validate API key
-        if not APIKey.objects.filter(key=apikey, is_active=True).exists():
+    raw = _extract_api_key(request)
+
+    if raw:
+        hashed = APIKey.hash(raw)
+        key_obj = (
+            APIKey.objects.filter(is_active=True)
+            .filter(Q(key_hash=hashed) | Q(key=raw))
+            .first()
+        )
+        if not key_obj:
             return JsonResponse({'detail': 'Invalid or unauthorized API Key.'}, status=401)
 
-        # Return the asset JSON
+        # optional audit
+        try:
+            ip = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
+            key_obj.mark_used(ip=ip)
+        except Exception:
+            pass  # never block the response on audit
+
         asset = get_object_or_404(Asset, pk=asset_id)
         data = AssetSerializer(asset).data
         return JsonResponse(data, status=200)
 
-    # No apikey -> show the HTML form (existing behavior)
+    # No credentials supplied -> show the small HTML helper page
     return render(request, 'enter_api_key.html', {'asset_id': asset_id})
+
 
 @login_required
 def profile(request):
     contributor, _ = ContentContributor.objects.get_or_create(user=request.user)
+    api_key_obj = getattr(request.user, "api_key", None)
+    # Show-once storage for freshly generated raw key
+    raw_new_key = request.session.pop("raw_new_api_key", "")
+
     if request.method == "POST":
+        # Generate / Regenerate API key (Manufacturers only)
+        if "generate_api_key" in request.POST:
+            if contributor.role != "MANUFACTURER":
+                messages.error(request, "API keys are only available to Manufacturers/Economic Operators.")
+                return redirect("profile")
+
+            api_key_obj, _ = APIKey.objects.get_or_create(user=request.user)
+            raw = api_key_obj.set_new_key()  # sets key_hash, returns raw key once
+            request.session["raw_new_api_key"] = raw
+            messages.success(request, "✅ New API key generated. Copy it now; it will be hidden next time.")
+            return redirect("profile")
+
+        # Revoke current key
+        if "revoke_api_key" in request.POST:
+            if api_key_obj:
+                api_key_obj.is_active = False
+                api_key_obj.save(update_fields=["is_active"])
+                messages.success(request, "🔒 API key revoked.")
+            return redirect("profile")
+
+        # Normal profile save
         form = ProfileForm(request.POST, instance=contributor, user=request.user)
         if form.is_valid():
             form.save()
@@ -165,7 +229,14 @@ def profile(request):
             return redirect("profile")
     else:
         form = ProfileForm(instance=contributor, user=request.user)
-    return render(request, "profile.html", {"form": form})
+
+    return render(request, "profile.html", {
+        "form": form,
+        "is_manufacturer": (contributor.role == "MANUFACTURER"),
+        "has_api": bool(api_key_obj and api_key_obj.is_active),
+        "api_fingerprint": (api_key_obj.fingerprint() if api_key_obj else ""),
+        "raw_new_api_key": raw_new_key,  # only present immediately after generation
+    })
 
 @login_required
 def dashboard(request):
@@ -352,6 +423,8 @@ def signup(request):
                 full_name   = form.cleaned_data['full_name'],
                 role        = form.cleaned_data['role'],
                 eori_number = form.cleaned_data['eori_number'],
+                company_name = form.cleaned_data.get('company_name', ''),
+                website      = form.cleaned_data.get('website', ''),
             )
             # 3. Send activation email (we’ll implement next)
             send_activation_email(request, user)
