@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 import secrets, hashlib
 from django.utils import timezone
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 class APIKey(models.Model):
     user = models.OneToOneField(
@@ -314,4 +316,23 @@ class EnergyMeterSpecs(models.Model):
 
     def __str__(self):
         return f"Energy Meter Specs for Asset {self.asset_id}"
+
+@receiver(pre_save, sender=ContentContributor)
+def _auto_revoke_key_when_role_downgrades(sender, instance, **kwargs):
+    """
+    If a contributor changes from MANUFACTURER to any other role,
+    automatically revoke their API key. Works from Admin as well.
+    """
+    if not instance.pk:
+        return
+    try:
+        prev = ContentContributor.objects.get(pk=instance.pk)
+    except ContentContributor.DoesNotExist:
+        return
+    if prev.role == "MANUFACTURER" and instance.role != "MANUFACTURER":
+        k = getattr(instance.user, "api_key", None)
+        if k and k.is_active:
+            k.is_active = False
+            k.rotated_at = timezone.now()
+            k.save(update_fields=["is_active", "rotated_at"])
 

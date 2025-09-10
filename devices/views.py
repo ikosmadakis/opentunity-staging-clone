@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib import messages
@@ -162,6 +163,7 @@ def asset_api_key_entry(request, asset_id):
     No key      -> render the HTML page to paste a key.
     Accepts Authorization/Api-Key, Api-Key, X-API-Key headers or ?apikey=.
     Validates against key_hash (new style) OR legacy key (plaintext).
+    Also denies keys whose owner is not MANUFACTURER (Economic Operator).
     """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'])
@@ -178,6 +180,11 @@ def asset_api_key_entry(request, asset_id):
         if not key_obj:
             return JsonResponse({'detail': 'Invalid or unauthorized API Key.'}, status=401)
 
+        # Deny keys if the owner is not currently an EO (Manufacturer)
+        cc = ContentContributor.objects.filter(user=key_obj.user).only("role").first()
+        if not cc or (cc.role or "").upper() != "MANUFACTURER":
+            return JsonResponse({'detail': 'Invalid or unauthorized API Key.'}, status=401)
+
         # optional audit
         try:
             ip = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
@@ -191,6 +198,7 @@ def asset_api_key_entry(request, asset_id):
 
     # No credentials supplied -> show the small HTML helper page
     return render(request, 'enter_api_key.html', {'asset_id': asset_id})
+
 
 
 @login_required
@@ -221,10 +229,22 @@ def profile(request):
                 messages.success(request, "🔒 API key revoked.")
             return redirect("profile")
 
-        # Normal profile save
+        # Normal profile save (detect role change)
+        old_role = contributor.role  # remember before saving
         form = ProfileForm(request.POST, instance=contributor, user=request.user)
         if form.is_valid():
-            form.save()
+            updated = form.save()
+            # If downgraded from Manufacturer → something else, revoke key
+            if old_role == "MANUFACTURER" and updated.role != "MANUFACTURER":
+                k = getattr(request.user, "api_key", None)
+                if k and k.is_active:
+                    k.is_active = False
+                    k.rotated_at = timezone.now()
+                    k.save(update_fields=["is_active", "rotated_at"])
+                    messages.info(
+                        request,
+                        "🔒 Your API key was revoked because your role is no longer Manufacturer/Economic Operator."
+                    )
             messages.success(request, "✅ Profile updated.")
             return redirect("profile")
     else:
