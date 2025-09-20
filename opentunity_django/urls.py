@@ -3,7 +3,8 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, include, reverse_lazy
 from django.conf import settings
 from devices import views as device_views
-from devices.views import activate
+from devices.views import activate, scan_ack
+from devices.api_kpis import KpiOverviewView
 
 
 def _from_email():
@@ -87,4 +88,6 @@ urlpatterns = [
     path('', include('devices.urls')),
     path("assets/<int:pk>/delete/", device_views.asset_delete, name="asset_delete"),
     path('api/assets/<int:asset_id>/enter-api-key/', device_views.asset_api_key_entry, name='asset_api_key_entry'),
+    path("api/scan/ack", scan_ack, name="scan_ack"),
+    path("api/kpis/overview", KpiOverviewView.as_view(), name="kpi_overview"),
 ]

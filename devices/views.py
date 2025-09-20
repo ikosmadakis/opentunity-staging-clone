@@ -2,6 +2,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
@@ -12,12 +13,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from .utils import send_activation_email
-import qrcode, io, os
+import qrcode, io, os, time, uuid, json
 from PIL import Image
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from devices.forms import ProfileForm, SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm, InverterSpecsForm, PVModuleSpecsForm, SCCSpecsForm, EnergyMeterSpecsForm
-from devices.models import ContentContributor, Asset, APIKey, CommunicationProtocol,  ElectricalSpecs, BESSSpecs, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
+from devices.models import ScanSession, ContentContributor, Asset, APIKey, CommunicationProtocol,  ElectricalSpecs, BESSSpecs, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
 from devices.serializers import AssetSerializer
 
 CLASS_TO_FORMS = {
@@ -168,6 +169,16 @@ def asset_api_key_entry(request, asset_id):
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'])
 
+    # 0) get or mint rid (attempt id), default qr_type=OT for now
+    rid = request.GET.get("rid") or str(uuid.uuid4())
+    qr_type = request.GET.get("qr_type", "OT")
+
+    t0 = time.perf_counter()
+    # Ensure we have a row to correlate later (idempotent if rid repeats)
+    ScanSession.objects.get_or_create(
+        rid=rid, defaults={"asset_id": asset_id, "qr_type": qr_type}
+    )
+
     raw = _extract_api_key(request)
 
     if raw:
@@ -178,11 +189,19 @@ def asset_api_key_entry(request, asset_id):
             .first()
         )
         if not key_obj:
+            latency = int((time.perf_counter() - t0) * 1000)
+            ScanSession.objects.filter(rid=rid).update(
+                success=False, reason="invalid_api_key", latency_ms=latency
+            )
             return JsonResponse({'detail': 'Invalid or unauthorized API Key.'}, status=401)
 
         # Deny keys if the owner is not currently an EO (Manufacturer)
         cc = ContentContributor.objects.filter(user=key_obj.user).only("role").first()
         if not cc or (cc.role or "").upper() != "MANUFACTURER":
+            latency = int((time.perf_counter() - t0) * 1000)
+            ScanSession.objects.filter(rid=rid).update(
+                success=False, reason="invalid_api_key", latency_ms=latency
+            )
             return JsonResponse({'detail': 'Invalid or unauthorized API Key.'}, status=401)
 
         # optional audit
@@ -194,12 +213,38 @@ def asset_api_key_entry(request, asset_id):
 
         asset = get_object_or_404(Asset, pk=asset_id)
         data = AssetSerializer(asset).data
-        return JsonResponse(data, status=200)
+        resp = JsonResponse(data, status=200)
+
+        # mark delivery success for this attempt
+        latency = int((time.perf_counter() - t0) * 1000)
+        ScanSession.objects.filter(rid=rid).update(
+            success=True, reason="OK", latency_ms=latency
+        )
+        resp["X-Scan-RID"] = rid
+        return resp
 
     # No credentials supplied -> show the small HTML helper page
     return render(request, 'enter_api_key.html', {'asset_id': asset_id})
 
+@csrf_exempt
+def scan_ack(request):
+    """
+    EMS calls this after it parses JSON successfully.
+    Body: {"rid": "<uuid-string>"}
+    """
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    try:
+        body = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"detail": "bad payload"}, status=400)
 
+    rid = (body or {}).get("rid")
+    if not rid:
+        return JsonResponse({"detail": "rid required"}, status=400)
+
+    updated = ScanSession.objects.filter(rid=rid).update(ack=True)
+    return JsonResponse({"ok": bool(updated)}, status=200)
 
 @login_required
 def profile(request):

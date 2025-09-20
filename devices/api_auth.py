@@ -2,38 +2,61 @@
 from rest_framework.authentication import BaseAuthentication
 from rest_framework import exceptions
 from django.contrib.auth.models import AnonymousUser
+from django.db.models import Q
 from .models import APIKey
 
 class ApiKeyOnlyAuthentication(BaseAuthentication):
     """
     Accept API key via:
-      - Header:  Api-Key: <key>
+      - Header:  Api-Key: <key>   (also X-API-Key / X-Api-Key)
       - Query:   ?apikey=<key>
+    Works with legacy plaintext (APIKey.key) OR hashed (APIKey.key_hash).
     """
-    header_names = ("Api-Key", "X-API-Key", "X-Api-Key")
+    header_names = ("Api-Key", "X-API-Key", "X-Api-Key", "Authorization")
+
+    def _extract_from_headers(self, request):
+        for h in self.header_names:
+            v = request.headers.get(h)
+            if not v:
+                continue
+            v = v.strip()
+            if not v:
+                continue
+            # Support "Api-Key <key>" in Authorization
+            if h.lower() == "authorization":
+                if v.lower().startswith("api-key "):
+                    return v.split(" ", 1)[1].strip()
+                # leave other auth schemes untouched
+                continue
+            return v
+        return None
 
     def authenticate(self, request):
         # 1) Try headers
-        key = None
-        for h in self.header_names:
-            v = request.headers.get(h)
-            if v:
-                key = v.strip()
-                break
+        key = self._extract_from_headers(request)
 
         # 2) Fallback to query param
         if not key:
             key = request.query_params.get("apikey")
 
-        # No key provided → unauthenticated; permission will raise 401
+        # No key → unauthenticated; permission will raise 401
         if not key:
             return None
 
-        # Column-safe lookup: key + is_active only
-        if not APIKey.objects.filter(key=key, is_active=True).exists():
+        # 3) Validate against active keys: plaintext OR hashed
+        try:
+            hashed = APIKey.hash(key)
+        except Exception:
+            hashed = None
+
+        exists = APIKey.objects.filter(is_active=True).filter(
+            Q(key=key) | (Q(key_hash=hashed) if hashed else Q(pk__isnull=True))
+        ).exists()
+
+        if not exists:
             raise exceptions.AuthenticationFailed("Invalid or unauthorized API Key.")
 
-        # DRF expects (user, auth); we don't tie to a user for this scheme
+        # DRF expects (user, auth). We keep AnonymousUser; the raw key is in request.auth
         return (AnonymousUser(), key)
 
 

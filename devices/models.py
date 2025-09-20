@@ -336,3 +336,43 @@ def _auto_revoke_key_when_role_downgrades(sender, instance, **kwargs):
             k.rotated_at = timezone.now()
             k.save(update_fields=["is_active", "rotated_at"])
 
+# --- KPI/Telemetry models ---
+
+class ApiRequestLog(models.Model):
+    ts = models.DateTimeField(auto_now_add=True)
+    method = models.CharField(max_length=8)
+    path = models.CharField(max_length=256)
+    status_code = models.IntegerField()
+    latency_ms = models.IntegerField()
+    is_qr_flow = models.BooleanField(default=False)
+    asset_id = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["ts"]),
+            models.Index(fields=["is_qr_flow", "ts"]),
+            models.Index(fields=["path", "ts"]),
+        ]
+
+
+QR_TYPE_CHOICES = (("OT", "OT"), ("DPP", "DPP"))
+
+class ScanSession(models.Model):
+    """
+    One row per QR attempt (rid). Tracks delivery result and optional EMS ACK.
+    """
+    ts = models.DateTimeField(auto_now_add=True)
+    rid = models.CharField(max_length=36, unique=True)
+    asset_id = models.IntegerField()
+    qr_type = models.CharField(max_length=3, choices=QR_TYPE_CHOICES, default="OT")
+    success = models.BooleanField(default=False)       # delivery success (2xx)
+    reason = models.CharField(max_length=32, blank=True)  # 'OK'|'invalid_api_key'|'not_found'|'server_error'
+    latency_ms = models.IntegerField(null=True, blank=True)
+    ack = models.BooleanField(default=False)           # EMS parsed & confirmed
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["ts"]),
+            models.Index(fields=["qr_type", "ts"]),
+        ]
+
