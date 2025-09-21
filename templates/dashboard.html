@@ -20,6 +20,7 @@
           <th>ID</th>
           <th>Model</th>
           <th>Classification</th>
+          <th>Completeness<br>Score</th>
           <th>Added On</th>
           <th>Actions</th>
           <th>Opentunity <br>Asset QR</th>
@@ -31,6 +32,11 @@
             <td>{{ asset.id }}</td>
             <td>{{ asset.model_name }}</td>
             <td>{{ asset.classification.type }}</td>
+            <td>
+            {% if asset.completeness_score is not None %}
+            {{ asset.completeness_score }}%
+            {% else %} — {% endif %}
+            </td>
             <td>{{ asset.record_insertion_date|date:"Y-m-d H:i" }}</td>
             <td>
                 <a href="{% url 'asset_detail' asset.id %}">View</a> |

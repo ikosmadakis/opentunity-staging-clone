@@ -20,6 +20,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from devices.forms import ProfileForm, SignupForm, AssetForm, ElectricalSpecsForm, BESSSpecsForm, InverterSpecsForm, PVModuleSpecsForm, SCCSpecsForm, EnergyMeterSpecsForm
 from devices.models import ScanSession, ContentContributor, Asset, APIKey, CommunicationProtocol,  ElectricalSpecs, BESSSpecs, InverterSpecs, PVModuleSpecs, SCCSpecs, EnergyMeterSpecs
 from devices.serializers import AssetSerializer
+from devices.completeness import completeness_score
 
 CLASS_TO_FORMS = {
     'HVAC': {
@@ -326,6 +327,12 @@ def dashboard(request):
 
     paginator = Paginator(qs, per)
     page_obj = paginator.get_page(request.GET.get('page', 1))
+    for a in page_obj.object_list:
+        try:
+            a.completeness_score = completeness_score(a)
+        except Exception:
+            a.completeness_score = None  # stay resilient if something odd shows up
+
 
     return render(request, 'dashboard.html', {
         'page_obj': page_obj,       # use this in template
