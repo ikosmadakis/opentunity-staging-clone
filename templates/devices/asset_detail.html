@@ -1,68 +1,72 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h2>Asset #{{ asset.id }}: {{ asset.model_name }}</h2>
-<table>
-    <tbody>
-        <tr>
-            <th>OpenTunity ID</th>
-            <td>{{ asset.opentunity_did|default:"—" }}</td>
-        </tr>
-        <tr>
-            <th>Contributor</th>
-            <td>{{ asset.record_contributor.user.get_full_name|default:asset.record_contributor.user.username }}</td>
-        </tr>
-        <tr>
-            <th>Added On</th>
-            <td>{{ asset.record_insertion_date|date:"Y-m-d H:i" }}</td>
-        </tr>
-        <tr>
-            <th>Digital Product Passport URL</th>
-            <td>{% if asset.dpp_url %}
-                <a href="{{ asset.dpp_url }}" target="_blank" rel="noopener">{{ asset.dpp_url }}</a>
-                {% else %}—{% endif %}
-            </td>
-        </tr>
-        <tr>
-            <th>EPREL URL</th>
-            <td>{% if asset.eprel_url %}
-                <a href="{{ asset.eprel_url }}" target="_blank" rel="noopener">{{ asset.eprel_url }}</a>
-                {% else %}—{% endif %}
-            </td>
-        </tr>
-        <tr>
-            <th>Vendor</th>
-            <td>{% if asset.vendor %}
-                <a href="{{ asset.vendor }}" target="_blank" rel="noopener">{{ asset.vendor }}</a>
-                {% else %}—{% endif %}
-            </td>
-        </tr>
-        <tr>
-            <th>Manufacturer</th>
-            <td>{{ asset.manufacturer.name }}</td>
-        </tr>
-        <tr>
-            <th>Model Name</th>
-            <td>{{ asset.model_name }}</td>
-        </tr>
-        <tr>
-            <th>Batch Name</th>
-            <td>{{ asset.batch_name|default:"—" }}</td>
-        </tr>
-        <tr>
-            <th>Serial Number</th>
-            <td>{{ asset.serial_number|default:"—" }}</td>
-        </tr>
-        <tr>
-            <th>Deployment</th>
-            <td>{{ asset.deployment.primary_environment|default:"—" }}</td>
-        </tr>
-        <tr>
-            <th>Classification</th>
-            <td>{{ asset.classification.type|default:"—" }}</td>
-        </tr>
-    </tbody>
-</table>
+
+<a href="{% url 'dashboard' %}" > < Back to Dashboard</a>
+<div class="login-flex-container">
+    <div class="login-center">
+        <h2>Asset #{{ asset.id }}: {{ asset.model_name }}</h2>
+        <p><a href="{% url 'asset_edit' asset.id %}" class="btn btn-primary">Edit</a></p>
+        <table>
+            <tbody>
+                <tr>
+                    <th>OpenTunity ID</th>
+                    <td>{{ asset.opentunity_did|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th>Contributor</th>
+                    <td>{{ asset.record_contributor.user.get_full_name|default:asset.record_contributor.user.username }}</td>
+                </tr>
+                <tr>
+                    <th>Added On</th>
+                    <td>{{ asset.record_insertion_date|date:"Y-m-d H:i" }}</td>
+                </tr>
+                <tr>
+                    <th>Digital Product Passport URL</th>
+                    <td>{% if asset.dpp_url %}
+                        <a href="{{ asset.dpp_url }}" target="_blank" rel="noopener">{{ asset.dpp_url }}</a>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>EPREL URL</th>
+                    <td>{% if asset.eprel_url %}
+                        <a href="{{ asset.eprel_url }}" target="_blank" rel="noopener">{{ asset.eprel_url }}</a>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Vendor</th>
+                    <td>{% if asset.vendor %}
+                        <a href="{{ asset.vendor }}" target="_blank" rel="noopener">{{ asset.vendor }}</a>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Manufacturer</th>
+                    <td>{{ asset.manufacturer.name }}</td>
+                </tr>
+                <tr>
+                    <th>Model Name</th>
+                    <td>{{ asset.model_name }}</td>
+                </tr>
+                <tr>
+                    <th>Batch Name</th>
+                    <td>{{ asset.batch_name|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th>Serial Number</th>
+                    <td>{{ asset.serial_number|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th>Deployment</th>
+                    <td>{{ asset.deployment.primary_environment|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th>Classification</th>
+                    <td>{{ asset.classification.type|default:"—" }}</td>
+                </tr>
+            </tbody>
+        </table>
 {# ELECTRICAL SPECS #}
 {% if asset.elec_specs %}
 <h3>Electrical Specs</h3>
@@ -314,12 +318,8 @@
       </tr>
     </tbody>
   </table>
-
-
-
-
-  <p>
-    <a href="{% url 'asset_edit' asset.id %}">Edit</a> |
-    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
-  </p>
+        <p><a href="{% url 'asset_edit' asset.id %}" class="btn btn-primary">Edit</a></p>
+    </div>
+</div>
+<a href="{% url 'dashboard' %}">< Back to Dashboard</a>
 {% endblock %}
