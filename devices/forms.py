@@ -122,15 +122,17 @@ class AssetForm(forms.ModelForm):
         model = Asset
         exclude = ['record_insertion_date', 'record_contributor']
         widgets = {
-            'dpp_url': forms.URLInput(attrs={'size':60, 'placeholder': 'e.g. https://example.com/01/09524810000339/10/YA12AB?17=271231'}),
+            'dpp_url': forms.URLInput(attrs={'size':64, 'placeholder': 'e.g. https://example.com/01/09524810000339/10/YA12AB?17=271231'}),
             'opentunity_did': forms.HiddenInput(),
+            'vendor': forms.TextInput(attrs={'size':64, 'placeholder': "e.g. Bluesun Automation Ltd."}),
             'gtin': forms.TextInput(attrs={'placeholder': 'e.g. 00012345600012'}),
-            'model_name': forms.TextInput(attrs={'placeholder': 'e.g. aroTherm Plus 7kW'}),
-            'batch_name': forms.TextInput(attrs={'placeholder': 'e.g. BN123456789XYZ'}),
-            'serial_number': forms.TextInput(attrs={'placeholder': 'e.g. SN123456789XYZ'}),
+            'model_name': forms.TextInput(attrs={'size':46, 'placeholder': 'e.g. aroTherm Plus 7kW'}),
+            'batch_name': forms.TextInput(attrs={'size':46, 'placeholder': 'e.g. BN123456789XYZ'}),
+            'serial_number': forms.TextInput(attrs={'size':46, 'placeholder': 'e.g. SN123456789XYZ'}),
+            'eprel_url': forms.TextInput(attrs={'size':64, 'placeholder': "e.g. https://eprel.ec.europa.eu/screen/product/<PRODUCT_GROUP>/<REG_NUMBER>"}),
             'commissioning_date': forms.DateInput(attrs={'placeholder': 'e.g. 2024-05-18','type': 'date'}),
             'release_year': forms.NumberInput(attrs={'placeholder': 'e.g. 2024'}),
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g. A battery energy storage system ...'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'size':46,  'placeholder': 'e.g. A battery energy storage system ...'}),
             'compliance_checklist': forms.Textarea(attrs={'rows': 4, 'placeholder': 'e.g. LVD/EMC/RED…'}),
             'dacq_actuation': forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g. enable Modbus-TCP on port 502…'}),
             # NOTE: do NOT put 'modbus_register_map' here (field is explicitly declared above; Meta.widgets would be ignored)
@@ -174,6 +176,11 @@ class AssetForm(forms.ModelForm):
                 'flexibility asset, helping identify its origin and ensuring proper '
                 'warranty, support, and service.'
             ),
+            'vendor': (
+                'The Vendor is the selling company for the flexibility asset; '
+                'this information is necessary for network identification, and '
+                'the Vendor may also be the Manufacturer.'
+            ),
             'model_name': (
                 'The specific designation and version assigned by the manufacturer '
                 'to identify a particular model of the flexible asset, distinguishing '
@@ -188,6 +195,10 @@ class AssetForm(forms.ModelForm):
                 'A unique alphanumeric code assigned by the manufacturer to each '
                 'individual device, used for identification, warranty tracking, '
                 'and service history management. (optional)'
+            ),
+            'eprel_url': (
+                'The QR payload of the EPREL energy class label; A product specific'
+                'URL pointing to the European Product Registry for Energy Labelling API. (optional) '
             ),
             'deployment': (
                 'The primary environment where the device is or will be installed, such as '
@@ -550,6 +561,7 @@ class ElectricalSpecsForm(forms.ModelForm):
             'power_output_nominal_uf': forms.HiddenInput(),
             'power_output_max_uf':    forms.HiddenInput(),
             'power_factor':           forms.NumberInput(attrs={'placeholder': 'e.g. 0.8'}),
+            'energy_class':           forms.TextInput(attrs={'placeholder': 'e.g. B'}),
         }
         labels = {
             'voltage_tolerance_df': 'Voltage tolerance',
@@ -614,6 +626,9 @@ class ElectricalSpecsForm(forms.ModelForm):
             ),
             'power_factor': (
                 'Ratio of real power (W) to apparent power (VA).'
+            ),
+            'energy_class': (
+                'The energy label according to the European Product Registry for Energy Labelling (EPREL).'
             ),
         }
 

@@ -14,8 +14,8 @@
   <h3>Your Assets</h3>
 
   {% if page_obj and page_obj.object_list %}
-    <table border="1" cellpadding="5" cellspacing="0">
-      <thead>
+    <table class="table table-striped table-bordered align-middle text-center">
+      <thead class="opentunity-gradient-thead">
         <tr>
           <th>ID</th>
           <th>Model</th>
@@ -49,9 +49,9 @@
                     {% csrf_token %}
                 </form>
             </td>
-            <td align="center" valign="middle">
+            <td style="text-align:center;vertical-align:middle;">
                 <a href="{% url 'api_qr' asset.id %}" download="api_qr_{{ asset.id }}.png">
-                    <img src="{% url 'api_qr' asset.id %}" alt="API QR" width="48" height="48">
+                    <img src="{% url 'api_qr' asset.id %}" alt="API QR" width="100" height="100">
                 </a>
             </td>
           </tr>

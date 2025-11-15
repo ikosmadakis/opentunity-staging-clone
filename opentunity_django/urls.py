@@ -5,6 +5,7 @@ from django.conf import settings
 from devices import views as device_views
 from devices.views import activate, scan_ack
 from devices.api_kpis import KpiOverviewView
+from django.views.generic.base import RedirectView
 
 
 def _from_email():
@@ -17,6 +18,11 @@ def _from_email():
 
 
 urlpatterns = [
+    path(
+        "api/asset",
+        RedirectView.as_view(url="/api/dpp/asset", query_string=True),
+        name="legacy_dpp_asset_redirect",
+    ),
     path('admin/', admin.site.urls),
 
     # --- Password reset (logged-out flow) ---

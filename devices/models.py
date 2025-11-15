@@ -137,10 +137,12 @@ class Asset(models.Model):
     record_contributor        = models.ForeignKey(ContentContributor, on_delete=models.PROTECT)
     record_insertion_date     = models.DateTimeField(auto_now_add=True)
     manufacturer              = models.ForeignKey(Manufacturer, on_delete=models.PROTECT)
+    vendor                    = models.TextField(blank=True, null=True, verbose_name="Vendor")
     gtin                      = models.CharField(max_length=14, blank=True, null=True)
     model_name                = models.TextField()
     batch_name                = models.TextField(blank=True, null=True)
     serial_number             = models.TextField(verbose_name="Serial Number", blank=True, null=True)
+    eprel_url                 = models.TextField(blank=True, null=True, verbose_name="EPREL URL")
     deployment                = models.ForeignKey(Deployment, on_delete=models.PROTECT, blank=True, null=True)
     classification            = models.ForeignKey(Classification, on_delete=models.PROTECT)
     description               = models.TextField(blank=True, null=True)
@@ -207,6 +209,7 @@ class ElectricalSpecs(models.Model):
     power_output_nominal_uf       = models.JSONField(blank=True, null=True)
     power_output_max_uf           = models.JSONField(blank=True, null=True)
     power_factor                  = models.FloatField()
+    energy_class                  = models.TextField(blank=True, null=True, verbose_name="Energy Class")
 
     def __str__(self):
         return f"Electrical Specs for Asset {self.asset.id}"

@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>My Profile</h2>
-
-<form method="post" action="{% url 'profile' %}">
+<div class="login-flex-container">
+    <div class="login-left">
+        <h2>My Profile</h2>
+        <form method="post" action="{% url 'profile' %}">
   {% csrf_token %}
   <div class="mb-3">
     <label class="form-label">Email</label>
@@ -49,49 +50,53 @@
     <div class="text-danger">{{ form.relation.errors }}</div>
   </div>
 
-  <button type="submit" class="btn btn-primary">Save changes</button>
-  <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
-</form>
-<hr>
-{% if is_manufacturer %}
-<hr>
-<h3>API access</h3>
-<p class="text-muted">Use an API key to call the OPENTUNITY API.</p>
 
-{% if raw_new_api_key %}
-  {# Show ONCE after generation #}
-  <div class="mb-2">
-    <label>New API key (copy now)</label><br>
-    <input type="password" id="api-key" value="{{ raw_new_api_key }}" readonly style="width: 520px;">
-    <button type="button" id="toggle-btn" class="btn btn-sm btn-outline-secondary">Show</button>
-    <button type="button" id="copy-btn" class="btn btn-sm btn-outline-primary">Copy</button>
-  </div>
-{% elif has_api %}
-  <div class="mb-2">
-    <label>Current API key</label><br>
-    <input type="password" value="•••••••• (stored securely)" readonly style="width: 520px;">
-    <small class="text-muted">Fingerprint: {{ api_fingerprint }}</small>
-  </div>
-{% else %}
-  <p class="text-muted">No API key yet.</p>
-{% endif %}
-
-<form method="post" style="display:inline">{% csrf_token %}
-  {% if has_api %}
-    <button type="submit" name="generate_api_key" value="1" class="btn btn-warning"
-      onclick="return confirm('Regenerate your API key? Existing clients will stop working.');">
-      Regenerate API key
-    </button>
-    <button type="submit" name="revoke_api_key" value="1" class="btn btn-outline-danger ms-2"
-      onclick="return confirm('Revoke your API key?');">
-      Revoke
-    </button>
-  {% else %}
-    <button type="submit" name="generate_api_key" value="1" class="btn btn-primary">
-      Generate API key
-    </button>
-  {% endif %}
 </form>
+    </div>
+    <div class="login-right">
+        {% if is_manufacturer %}
+        <h3>API access</h3>
+        <p class="text-muted">Use an API key to call the OPENTUNITY API.</p>
+        {% if raw_new_api_key %}
+        {# Show ONCE after generation #}
+        <div class="mb-2">
+            <label>New API key (copy now)</label><br>
+            <input type="password" id="api-key" value="{{ raw_new_api_key }}" readonly style="width: 520px;">
+            <button type="button" id="toggle-btn" class="btn btn-sm btn-outline-secondary">Show</button>
+            <button type="button" id="copy-btn" class="btn btn-sm btn-outline-primary">Copy</button>
+        </div>
+        {% elif has_api %}
+        <div class="mb-2">
+            <label>Current API key</label><br>
+            <input type="password" value="•••••••• (stored securely)" readonly style="width: 520px;">
+            <small class="text-muted">Fingerprint: {{ api_fingerprint }}</small>
+        </div>
+        {% else %}
+        <p class="text-muted">No API key yet.</p>
+        {% endif %}
+        <form method="post" style="display:inline">{% csrf_token %}
+        {% if has_api %}
+        <button type="submit" name="generate_api_key" value="1" class="btn btn-warning" onclick="return confirm('Regenerate your API key? Existing clients will stop working.');">
+            Regenerate API key
+        </button>
+        <button type="submit" name="revoke_api_key" value="1" class="btn btn-outline-danger ms-2" onclick="return confirm('Revoke your API key?');">
+            Revoke
+        </button>
+        {% else %}
+        <button type="submit" name="generate_api_key" value="1" class="btn btn-primary">
+            Generate API key
+        </button>
+        {% endif %}
+        </form><br><br>
+        <hr>
+        <h3>Security</h3>
+        <p><a href="{% url 'password_change' %}">Change password</a></p>
+        <br><br><br>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+
+    </div>
+</div>
 
 <script>
 (function () {
@@ -114,7 +119,5 @@
 </script>
 {% endif %}
 
-<hr>
-<p><strong>Security</strong></p>
-<p><a href="{% url 'password_change' %}">Change password</a></p>
+
 {% endblock %}

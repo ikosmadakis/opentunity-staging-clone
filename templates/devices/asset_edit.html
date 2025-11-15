@@ -19,6 +19,16 @@
       {{ asset_form.dpp_url }}<br>{{ asset_form.dpp_url.errors }}
       <small class="text-muted">{{ asset_form.fields.dpp_url.help_text }}</small>
   </div>
+  <div class="mb-3">
+      <strong>{{ asset_form.eprel_url.label_tag }}</strong>
+      {{ asset_form.eprel_url }}<br>{{ asset_form.eprel_url.errors }}
+      <small class="text-muted">{{ asset_form.fields.eprel_url.help_text }}</small>
+  </div>
+  <div class="mb-3">
+    <strong>{{ asset_form.vendor.label_tag }}</strong>
+    {{ asset_form.vendor }}<br>{{ asset_form.vendor.errors }}
+    <small class="text-muted">{{ asset_form.vendor.help_text }}</small>
+  </div>
 
   <div class="mb-3">
     <strong>{{ asset_form.manufacturer.label_tag }}</strong>

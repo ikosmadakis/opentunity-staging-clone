@@ -24,6 +24,20 @@
             </td>
         </tr>
         <tr>
+            <th>EPREL URL</th>
+            <td>{% if asset.eprel_url %}
+                <a href="{{ asset.eprel_url }}" target="_blank" rel="noopener">{{ asset.eprel_url }}</a>
+                {% else %}—{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Vendor</th>
+            <td>{% if asset.vendor %}
+                <a href="{{ asset.vendor }}" target="_blank" rel="noopener">{{ asset.vendor }}</a>
+                {% else %}—{% endif %}
+            </td>
+        </tr>
+        <tr>
             <th>Manufacturer</th>
             <td>{{ asset.manufacturer.name }}</td>
         </tr>
@@ -81,6 +95,7 @@
         <tr><th>Power Output (Nominal)</th>  <td><pre>{{ asset.elec_specs.power_output_nominal_uf|default:"—" }}</pre></td></tr>
         <tr><th>Power Output (Max)</th>      <td><pre>{{ asset.elec_specs.power_output_max_uf|default:"—" }}</pre></td></tr>
         <tr><th>Power Factor</th>            <td>{{ asset.elec_specs.power_factor|default:"—" }}</td></tr>
+        <tr><th>Energy Class</th>            <td>{{ asset.elec_specs.energy_class|default:"—" }}</td></tr>
       </tbody>
     </table>
   {% endif %}

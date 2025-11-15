@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Add a New Device</h2>
-<form method="post" action="{% url 'add_device' %}">
+<a href="{% url 'dashboard' %}" > < Back to Dashboard</a>
+<div class="login-flex-container">
+    <div class="login-center">
+    <form method="post" action="{% url 'add_device' %}">
     {% csrf_token %}
 
     {% if asset_form.non_field_errors %}
@@ -14,8 +17,14 @@
     <div class="mb-3"><strong>{{ asset_form.dpp_url.label_tag }}</strong>{{ asset_form.dpp_url }}<br>{{ asset_form.dpp_url.errors }}</div>
     <small class="text-muted">{{ asset_form.dpp_url.help_text }}</small><br><br>
 
+    <div class="mb-3"><strong>{{ asset_form.eprel_url.label_tag }}</strong>{{ asset_form.eprel_url }}<br>{{ asset_form.eprel_url.errors }}</div>
+    <small class="text-muted">{{ asset_form.eprel_url.help_text }}</small><br><br>
+
     <div class="mb-3"><strong>{{ asset_form.gtin.label_tag }}</strong>{{ asset_form.gtin }}<br>{{ asset_form.gtin.errors }}</div>
     <small class="text-muted">{{ asset_form.gtin.help_text }}</small><br><br>
+
+    <div class="mb-3"><strong>{{ asset_form.vendor.label_tag }}</strong>{{ asset_form.vendor }}<br>{{ asset_form.vendor.errors }}</div>
+    <small class="text-muted">{{ asset_form.vendor.help_text }}</small><br><br>
 
     <div class="mb-3"><strong>{{ asset_form.manufacturer.label_tag }}</strong>{{ asset_form.manufacturer }}<br>{{ asset_form.manufacturer.errors }}</div>
     <small class="text-muted">{{ asset_form.manufacturer.help_text }}</small><br><br>
@@ -36,9 +45,7 @@
     <small class="text-muted">{{ asset_form.classification.help_text }}</small><br><br>
 
 
-    {# =========================
-       DYNAMIC SUB-FORM SECTION
-       ========================= #}
+    <!--{# ========================= DYNAMIC SUB-FORM SECTION ========================= #}-->
 
     <h3 id="subform-title">{{ subform_title }}</h3>
 
@@ -196,6 +203,13 @@
     <strong>{{ elec_form.power_factor.label_tag }}</strong>
     {{ elec_form.power_factor }}<br>{{ elec_form.power_factor.errors }}
     <small class="form-text text-muted">{{ elec_form.fields.power_factor.help_text }}</small>
+  </div>
+
+  <!-- Energy Label -->
+  <div class="mb-3" data-elec="energy_class">
+    <strong>{{ elec_form.energy_class.label_tag }}</strong>
+    {{ elec_form.energy_class }}<br>{{ elec_form.energy_class.errors }}
+    <small class="form-text text-muted">{{ elec_form.fields.energy_class.help_text }}</small>
   </div>
 
   <!-- Hidden JSONs (keep rendered; JS disables when section hidden) -->
@@ -418,7 +432,7 @@
     <div class="mb-3"><strong>{{ asset_form.regulation_response_time_accuracy.label_tag }}</strong>{{ asset_form.regulation_response_time_accuracy }}<br>{{ asset_form.regulation_response_time_accuracy.errors }}</div>
     <small class="text-muted">{{ asset_form.regulation_response_time_accuracy.help_text }}</small><br><br>
 
-    {# -- upward / downward / min step / env / dims / weight / form factor (unchanged) -- #}
+    <!-- {# -- upward / downward / min step / env / dims / weight / form factor (unchanged) -- #} -->
     <h5>Maximum upward regulation</h5>
     <div class="row mb-3">
       <div class="col">{{ asset_form.power_generation.label_tag }}{{ asset_form.power_generation }}{{ asset_form.power_generation.errors }}</div>
@@ -501,22 +515,23 @@
     <button type="submit" class="btn btn-primary">Submit</button>
     <a href="{% url 'dashboard' %}" class="btn btn-secondary ms-2">Cancel</a>
 </form>
-
+    </div>
+</div>
 <script>
   // ----------------------------
   // Classification mapping (UPPERCASE keys)
   // ----------------------------
   const MAP = {
-    "HVAC":                { title: "HVAC Specs",                       forms: ["elec"] },
-    "EVSE":                { title: "EVSE Specs",                       forms: ["elec"] },
-    "WATER HEATER":        { title: "Water Heater Specs",               forms: ["elec"] },
-    "WHITE APPLIANCE":     { title: "White Appliance Specs",            forms: ["elec"] },
-    "ENERGY METER":        { title: "Energy Meter Specs",               forms: ["meter"] },
-    "BATTERY SYSTEM":      { title: "BESS & Inverter Specs",            forms: ["bess","inv"] },
-    "PV SYSTEM":           { title: "PV Module & Inverter Specs",       forms: ["pv","inv"] },
-    "GENSET SYSTEM":       { title: "Genset Electrical Specs",          forms: ["elec"] },
-    "PV & BAT SYSTEM":     { title: "PV & BESS & SCC & Inverter Specs", forms: ["pv","bess","scc","inv"] },
-    "GENSET & BAT SYSTEM": { title: "Genset & BESS & Inverter Specs",   forms: ["elec","bess","inv"] }
+    "HVAC":                { title: "Heating, Ventilation, & Air Conditioning", forms: ["elec"] },
+    "EVSE":                { title: "Electric Vehicle Supply Equipment", forms: ["elec"] },
+    "WATER HEATER":        { title: "Water Heater",               forms: ["elec"] },
+    "WHITE APPLIANCE":     { title: "White Appliance",            forms: ["elec"] },
+    "ENERGY METER":        { title: "Energy Meter",               forms: ["meter"] },
+    "BATTERY SYSTEM":      { title: "Battery & Inverter",            forms: ["bess","inv"] },
+    "PV SYSTEM":           { title: "Photovoltaics & Inverter",       forms: ["pv","inv"] },
+    "GENSET SYSTEM":       { title: "Generator Set",          forms: ["elec"] },
+    "PV & BAT SYSTEM":     { title: "PV & Battery & Solar Charge Controller & Inverter", forms: ["pv","bess","scc","inv"] },
+    "GENSET & BAT SYSTEM": { title: "Generator Set & Battery & Inverter",   forms: ["elec","bess","inv"] }
   };
 
   const ALL_CODES = ["elec","bess","inv","pv","scc","meter"];
@@ -592,7 +607,7 @@
     "current_nominal_df","current_min_df","current_max_df",
     "inrush_current_max_df","standby_power_consumption",
     "power_consumption_nominal_df","power_consumption_max_df","power_consumption_units",
-    "voltage_regulation_uf","output_current_nominal_uf","power_factor"
+    "voltage_regulation_uf","output_current_nominal_uf","power_factor", "energy_class"
   ];
   const ELEC_ALLOWED_BY_CLASS = {
     "HVAC": new Set([
@@ -600,7 +615,7 @@
       "current_nominal_df","current_min_df","current_max_df",
       "inrush_current_max_df","standby_power_consumption",
       "power_consumption_nominal_df","power_consumption_units",
-      "voltage_regulation_uf","power_factor"
+      "voltage_regulation_uf","power_factor", "energy_class"
     ]),
     "EVSE": new Set([
       "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
@@ -613,14 +628,14 @@
       "current_nominal_df","current_min_df","current_max_df",
       "inrush_current_max_df","standby_power_consumption",
       "power_consumption_nominal_df","power_consumption_units",
-      "power_factor"
+      "power_factor", "energy_class"
     ]),
     "WHITE APPLIANCE": new Set([
       "phase_configuration","frequency","voltage_nominal","voltage_tolerance_df",
       "current_nominal_df","current_min_df","current_max_df",
       "inrush_current_max_df","standby_power_consumption",
       "power_consumption_nominal_df","power_consumption_units",
-      "voltage_regulation_uf","power_factor"
+      "voltage_regulation_uf","power_factor", "energy_class"
     ])
   };
 
