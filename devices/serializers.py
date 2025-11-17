@@ -111,3 +111,111 @@ class AssetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asset
         fields = "__all__"
+
+
+class EOAssetIngestSerializer(serializers.Serializer):
+    # Top-level mandatory fields
+    manufacturer   = serializers.CharField(max_length=255)
+    vendor         = serializers.CharField(max_length=255)
+    model_name     = serializers.CharField(max_length=255)
+    classification = serializers.CharField(max_length=255)
+    flexibility    = serializers.CharField(max_length=255)
+    regulation     = serializers.CharField(max_length=255)
+
+    # Communication blocks (JSON)
+    communication          = serializers.JSONField()
+    communication_protocol = serializers.JSONField()
+
+    # Optional spec blocks, required per-class by validation rules
+    electrical_specs   = serializers.JSONField(required=False)
+    bess_specs         = serializers.JSONField(required=False)
+    inverter_specs     = serializers.JSONField(required=False)
+    pv_module_specs    = serializers.JSONField(required=False)
+    scc_specs          = serializers.JSONField(required=False)
+    energy_meter_specs = serializers.JSONField(required=False)
+    modbus_register_map = serializers.JSONField(required=False)
+
+    # EO-specific
+    eo_organisation = serializers.CharField(max_length=255)
+    description     = serializers.CharField(allow_blank=True, required=False)
+
+    # ---- Class-based rules ----
+    CLASS_REQUIRED_BLOCKS = {
+        # Downstream you can tweak these if you want stricter/looser rules
+        "HVAC":             ["electrical_specs"],
+        "EVSE":             ["electrical_specs"],
+        "WATER HEATER":     ["electrical_specs"],
+        "WHITE APPLIANCE":  ["electrical_specs"],
+        "ENERGY METER":     ["energy_meter_specs"],
+        "BATTERY SYSTEM":   ["bess_specs", "inverter_specs"],
+        "PV SYSTEM":        ["pv_module_specs", "inverter_specs"],
+        "PV & BAT SYSTEM":  ["pv_module_specs", "bess_specs", "scc_specs", "inverter_specs"],
+        "GENSET SYSTEM":    ["electrical_specs"],
+        "GENSET & BAT SYSTEM": ["electrical_specs", "bess_specs", "inverter_specs"],
+    }
+
+    ENERGY_CLASS_REQUIRED_FOR = {
+        "HVAC",
+        "EVSE",
+        "WATER HEATER",
+        "WHITE APPLIANCE",
+    }
+
+    MODBUS_PROTOCOLS = {"MODBUS TCP", "MODBUS RTU"}
+
+    def validate(self, data):
+        errors = {}
+
+        # --- Normalize classification ---
+        raw_class = (data.get("classification") or "").strip()
+        classification = raw_class.upper()
+        data["classification"] = raw_class  # keep original; use upper for rules
+
+        # --- (a) Classification must be one of the known types ---
+        known_classes = set(self.CLASS_REQUIRED_BLOCKS.keys())
+        if classification not in known_classes:
+            errors["classification"] = [
+                f"Unsupported classification '{raw_class}'. "
+                f"Expected one of: {sorted(known_classes)}"
+            ]
+
+        # --- (b) Class-based mandatory spec blocks ---
+        if classification in self.CLASS_REQUIRED_BLOCKS:
+            missing_blocks = []
+            for block in self.CLASS_REQUIRED_BLOCKS[classification]:
+                block_value = data.get(block)
+                if block_value is None or block_value == {}:
+                    missing_blocks.append(block)
+            if missing_blocks:
+                errors["class_specs"] = [
+                    f"For classification '{raw_class}', the following "
+                    f"spec blocks are mandatory but missing or empty: {missing_blocks}"
+                ]
+
+        # --- (c) Modbus conditional requirement ---
+        proto = data.get("communication_protocol") or {}
+        supported = proto.get("supported_com_protocols") or []
+        supported_upper = {str(p).upper() for p in supported}
+        requires_modbus = bool(self.MODBUS_PROTOCOLS & supported_upper)
+        if requires_modbus:
+            mr = data.get("modbus_register_map")
+            if mr is None or mr == {}:
+                errors["modbus_register_map"] = [
+                    "modbus_register_map is mandatory when communication_protocol "
+                    "includes MODBUS TCP or MODBUS RTU."
+                ]
+
+        # --- (d) Energy class mandatory for some classifications ---
+        if classification in self.ENERGY_CLASS_REQUIRED_FOR:
+            elec = data.get("electrical_specs") or {}
+            energy_class = elec.get("energy_class")
+            if not energy_class:
+                errors["energy_class"] = [
+                    "electrical_specs.energy_class is mandatory for "
+                    f"classifications: {sorted(self.ENERGY_CLASS_REQUIRED_FOR)}"
+                ]
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return data

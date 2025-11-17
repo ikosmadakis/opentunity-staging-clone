@@ -1,6 +1,8 @@
 from django.urls import path, include
 from .api_views import AssetViewSet, NoRootRouter
 from devices.dpp_views import DPPResolveView, DPPImportView, DPPAssetView
+from devices.eo_views import EOAssetIngestView
+
 from . import views
 
 router = NoRootRouter()
@@ -14,4 +16,5 @@ urlpatterns = [
     path("api/dpp/resolve", DPPResolveView.as_view(), name="dpp_resolve"),
     path("api/dpp/import",  DPPImportView.as_view(),  name="dpp_import"),
     path("api/dpp/asset",   DPPAssetView.as_view(),   name="dpp_asset"),
+    path("api/eo/assets/", EOAssetIngestView.as_view(), name="eo_asset_ingest"),
 ]
