@@ -127,7 +127,7 @@ class EOAssetIngestSerializer(serializers.Serializer):
     communication_protocol = serializers.JSONField()
 
     # Optional spec blocks, required per-class by validation rules
-    electrical_specs   = serializers.JSONField(required=False)
+    electrical_specs   = serializers.JSONField(required=False, allow_null=True)
     bess_specs         = serializers.JSONField(required=False)
     inverter_specs     = serializers.JSONField(required=False)
     pv_module_specs    = serializers.JSONField(required=False)

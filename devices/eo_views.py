@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.exceptions import ValidationError
 from devices.auth import APIKeyAuthentication
 from devices.models import (
     Asset,
@@ -35,7 +35,7 @@ class EOAssetIngestView(APIView):
     Auth: Api-Key (MANUFACTURER role required).
     """
     authentication_classes = [APIKeyAuthentication]
-    
+
     # --- helper to resolve Units FK from id or symbol/name ---
     def _resolve_units_id(self, value, default_symbol="W"):
         """
@@ -341,9 +341,33 @@ class EOAssetIngestView(APIView):
         # === Energy meter specs ===
         meter_payload = raw_payload.get("energy_meter_specs") or {}
         if meter_payload:
+            # Start from a cleaned copy (drop id/asset if present)
+            meter_kwargs = _clean_payload(meter_payload)
+
+            # Handle power_consumption_units (FK → Units)
+            pcu_val = meter_payload.get("power_consumption_units")
+            # remove the raw value so we don't pass it twice
+            meter_kwargs.pop("power_consumption_units", None)
+
+            if pcu_val is not None:
+                # Case 1: EO sends a numeric Units.id
+                if isinstance(pcu_val, int):
+                    meter_kwargs["power_consumption_units_id"] = pcu_val
+
+                # Case 2: EO sends a string symbol like "W"
+                elif isinstance(pcu_val, str) and pcu_val.strip():
+                    symbol = pcu_val.strip()
+                    try:
+                        unit_obj = Units.objects.get(symbol=symbol)
+                        meter_kwargs["power_consumption_units_id"] = unit_obj.id
+                    except Units.DoesNotExist:
+                        # You can either silently ignore, or raise a 400 via serializer
+                        # For now we ignore and let DB/defaults handle it.
+                        pass
+
             EnergyMeterSpecs.objects.create(
                 asset=asset,
-                **_clean_payload(meter_payload),
+                **meter_kwargs,
             )
 
         # === Modbus register map stored directly on Asset ===
